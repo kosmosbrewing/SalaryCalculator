@@ -40,7 +40,7 @@ const iconClass = computed(() => {
 </script>
 
 <template>
-  <div class="border border-border/60 bg-muted/20 px-3 py-4 text-center">
+  <div class="rounded-xl border border-border/60 bg-muted/20 px-3 py-4 text-center">
     <component :is="iconComponent" :class="iconClass" class="mx-auto" />
     <p class="mt-1 text-caption font-semibold text-foreground">{{ title || defaultTitle }}</p>
     <p class="mt-1 text-caption text-muted-foreground">{{ description || defaultDescription }}</p>

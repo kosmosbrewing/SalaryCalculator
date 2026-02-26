@@ -47,7 +47,7 @@ const suggestions = computed(() => {
         v-for="item in suggestions"
         :key="item.to"
         :to="item.to"
-        class="border border-border/60 bg-muted/20 px-3 py-2 transition-colors hover:border-primary/50 hover:bg-primary/5"
+        class="rounded-xl border border-border/60 bg-muted/20 px-3 py-2 transition-colors hover:border-primary/50 hover:bg-primary/5"
       >
         <p class="text-body font-semibold text-foreground">{{ item.label }}</p>
         <p class="mt-0.5 text-caption text-muted-foreground">{{ item.desc }}</p>

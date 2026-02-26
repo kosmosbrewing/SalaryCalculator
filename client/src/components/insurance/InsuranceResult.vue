@@ -32,11 +32,11 @@ const title = computed(() => {
       </p>
 
       <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
-        <div class="border border-border/60 bg-muted/20 p-3">
+        <div class="rounded-xl border border-border/60 bg-muted/20 p-3">
           <p class="text-caption text-muted-foreground">월급(세전)</p>
           <p class="text-heading font-bold tabular-nums">{{ formatWon(calc.monthlyGross.value) }}</p>
         </div>
-        <div class="border border-border/60 bg-muted/20 p-3">
+        <div class="rounded-xl border border-border/60 bg-muted/20 p-3">
           <p class="text-caption text-muted-foreground">월 실수령</p>
           <p class="text-heading font-bold tabular-nums">{{ formatWon(calc.monthlyNet.value) }}</p>
         </div>
