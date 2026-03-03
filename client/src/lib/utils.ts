@@ -17,13 +17,9 @@ export function formatWon(amount: number | null | undefined): string {
   return `${Math.round(amount).toLocaleString("ko-KR")}원`;
 }
 
-// 만원 단위 포맷: 240 -> "240만원", 10000 -> "1억원", 12500 -> "1억 2,500만원"
-export function formatManWonValue(manWon: number | null | undefined): string {
-  if (manWon == null) return "-";
-
-  const rounded = Math.round(manWon);
-  const sign = rounded < 0 ? "-" : "";
-  const absolute = Math.abs(rounded);
+function formatCompactManWon(roundedManWon: number): string {
+  const sign = roundedManWon < 0 ? "-" : "";
+  const absolute = Math.abs(roundedManWon);
 
   if (absolute >= 10_000) {
     const eok = Math.floor(absolute / 10_000);
@@ -37,10 +33,34 @@ export function formatManWonValue(manWon: number | null | undefined): string {
   return `${sign}${absolute.toLocaleString("ko-KR")}만원`;
 }
 
+// 만원 단위 포맷: 240 -> "240만원", 10000 -> "1억원", 12500 -> "1억 2,500만원"
+export function formatManWonValue(manWon: number | null | undefined): string {
+  if (manWon == null) return "-";
+  return formatCompactManWon(Math.round(manWon));
+}
+
+// 축약 KRW 포맷: 1,000,000 -> "100만원", 100,000,000 -> "1억원"
+export function formatKrwCompact(amount: number | null | undefined): string {
+  if (amount == null) return "-";
+  const roundedManWon = Math.round(amount / 10_000);
+  return formatCompactManWon(roundedManWon);
+}
+
 // 만원 포맷: 50000000 → "5,000만원", 100000000 -> "1억원"
 export function formatManWon(amount: number | null | undefined): string {
   if (amount == null) return "-";
-  return formatManWonValue(amount / 10_000);
+  return formatKrwCompact(amount);
+}
+
+// 자동 KRW 포맷 규칙:
+// - 절대값 100만원 미만: "1,000원"
+// - 절대값 100만원 이상: "100만원" / "1억원"
+export function formatKrwAuto(amount: number | null | undefined): string {
+  if (amount == null) return "-";
+  if (Math.abs(amount) < 1_000_000) {
+    return formatWon(amount);
+  }
+  return formatKrwCompact(amount);
 }
 
 // 퍼센트 포맷: 0.1234 → "12.34%"
@@ -78,4 +98,29 @@ export function copyUsingExecCommand(text: string): boolean {
 
   document.body.removeChild(textarea);
   return copied;
+}
+
+// 슬라이더 가변 윈도우: 현재값 중심으로 조작 가능한 구간만 노출
+export function getSliderWindow(
+  current: number,
+  absoluteMin: number,
+  absoluteMax: number,
+  windowSize: number
+): { min: number; max: number } {
+  const normalizedMin = Math.min(absoluteMin, absoluteMax);
+  const normalizedMax = Math.max(absoluteMin, absoluteMax);
+  const size = Math.max(1, Math.floor(windowSize));
+  const totalRange = normalizedMax - normalizedMin;
+
+  if (totalRange <= size) {
+    return { min: normalizedMin, max: normalizedMax };
+  }
+
+  const center = Math.max(normalizedMin, Math.min(normalizedMax, Math.round(current)));
+  const half = Math.floor(size / 2);
+  let min = Math.max(normalizedMin, center - half);
+  let max = Math.min(normalizedMax, min + size);
+  min = Math.max(normalizedMin, max - size);
+
+  return { min, max };
 }

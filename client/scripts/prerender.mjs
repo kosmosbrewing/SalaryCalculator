@@ -8,8 +8,10 @@ const INDEX_HTML = resolve(DIST_DIR, "index.html");
 const SITE_URL = "https://finance.shakilabs.com";
 const SALARY_ROUTE_RE = /^\/salary\/(\d+)$/;
 const INSURANCE_ROUTE_RE = /^\/insurance\/(\d+)$/;
+const COMPREHENSIVE_TAX_ROUTE_RE = /^\/comprehensive-tax\/(\d+)$/;
 const COMPARE_ROUTE_RE = /^\/compare\/(\d+)-vs-(\d+)$/;
 const QUIT_ROUTE_RE = /^\/quit\/(\d+)years$/;
+const WITHHOLDING_ROUTE_RE = /^\/withholding\/(\d+)$/;
 
 if (!existsSync(INDEX_HTML)) {
   console.warn("[prerender] dist/index.html not found. Skipping prerender.");
@@ -55,6 +57,13 @@ function readInsuranceFee(route) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
 }
 
+function readComprehensiveTaxManWon(route) {
+  const matched = route.match(COMPREHENSIVE_TAX_ROUTE_RE);
+  if (!matched) return null;
+  const parsed = Number.parseInt(matched[1], 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
 function readComparePair(route) {
   const matched = route.match(COMPARE_ROUTE_RE);
   if (!matched) return null;
@@ -76,6 +85,13 @@ function readQuitYears(route) {
   return years;
 }
 
+function readWithholdingAmount(route) {
+  const matched = route.match(WITHHOLDING_ROUTE_RE);
+  if (!matched) return null;
+  const parsed = Number.parseInt(matched[1], 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
 // --- Breadcrumb 빌더 ---
 function buildBreadcrumb(items) {
   return {
@@ -92,7 +108,7 @@ function buildBreadcrumb(items) {
 
 function buildMeta(route) {
   if (route === "/privacy") {
-    const title = "개인정보처리방침 | finance.shakilabs.com";
+    const title = "개인정보처리방침 | 연봉 실수령액 계산기";
     const description = "finance.shakilabs.com 서비스의 개인정보 처리 원칙을 안내합니다.";
     const canonical = `${SITE_URL}/privacy`;
     return {
@@ -115,8 +131,8 @@ function buildMeta(route) {
   }
 
   if (route === "/about") {
-    const title = "서비스 소개 | 2026 연봉·건보료 계산기";
-    const description = "finance.shakilabs.com 서비스 목적과 계산 기준을 소개합니다.";
+    const title = "서비스 소개 | 2026 연봉·세금 계산기";
+    const description = "연봉 실수령액, 건보료 역산, 이직 비교, 퇴사 시뮬레이션을 제공하는 무료 계산기. 2026 최신 세율 반영.";
     const canonical = `${SITE_URL}/about`;
     return {
       title,
@@ -133,6 +149,46 @@ function buildMeta(route) {
       breadcrumb: buildBreadcrumb([
         { name: "홈", url: SITE_URL },
         { name: "서비스 소개" },
+      ]),
+    };
+  }
+
+  const withholdingAmount = readWithholdingAmount(route);
+  if (withholdingAmount !== null) {
+    const title = `월 소득세 ${formatWon(withholdingAmount)} → 연봉 역산 계산기 | 2026`;
+    const description = `월 소득세 ${formatWon(withholdingAmount)} 기준 추정 연봉과 실수령액을 역산합니다. 4대보험 포함 공제 상세 확인.`;
+    const canonical = `${SITE_URL}/withholding/${withholdingAmount}`;
+
+    return {
+      title,
+      description,
+      canonical,
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: [
+          {
+            "@type": "Question",
+            name: `소득세 ${formatWon(withholdingAmount)}이면 연봉이 얼마인가요?`,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: `2026년 기준 이진탐색 역산으로 추정 연봉을 즉시 계산할 수 있습니다.`,
+            },
+          },
+          {
+            "@type": "Question",
+            name: `소득세 ${formatWon(withholdingAmount)}이면 월 실수령액은 얼마인가요?`,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "부양가족 수와 비과세액에 따라 달라집니다. 계산기에서 조건을 입력해 즉시 확인할 수 있습니다.",
+            },
+          },
+        ],
+      },
+      breadcrumb: buildBreadcrumb([
+        { name: "홈", url: SITE_URL },
+        { name: "원천세 역산", url: `${SITE_URL}/withholding` },
+        { name: `소득세 ${formatWon(withholdingAmount)}` },
       ]),
     };
   }
@@ -192,8 +248,8 @@ function buildMeta(route) {
 
   const salaryManWon = readSalaryManWon(route);
   if (salaryManWon !== null) {
-    const title = `연봉 ${formatManWon(salaryManWon)}원 실수령액 · 2026 4대보험 계산기`;
-    const description = `연봉 ${formatManWon(salaryManWon)}원 기준 4대보험, 소득세, 지방소득세 공제 구조를 확인하고 월 실수령액을 계산해보세요.`;
+    const title = `연봉 ${formatManWon(salaryManWon)} 실수령액 | 2026 월급 실수령 계산기`;
+    const description = `2026년 연봉 ${formatManWon(salaryManWon)} 월 실수령액은 계산 결과를 기준으로 확인할 수 있습니다. 4대보험·소득세 공제 내역과 부양가족별 계산도 확인하세요.`;
     const canonical = `${SITE_URL}/salary/${salaryManWon}`;
 
     return {
@@ -206,7 +262,7 @@ function buildMeta(route) {
         mainEntity: [
           {
             "@type": "Question",
-            name: `연봉 ${formatManWon(salaryManWon)}원의 월 실수령액은 얼마인가요?`,
+            name: `연봉 ${formatManWon(salaryManWon)}의 월 실수령액은 얼마인가요?`,
             acceptedAnswer: {
               "@type": "Answer",
               text: "부양가족 수와 비과세액에 따라 달라집니다. 계산기에서 조건을 입력해 즉시 확인할 수 있습니다.",
@@ -214,7 +270,7 @@ function buildMeta(route) {
           },
           {
             "@type": "Question",
-            name: `연봉 ${formatManWon(salaryManWon)}원에서 4대보험은 얼마나 공제되나요?`,
+            name: `연봉 ${formatManWon(salaryManWon)}에서 4대보험은 얼마나 공제되나요?`,
             acceptedAnswer: {
               "@type": "Answer",
               text: "국민연금, 건강보험, 장기요양보험, 고용보험이 공제됩니다. 계산기에서 항목별 금액을 확인할 수 있습니다.",
@@ -222,7 +278,7 @@ function buildMeta(route) {
           },
           {
             "@type": "Question",
-            name: `연봉 ${formatManWon(salaryManWon)}원의 소득세는 얼마인가요?`,
+            name: `연봉 ${formatManWon(salaryManWon)}의 소득세는 얼마인가요?`,
             acceptedAnswer: {
               "@type": "Answer",
               text: "소득세는 부양가족 수에 따라 달라지며, 지방소득세(소득세의 10%)가 추가로 공제됩니다.",
@@ -233,7 +289,47 @@ function buildMeta(route) {
       breadcrumb: buildBreadcrumb([
         { name: "홈", url: SITE_URL },
         { name: "연봉 계산기", url: `${SITE_URL}/salary` },
-        { name: `연봉 ${formatManWon(salaryManWon)}원` },
+        { name: `연봉 ${formatManWon(salaryManWon)}` },
+      ]),
+    };
+  }
+
+  const comprehensiveTaxManWon = readComprehensiveTaxManWon(route);
+  if (comprehensiveTaxManWon !== null) {
+    const title = `종합소득 ${comprehensiveTaxManWon}만원 세금 계산 | 2026 종합소득세 계산기`;
+    const description = `연수입 ${comprehensiveTaxManWon}만원 기준으로 사업소득·임대소득·기타소득을 합산해 종합소득세를 계산합니다.`;
+    const canonical = `${SITE_URL}/comprehensive-tax/${comprehensiveTaxManWon}`;
+
+    return {
+      title,
+      description,
+      canonical,
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: [
+          {
+            "@type": "Question",
+            name: `연수입 ${comprehensiveTaxManWon}만원이면 종합소득세를 얼마나 내나요?`,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "사업소득·임대소득·기타소득 비중, 경비율, 부양가족 수, 연금공제 반영 여부에 따라 달라집니다.",
+            },
+          },
+          {
+            "@type": "Question",
+            name: "임대·기타소득은 분리과세와 종합과세 중 무엇이 유리한가요?",
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "분리과세 요건을 충족하면 비교 위젯에서 종합과세 대비 세액 차이를 확인할 수 있습니다.",
+            },
+          },
+        ],
+      },
+      breadcrumb: buildBreadcrumb([
+        { name: "홈", url: SITE_URL },
+        { name: "종합소득세", url: `${SITE_URL}/comprehensive-tax` },
+        { name: `${comprehensiveTaxManWon}만원` },
       ]),
     };
   }
@@ -242,8 +338,8 @@ function buildMeta(route) {
   if (comparePair) {
     const aLabel = comparePair.a.toLocaleString("ko-KR");
     const bLabel = comparePair.b.toLocaleString("ko-KR");
-    const title = `연봉 ${aLabel} vs ${bLabel} 이직 비교 | 실수령 차이`;
-    const description = `연봉 ${aLabel}만원에서 ${bLabel}만원 이직 시 실수령 차이를 비교합니다.`;
+    const title = "연봉 비교 결과 | 이직 실수령 차이 계산 2026";
+    const description = `연봉 ${aLabel}만원에서 ${bLabel}만원으로 이직하면 월 실수령 차이를 비교할 수 있습니다.`;
     const canonical = `${SITE_URL}/compare/${comparePair.a}-vs-${comparePair.b}`;
 
     return {
@@ -282,7 +378,7 @@ function buildMeta(route) {
 
   const quitYears = readQuitYears(route);
   if (quitYears !== null) {
-    const title = `${quitYears}년 근속 퇴사 시뮬레이션 | 퇴직금·실업급여 계산`;
+    const title = `${quitYears}년 근속 퇴사 계산기 | 퇴직금·실업급여·생존기간 2026`;
     const description = `${quitYears}년 근속 기준 퇴직금, 실업급여, 퇴사 후 월 고정비와 생존기간을 계산합니다.`;
     const canonical = `${SITE_URL}/quit/${quitYears}years`;
 
@@ -322,7 +418,7 @@ function buildMeta(route) {
       },
       breadcrumb: buildBreadcrumb([
         { name: "홈", url: SITE_URL },
-        { name: "퇴사 시뮬레이터", url: `${SITE_URL}/quit` },
+        { name: "퇴사 계산기", url: `${SITE_URL}/quit` },
         { name: `${quitYears}년 근속` },
       ]),
     };
@@ -330,9 +426,14 @@ function buildMeta(route) {
 
   // --- 랜딩 페이지 ---
   if (route === "/insurance" || route === "/") {
-    const title = "2026 건보료로 연봉 역산 | 건강보험료 연봉 계산기";
-    const description = "건보료를 입력하면 추정 연봉과 실수령액을 알려드립니다. 2026년 건강보험 7.19% 기준.";
-    const canonical = `${SITE_URL}/insurance`;
+    const isHome = route === "/";
+    const title = isHome
+      ? "2026 연봉 실수령액 계산기 | 건보료 역산·4대보험·종합소득세"
+      : "2026 건강보험료로 연봉 역산 계산기 | 4대보험";
+    const description = isHome
+      ? "2026년 최신 세율 반영. 연봉 실수령액, 건보료 연봉 역산, 종합소득세, 이직 비교, 퇴사 시뮬레이션을 무료로 계산하세요."
+      : "건강보험료를 입력하면 추정 연봉과 월 실수령액을 계산합니다. 2026 최신 요율 반영.";
+    const canonical = isHome ? `${SITE_URL}/` : `${SITE_URL}/insurance`;
 
     return {
       title,
@@ -355,7 +456,7 @@ function buildMeta(route) {
         {
           "@context": "https://schema.org",
           "@type": "WebApplication",
-          name: "2026 건보료 역산 계산기",
+          name: isHome ? "2026 연봉 실수령액 계산기" : "2026 건강보험료 연봉 역산 계산기",
           url: canonical,
           applicationCategory: "FinanceApplication",
           operatingSystem: "Any",
@@ -366,14 +467,14 @@ function buildMeta(route) {
       ],
       breadcrumb: buildBreadcrumb([
         { name: "홈", url: SITE_URL },
-        { name: "건보료 역산" },
+        { name: isHome ? "연봉 실수령액 계산기" : "건보료 역산" },
       ]),
     };
   }
 
   if (route === "/salary") {
     const title = "2026 연봉 실수령액 계산기 | 4대보험 + 소득세 자동 계산";
-    const description = "연봉을 입력하면 4대보험, 소득세를 자동 계산해 월 실수령액을 알려드립니다.";
+    const description = "2026년 연봉 실수령액을 즉시 계산하세요. 국민연금·건보료·소득세 공제 후 실제 통장에 들어오는 월급을 확인합니다.";
     const canonical = `${SITE_URL}/salary`;
     return {
       title,
@@ -395,9 +496,33 @@ function buildMeta(route) {
     };
   }
 
+  if (route === "/comprehensive-tax") {
+    const title = "2026 종합소득세 계산기 | 프리랜서·사업소득 세금";
+    const description = "프리랜서·사업자·임대소득자를 위한 종합소득세 계산. 분리과세 비교까지 한 번에 확인하세요.";
+    const canonical = `${SITE_URL}/comprehensive-tax`;
+    return {
+      title,
+      description,
+      canonical,
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        name: "종합소득세 계산기",
+        url: canonical,
+        applicationCategory: "FinanceApplication",
+        inLanguage: "ko",
+        offers: { "@type": "Offer", price: "0", priceCurrency: "KRW" },
+      },
+      breadcrumb: buildBreadcrumb([
+        { name: "홈", url: SITE_URL },
+        { name: "종합소득세" },
+      ]),
+    };
+  }
+
   if (route === "/compare") {
-    const title = "이직 연봉 비교기 | A사 vs B사 실수령 차이 계산";
-    const description = "두 회사의 연봉, 비과세, 복지, 성과급을 입력해 실수령 차이를 비교합니다.";
+    const title = "이직 연봉 비교 계산기 | 실수령액 차이 비교 2026";
+    const description = "연봉과 복지 조건을 입력해 4대보험·세금을 반영한 실수령 차이를 비교합니다.";
     const canonical = `${SITE_URL}/compare`;
     return {
       title,
@@ -406,7 +531,7 @@ function buildMeta(route) {
       jsonLd: {
         "@context": "https://schema.org",
         "@type": "WebApplication",
-        name: "이직 연봉 비교기",
+        name: "이직 연봉 비교 계산기",
         url: canonical,
         applicationCategory: "FinanceApplication",
         inLanguage: "ko",
@@ -419,9 +544,33 @@ function buildMeta(route) {
     };
   }
 
+  if (route === "/withholding") {
+    const title = "원천세 역산 계산기 | 소득세로 연봉 추정 2026";
+    const description = "급여명세서 소득세를 입력하면 추정 연봉과 월 실수령액을 역산합니다. 2026 최신 세율 반영.";
+    const canonical = `${SITE_URL}/withholding`;
+    return {
+      title,
+      description,
+      canonical,
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        name: "원천세 역산 계산기",
+        url: canonical,
+        applicationCategory: "FinanceApplication",
+        inLanguage: "ko",
+        offers: { "@type": "Offer", price: "0", priceCurrency: "KRW" },
+      },
+      breadcrumb: buildBreadcrumb([
+        { name: "홈", url: SITE_URL },
+        { name: "원천세 역산" },
+      ]),
+    };
+  }
+
   if (route === "/quit") {
-    const title = "퇴사 시뮬레이터 | 퇴직금 + 실업급여 + 생존 계산";
-    const description = "퇴직금, 실업급여, 퇴사 후 월 고정비를 한번에 계산해 버틸 수 있는 기간을 확인합니다.";
+    const title = "퇴사 계산기 2026 | 퇴직금·실업급여·생존기간";
+    const description = "퇴직금, 실업급여, 퇴사 후 월 고정비를 한 번에 계산해 버틸 수 있는 기간을 확인합니다.";
     const canonical = `${SITE_URL}/quit`;
     return {
       title,
@@ -430,7 +579,7 @@ function buildMeta(route) {
       jsonLd: {
         "@context": "https://schema.org",
         "@type": "WebApplication",
-        name: "퇴사 시뮬레이터",
+        name: "퇴사 계산기",
         url: canonical,
         applicationCategory: "FinanceApplication",
         inLanguage: "ko",
@@ -438,14 +587,14 @@ function buildMeta(route) {
       },
       breadcrumb: buildBreadcrumb([
         { name: "홈", url: SITE_URL },
-        { name: "퇴사 시뮬레이터" },
+        { name: "퇴사 계산기" },
       ]),
     };
   }
 
   // fallback
-  const title = "2026 연봉·건보료·4대보험 계산기";
-  const description = "건보료 역산, 실수령액 계산, 이직 비교, 퇴사 시뮬레이션을 한곳에서 제공합니다.";
+  const title = "2026 연봉 실수령액 계산기 | 건보료 역산·4대보험·종합소득세";
+  const description = "2026년 최신 세율 반영. 연봉 실수령액, 건보료 연봉 역산, 종합소득세, 이직 비교, 퇴사 시뮬레이션을 무료로 계산하세요.";
   const canonical = `${SITE_URL}${route}`;
 
   return {
@@ -491,13 +640,23 @@ function buildPrerenderSection(route, meta) {
     </section>`;
   }
 
+  const comprehensiveTaxManWon = readComprehensiveTaxManWon(route);
+  if (comprehensiveTaxManWon !== null) {
+    return `
+    <section data-seo-prerender style="max-width:920px;margin:0 auto;padding:20px 16px;line-height:1.6;">
+      <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">종합소득 ${comprehensiveTaxManWon}만원 계산</h1>
+      <p style="margin:0 0 10px;">사업소득·임대소득·기타소득을 합산하고 분리과세와 종합과세를 비교해 최종 세액을 계산할 수 있습니다.</p>
+      <p style="margin:0;"><a href="/comprehensive-tax">종합소득세 계산기 열기</a></p>
+    </section>`;
+  }
+
   const comparePair = readComparePair(route);
   if (comparePair) {
     return `
     <section data-seo-prerender style="max-width:920px;margin:0 auto;padding:20px 16px;line-height:1.6;">
       <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">연봉 ${comparePair.a.toLocaleString("ko-KR")} vs ${comparePair.b.toLocaleString("ko-KR")} 이직 비교</h1>
       <p style="margin:0 0 10px;">두 회사의 연봉/복지 조건을 넣으면 월 실수령 및 실질 소득 차이를 확인할 수 있습니다.</p>
-      <p style="margin:0;"><a href="/compare">이직 연봉 비교기 열기</a></p>
+      <p style="margin:0;"><a href="/compare">이직 연봉 비교 계산기 열기</a></p>
     </section>`;
   }
 
@@ -505,9 +664,19 @@ function buildPrerenderSection(route, meta) {
   if (quitYears !== null) {
     return `
     <section data-seo-prerender style="max-width:920px;margin:0 auto;padding:20px 16px;line-height:1.6;">
-      <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">${quitYears}년 근속 퇴사 시뮬레이션</h1>
+      <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">${quitYears}년 근속 퇴사 계산</h1>
       <p style="margin:0 0 10px;">퇴직금, 실업급여, 월 고정비를 계산해 퇴사 후 생존기간을 확인할 수 있습니다.</p>
-      <p style="margin:0;"><a href="/quit">퇴사 시뮬레이터 열기</a></p>
+      <p style="margin:0;"><a href="/quit">퇴사 계산기 열기</a></p>
+    </section>`;
+  }
+
+  const withholdingAmt = readWithholdingAmount(route);
+  if (withholdingAmt !== null) {
+    return `
+    <section data-seo-prerender style="max-width:920px;margin:0 auto;padding:20px 16px;line-height:1.6;">
+      <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">소득세 ${formatWon(withholdingAmt)}이면 연봉 얼마?</h1>
+      <p style="margin:0 0 10px;">월 소득세 ${formatWon(withholdingAmt)} 기준 추정 연봉과 월 실수령액을 역산합니다.</p>
+      <p style="margin:0;"><a href="/withholding">원천세 역산 계산기 열기</a></p>
     </section>`;
   }
 
@@ -518,8 +687,9 @@ function buildPrerenderSection(route, meta) {
       <ul style="margin:0;padding-left:20px;">
         <li><a href="/insurance">건보료 역산 계산기</a></li>
         <li><a href="/salary">연봉 실수령액 계산기</a></li>
-        <li><a href="/compare">이직 연봉 비교기</a></li>
-        <li><a href="/quit">퇴사 시뮬레이터</a></li>
+        <li><a href="/comprehensive-tax">종합소득세 계산기</a></li>
+        <li><a href="/compare">이직 연봉 비교 계산기</a></li>
+        <li><a href="/quit">퇴사 계산기</a></li>
       </ul>
     </section>`;
 }

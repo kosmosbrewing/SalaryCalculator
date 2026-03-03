@@ -3,38 +3,64 @@ import { computed } from "vue";
 import { RouterLink } from "vue-router";
 
 const props = defineProps<{
-  current: "insurance" | "salary" | "compare" | "quit";
+  current: "insurance" | "salary" | "comprehensive-tax" | "compare" | "quit" | "withholding";
 }>();
 
 const suggestions = computed(() => {
   if (props.current === "insurance") {
     return [
-      { to: "/salary", label: "실수령액 계산" },
-      { to: "/compare", label: "이직 비교" },
-      { to: "/quit", label: "퇴사 시뮬레이션" },
+      { to: "/salary", label: "연봉 실수령액 계산기" },
+      { to: "/comprehensive-tax", label: "종합소득세 계산기" },
+      { to: "/compare", label: "이직 연봉 비교" },
+      { to: "/quit", label: "퇴사 계산기" },
+      { to: "/withholding", label: "원천세 역산 계산기" },
     ];
   }
 
   if (props.current === "salary") {
     return [
-      { to: "/compare", label: "이직 비교" },
-      { to: "/quit", label: "퇴사 시뮬레이션" },
-      { to: "/insurance", label: "건보료 연봉 추정" },
+      { to: "/comprehensive-tax", label: "종합소득세 계산기" },
+      { to: "/compare", label: "이직 연봉 비교" },
+      { to: "/quit", label: "퇴사 계산기" },
+      { to: "/insurance", label: "건보료 연봉 역산" },
+      { to: "/withholding", label: "원천세 역산 계산기" },
+    ];
+  }
+
+  if (props.current === "comprehensive-tax") {
+    return [
+      { to: "/salary", label: "연봉 실수령액 계산기" },
+      { to: "/insurance", label: "건보료 연봉 역산" },
+      { to: "/quit", label: "퇴사 계산기" },
+      { to: "/withholding", label: "원천세 역산 계산기" },
     ];
   }
 
   if (props.current === "compare") {
     return [
-      { to: "/quit", label: "퇴사 시뮬레이션" },
-      { to: "/insurance", label: "건보료 연봉 추정" },
-      { to: "/salary", label: "실수령액 계산" },
+      { to: "/comprehensive-tax", label: "종합소득세 계산기" },
+      { to: "/quit", label: "퇴사 계산기" },
+      { to: "/insurance", label: "건보료 연봉 역산" },
+      { to: "/salary", label: "연봉 실수령액 계산기" },
+      { to: "/withholding", label: "원천세 역산 계산기" },
+    ];
+  }
+
+  if (props.current === "withholding") {
+    return [
+      { to: "/insurance", label: "건보료 연봉 역산" },
+      { to: "/salary", label: "연봉 실수령액 계산기" },
+      { to: "/comprehensive-tax", label: "종합소득세 계산기" },
+      { to: "/compare", label: "이직 연봉 비교" },
     ];
   }
 
   return [
-    { to: "/insurance", label: "건보료 연봉 추정" },
-    { to: "/salary", label: "실수령액 계산" },
-    { to: "/compare", label: "이직 비교" },
+    { to: "/comprehensive-tax", label: "종합소득세 계산기" },
+    { to: "/insurance", label: "건보료 연봉 역산" },
+    { to: "/salary", label: "연봉 실수령액 계산기" },
+    { to: "/compare", label: "이직 연봉 비교" },
+    { to: "/withholding", label: "원천세 역산 계산기" },
   ];
 });
 </script>

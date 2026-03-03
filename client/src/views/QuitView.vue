@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch, watchEffect } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch, watchEffect } from "vue";
 import SEOHead from "@/components/common/SEOHead.vue";
 
 
@@ -19,6 +19,7 @@ import { useUnemploymentCalc } from "@/composables/useUnemploymentCalc";
 import { useSurvivalCalc } from "@/composables/useSurvivalCalc";
 
 import { copyUsingExecCommand, formatManWon, formatWon } from "@/lib/utils";
+import { DEFAULT_SITE_URL } from "@/lib/site";
 import { showAlert } from "@/composables/useAlert";
 import { addEntry } from "@/composables/useRecentCalcs";
 import type { QuitReason } from "@/data/unemploymentTable";
@@ -55,6 +56,8 @@ const childrenUnder20 = ref(0);
 const unusedLeaveDays = ref(12);
 const annualBonus = ref(4_000_000);
 const monthlyLivingCost = ref(2_500_000);
+const isRangeUpdating = ref(false);
+let rangeUpdatingTimer: ReturnType<typeof setTimeout> | null = null;
 
 onMounted(() => {
   const q = route.query;
@@ -73,6 +76,12 @@ onMounted(() => {
 
   if (props.initialYears && Number.isFinite(props.initialYears) && props.initialYears > 0) {
     startDate.value = subtractYears(endDate.value, Math.floor(props.initialYears));
+  }
+});
+
+onUnmounted(() => {
+  if (rangeUpdatingTimer) {
+    clearTimeout(rangeUpdatingTimer);
   }
 });
 
@@ -153,13 +162,27 @@ const survival = useSurvivalCalc(
 );
 
 const seoTitle = computed(
-  () => `퇴사 시뮬레이터 | 퇴직금+실업급여+생존 계산 (${insuranceYears.value}년 근속 기준)`
+  () => `${insuranceYears.value}년 근속 퇴사 계산기 | 퇴직금·실업급여·생존기간 2026`
 );
 
 const seoDescription = computed(
   () =>
-    `퇴사 후 받을 돈은 ${formatManWon(totalReceivables.value)}, 월 고정비는 ${formatManWon(monthlyFixedCost.value)}으로 추정됩니다.`
+    `퇴사하면 얼마나 버틸 수 있을까? 받을 돈 총 ${formatManWon(totalReceivables.value)}, 월 고정비 ${formatManWon(monthlyFixedCost.value)}. 실업급여·생존기간까지 한 번에 계산합니다.`
 );
+
+const breadcrumbJsonLd = computed(() => ({
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "홈", item: `${DEFAULT_SITE_URL}/` },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: "퇴사 계산기",
+      item: `${DEFAULT_SITE_URL}${route.path}`,
+    },
+  ],
+}));
 
 function getShareUrl(): string {
   const query = new URLSearchParams();
@@ -171,6 +194,17 @@ function getShareUrl(): string {
   return qs
     ? `${window.location.origin}/quit?${qs}`
     : `${window.location.origin}/quit`;
+}
+
+function handleRangeApply(range: { startDate: string; endDate: string }): void {
+  if (startDate.value === range.startDate && endDate.value === range.endDate) return;
+  isRangeUpdating.value = true;
+  if (rangeUpdatingTimer) {
+    clearTimeout(rangeUpdatingTimer);
+  }
+  rangeUpdatingTimer = setTimeout(() => {
+    isRangeUpdating.value = false;
+  }, 500);
 }
 
 async function copyQuitLink(): Promise<void> {
@@ -207,9 +241,19 @@ watch(
 
 <template>
   <div class="container space-y-4 py-6">
-    <SEOHead :title="seoTitle" :description="seoDescription" />
+    <SEOHead :title="seoTitle" :description="seoDescription" :json-ld="breadcrumbJsonLd" />
 
-    <h1 class="text-h1 font-title">퇴사 올인원 시뮬레이터</h1>
+    <div class="flex items-center justify-between gap-2">
+      <h1 class="text-h1 font-title">퇴사 계산기 | 퇴직금·실업급여·생존기간</h1>
+      <span
+        v-if="isRangeUpdating"
+        class="text-caption text-muted-foreground"
+        role="status"
+        aria-live="polite"
+      >
+        업데이트 중
+      </span>
+    </div>
 
     <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div class="space-y-4 order-1">
@@ -225,6 +269,7 @@ watch(
           v-model:unused-leave-days="unusedLeaveDays"
           v-model:annual-bonus="annualBonus"
           v-model:monthly-living-cost="monthlyLivingCost"
+          @range-apply="handleRangeApply"
         />
 
         <AdSlot slot="140001" label="광고 · top" />

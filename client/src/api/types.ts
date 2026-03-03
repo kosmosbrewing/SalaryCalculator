@@ -1,9 +1,7 @@
 export type Comment = {
   id: string;
-  content: string;
-  nickname: string;
   pageKey: string;
+  nickname: string;
+  content: string;
   createdAt: string;
-  likeCount?: number;
-  dislikeCount?: number;
 };

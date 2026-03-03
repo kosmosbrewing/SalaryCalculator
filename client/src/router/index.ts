@@ -1,6 +1,44 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from "vue-router";
 import { trackPageView } from "@/lib/analytics";
 
+function readFirstQueryValue(value: unknown): string | null {
+  if (Array.isArray(value)) {
+    const first = value[0];
+    return typeof first === "string" ? first : null;
+  }
+  return typeof value === "string" ? value : null;
+}
+
+function mapLegacyFreelanceQuery(
+  query: Record<string, unknown>,
+  amountParam?: string
+): Record<string, string> {
+  const mapped: Record<string, string> = {};
+
+  const legacyType = readFirstQueryValue(query.type);
+  const legacyIndustry = readFirstQueryValue(query.industry);
+  const legacyDep = readFirstQueryValue(query.dep);
+
+  const rawAmount = amountParam ?? readFirstQueryValue(query.gross);
+  const parsedAmount = Number.parseInt(rawAmount ?? "", 10);
+  const amount = Number.isFinite(parsedAmount) && parsedAmount > 0 ? parsedAmount : null;
+
+  if (amount !== null) {
+    if (legacyType === "other") {
+      mapped.oth = String(amount);
+      // 기존 프리랜서 기타소득 계산은 분리과세 개념이 없어 종합과세로 매핑
+      mapped.osp = "0";
+    } else {
+      mapped.biz = String(amount);
+    }
+  }
+
+  if (legacyIndustry) mapped.ind = legacyIndustry;
+  if (legacyDep) mapped.dep = legacyDep;
+
+  return mapped;
+}
+
 const routes: RouteRecordRaw[] = [
   {
     path: "/",
@@ -10,7 +48,7 @@ const routes: RouteRecordRaw[] = [
     path: "/insurance",
     name: "Insurance",
     component: () => import("@/views/InsuranceView.vue"),
-    meta: { title: "2026 건보료로 연봉 추정 | 4대보험 계산기" },
+    meta: { title: "2026 건강보험료로 연봉 역산 계산기 | 4대보험" },
   },
   {
     path: "/insurance/:amount(\\d+)",
@@ -19,7 +57,7 @@ const routes: RouteRecordRaw[] = [
     props: (route) => ({
       initialHealthInsuranceFee: Number.parseInt(String(route.params.amount), 10),
     }),
-    meta: { title: "건보료로 연봉 추정 | 2026 연봉 계산기" },
+    meta: { title: "건보료 역산 결과 | 2026 건강보험료 계산기" },
   },
   {
     path: "/salary",
@@ -31,13 +69,45 @@ const routes: RouteRecordRaw[] = [
     path: "/salary/:amount",
     name: "SalaryLanding",
     component: () => import("@/views/SalaryLandingView.vue"),
-    meta: { title: "연봉 실수령액 계산" },
+    meta: { title: "2026 연봉 실수령액 계산기 | 월급 계산" },
+  },
+  {
+    path: "/comprehensive-tax",
+    name: "ComprehensiveTax",
+    component: () => import("@/views/ComprehensiveTaxView.vue"),
+    meta: { title: "2026 종합소득세 계산기 | 프리랜서·사업소득 세금" },
+  },
+  {
+    path: "/comprehensive-tax/:amount(\\d+)",
+    name: "ComprehensiveTaxLanding",
+    component: () => import("@/views/ComprehensiveTaxView.vue"),
+    props: (route) => ({
+      initialBusinessAmountManWon: Number.parseInt(String(route.params.amount), 10),
+    }),
+    meta: { title: "종합소득세 계산 결과 | 2026 프리랜서 세금 계산기" },
+  },
+  {
+    path: "/freelance/:amount(\\d+)",
+    redirect: (to) => ({
+      path: "/comprehensive-tax",
+      query: mapLegacyFreelanceQuery(
+        to.query as Record<string, unknown>,
+        String(to.params.amount)
+      ),
+    }),
+  },
+  {
+    path: "/freelance",
+    redirect: (to) => ({
+      path: "/comprehensive-tax",
+      query: mapLegacyFreelanceQuery(to.query as Record<string, unknown>),
+    }),
   },
   {
     path: "/compare",
     name: "Compare",
     component: () => import("@/views/CompareView.vue"),
-    meta: { title: "이직 연봉 비교기 | A사 vs B사 실수령 차이 계산" },
+    meta: { title: "이직 연봉 비교 계산기 | 실수령액 차이 비교 2026" },
   },
   {
     path: "/compare/:a(\\d+)-vs-:b(\\d+)",
@@ -47,13 +117,28 @@ const routes: RouteRecordRaw[] = [
       initialAManWon: Number.parseInt(String(route.params.a), 10),
       initialBManWon: Number.parseInt(String(route.params.b), 10),
     }),
-    meta: { title: "이직 연봉 비교기 | A사 vs B사 실수령 차이 계산" },
+    meta: { title: "연봉 비교 결과 | 이직 실수령 차이 계산 2026" },
+  },
+  {
+    path: "/withholding",
+    name: "Withholding",
+    component: () => import("@/views/WithholdingView.vue"),
+    meta: { title: "원천세 역산 계산기 | 소득세로 연봉 추정 2026" },
+  },
+  {
+    path: "/withholding/:amount(\\d+)",
+    name: "WithholdingDetail",
+    component: () => import("@/views/WithholdingView.vue"),
+    props: (route) => ({
+      initialAmountWon: Number.parseInt(String(route.params.amount), 10),
+    }),
+    meta: { title: "원천세 역산 결과 | 연봉 추정 계산기" },
   },
   {
     path: "/quit",
     name: "Quit",
     component: () => import("@/views/QuitView.vue"),
-    meta: { title: "퇴사 시뮬레이터 | 퇴직금·실업급여·생존 계산" },
+    meta: { title: "퇴사 계산기 2026 | 퇴직금·실업급여·생존기간" },
   },
   {
     path: "/quit/:years(\\d+years)",
@@ -62,19 +147,19 @@ const routes: RouteRecordRaw[] = [
     props: (route) => ({
       initialYears: Number.parseInt(String(route.params.years).replace("years", ""), 10),
     }),
-    meta: { title: "퇴사 시뮬레이터 | 퇴직금·실업급여·생존 계산" },
+    meta: { title: "퇴사 시뮬레이션 결과 | 퇴직금·실업급여 계산" },
   },
   {
     path: "/about",
     name: "About",
     component: () => import("@/views/AboutView.vue"),
-    meta: { title: "서비스 소개 | finance.shakilabs.com" },
+    meta: { title: "서비스 소개 | 2026 연봉·세금 계산기" },
   },
   {
     path: "/privacy",
     name: "Privacy",
     component: () => import("@/views/PrivacyView.vue"),
-    meta: { title: "개인정보처리방침 | finance.shakilabs.com" },
+    meta: { title: "개인정보처리방침 | 연봉 실수령액 계산기" },
   },
   {
     path: "/:pathMatch(.*)*",
@@ -98,7 +183,7 @@ router.beforeEach((to, _from, next) => {
   const title =
     typeof to.meta.title === "string"
       ? to.meta.title
-      : "2026 연봉·건보료·4대보험 계산기";
+      : "2026 연봉 실수령액 계산기 | 건보료 역산·4대보험·종합소득세";
   document.title = title;
   next();
 });

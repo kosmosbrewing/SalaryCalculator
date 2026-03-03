@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watchEffect } from "vue";
 import { Share2 } from "lucide-vue-next";
-import { formatWon, formatPercent } from "@/lib/utils";
+import { formatKrwAuto, formatWon, formatPercent } from "@/lib/utils";
 import type { SalaryCalcResult } from "@/composables/useSalaryCalc";
 
 const props = defineProps<{
@@ -109,15 +109,17 @@ onUnmounted(() => {
           {{ formatWon(displayedMonthlyNet) }}
         </p>
         <p class="text-caption text-muted-foreground mt-1">
-          연 실수령액: {{ formatWon(props.calc.annualNet.value) }}
+          연 실수령액: {{ formatKrwAuto(props.calc.annualNet.value) }}
         </p>
-        <p
-          v-if="showDiff"
-          class="text-caption mt-1 font-semibold"
-          :class="diffClass"
-        >
-          직전 입력 대비 {{ diffLabel }}
-        </p>
+        <Transition name="fade">
+          <p
+            v-if="showDiff"
+            class="text-caption mt-1 font-semibold"
+            :class="diffClass"
+          >
+            직전 입력 대비 {{ diffLabel }}
+          </p>
+        </Transition>
       </div>
 
       <!-- 요약 그리드 -->
@@ -140,63 +142,81 @@ onUnmounted(() => {
         </div>
       </div>
 
-      <!-- 공제 항목 바 -->
-      <div class="space-y-2">
-        <div class="flex items-center justify-between text-caption">
-          <span class="text-muted-foreground">4대보험</span>
+      <!-- 4대보험 차트 -->
+      <div class="retro-chart">
+        <div class="retro-chart-header">
+          <span class="font-semibold text-foreground">4대보험</span>
           <span class="font-semibold tabular-nums">{{ formatWon(props.calc.totalInsurance.value) }}</span>
         </div>
-        <div class="flex gap-0.5 h-2 rounded-full overflow-hidden bg-muted">
+        <div class="retro-chart-bar">
           <div
-            class="bg-chart-pension transition-all duration-200"
+            class="bg-chart-pension retro-chart-segment"
             :style="{ width: props.calc.monthlyGross.value > 0 ? `${(props.calc.nationalPension.value / props.calc.monthlyGross.value) * 100}%` : '0%' }"
             title="국민연금"
           />
           <div
-            class="bg-chart-health transition-all duration-200"
+            class="bg-chart-health retro-chart-segment"
             :style="{ width: props.calc.monthlyGross.value > 0 ? `${(props.calc.healthInsurance.value / props.calc.monthlyGross.value) * 100}%` : '0%' }"
             title="건강보험"
           />
           <div
-            class="bg-chart-care transition-all duration-200"
+            class="bg-chart-care retro-chart-segment"
             :style="{ width: props.calc.monthlyGross.value > 0 ? `${(props.calc.longTermCare.value / props.calc.monthlyGross.value) * 100}%` : '0%' }"
             title="장기요양"
           />
           <div
-            class="bg-chart-employment transition-all duration-200"
+            class="bg-chart-employment retro-chart-segment"
             :style="{ width: props.calc.monthlyGross.value > 0 ? `${(props.calc.employmentInsurance.value / props.calc.monthlyGross.value) * 100}%` : '0%' }"
             title="고용보험"
           />
         </div>
-        <div class="flex flex-wrap gap-x-3 gap-y-1 text-caption">
-          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-chart-pension" />국민연금</span>
-          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-chart-health" />건강보험</span>
-          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-chart-care" />장기요양</span>
-          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-chart-employment" />고용보험</span>
+        <div class="retro-chart-legend">
+          <div class="retro-chart-legend-item">
+            <span class="flex items-center gap-1.5"><span class="retro-chart-dot bg-chart-pension" />국민연금</span>
+            <span class="tabular-nums font-medium">{{ formatWon(props.calc.nationalPension.value) }}</span>
+          </div>
+          <div class="retro-chart-legend-item">
+            <span class="flex items-center gap-1.5"><span class="retro-chart-dot bg-chart-health" />건강보험</span>
+            <span class="tabular-nums font-medium">{{ formatWon(props.calc.healthInsurance.value) }}</span>
+          </div>
+          <div class="retro-chart-legend-item">
+            <span class="flex items-center gap-1.5"><span class="retro-chart-dot bg-chart-care" />장기요양</span>
+            <span class="tabular-nums font-medium">{{ formatWon(props.calc.longTermCare.value) }}</span>
+          </div>
+          <div class="retro-chart-legend-item">
+            <span class="flex items-center gap-1.5"><span class="retro-chart-dot bg-chart-employment" />고용보험</span>
+            <span class="tabular-nums font-medium">{{ formatWon(props.calc.employmentInsurance.value) }}</span>
+          </div>
         </div>
       </div>
 
-      <!-- 세금 -->
-      <div class="space-y-2">
-        <div class="flex items-center justify-between text-caption">
-          <span class="text-muted-foreground">세금</span>
+      <!-- 세금 차트 -->
+      <div class="retro-chart">
+        <div class="retro-chart-header">
+          <span class="font-semibold text-foreground">세금</span>
           <span class="font-semibold tabular-nums">{{ formatWon(props.calc.totalTax.value) }}</span>
         </div>
-        <div class="flex gap-0.5 h-2 rounded-full overflow-hidden bg-muted">
+        <div class="retro-chart-bar">
           <div
-            class="bg-chart-tax transition-all duration-200"
+            class="bg-chart-tax retro-chart-segment"
             :style="{ width: props.calc.monthlyGross.value > 0 ? `${(props.calc.monthlyIncomeTax.value / props.calc.monthlyGross.value) * 100}%` : '0%' }"
             title="소득세"
           />
           <div
-            class="bg-chart-localTax transition-all duration-200"
+            class="bg-chart-localTax retro-chart-segment"
             :style="{ width: props.calc.monthlyGross.value > 0 ? `${(props.calc.monthlyLocalTax.value / props.calc.monthlyGross.value) * 100}%` : '0%' }"
             title="지방소득세"
           />
         </div>
-        <div class="flex flex-wrap gap-x-3 gap-y-1 text-caption">
-          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-chart-tax" />소득세</span>
-          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-chart-localTax" />지방소득세</span>
+        <div class="retro-chart-legend">
+          <div class="retro-chart-legend-item">
+            <span class="flex items-center gap-1.5"><span class="retro-chart-dot bg-chart-tax" />소득세</span>
+            <span class="tabular-nums font-medium">{{ formatWon(props.calc.monthlyIncomeTax.value) }}</span>
+          </div>
+          <div class="retro-chart-legend-item">
+            <span class="flex items-center gap-1.5"><span class="retro-chart-dot bg-chart-localTax" />지방소득세</span>
+            <span class="tabular-nums font-medium">{{ formatWon(props.calc.monthlyLocalTax.value) }}</span>
+          </div>
         </div>
       </div>
     </div>

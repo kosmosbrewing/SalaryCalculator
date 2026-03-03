@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { formatWon, formatPercent } from "@/lib/utils";
+import { formatKrwAuto, formatWon, formatPercent } from "@/lib/utils";
 import {
   NATIONAL_PENSION,
   HEALTH_INSURANCE,
@@ -104,7 +104,7 @@ defineProps<{
             <div class="retro-board-list mb-3">
               <div class="retro-board-item">
                 <span>과세대상 총급여 (연)</span>
-                <span class="font-semibold tabular-nums">{{ formatWon(calc.annualTaxableIncome.value) }}</span>
+                <span class="font-semibold tabular-nums">{{ formatKrwAuto(calc.annualTaxableIncome.value) }}</span>
               </div>
               <div class="retro-board-item pl-6 sm:pl-8">
                 <span class="text-muted-foreground">(-) 근로소득공제</span>
@@ -116,7 +116,7 @@ defineProps<{
               </div>
               <div class="retro-board-item pl-6 sm:pl-8">
                 <span class="text-muted-foreground">(-) 보험료공제 (연)</span>
-                <span class="font-semibold tabular-nums text-primary">{{ formatWon(calc.annualInsuranceDeduction.value) }}</span>
+                <span class="font-semibold tabular-nums text-primary">{{ formatKrwAuto(calc.annualInsuranceDeduction.value) }}</span>
               </div>
               <div class="retro-board-item bg-muted/50">
                 <span class="font-bold">= 과세표준</span>
@@ -139,17 +139,19 @@ defineProps<{
                 <span class="text-muted-foreground">(-) 표준세액공제</span>
                 <span class="font-semibold tabular-nums text-primary">{{ formatWon(calc.standardTaxCredit.value) }}</span>
               </div>
-              <div v-if="calc.childTaxCredit.value > 0" class="retro-board-item pl-6 sm:pl-8">
-                <span class="text-muted-foreground">(-) 자녀세액공제</span>
-                <span class="font-semibold tabular-nums text-primary">{{ formatWon(calc.childTaxCredit.value) }}</span>
-              </div>
+              <Transition name="fade">
+                <div v-if="calc.childTaxCredit.value > 0" class="retro-board-item pl-6 sm:pl-8">
+                  <span class="text-muted-foreground">(-) 자녀세액공제</span>
+                  <span class="font-semibold tabular-nums text-primary">{{ formatWon(calc.childTaxCredit.value) }}</span>
+                </div>
+              </Transition>
               <div class="retro-board-item bg-muted/50">
                 <span class="font-bold">= 결정세액 (연)</span>
-                <span class="font-bold tabular-nums">{{ formatWon(calc.determinedTax.value) }}</span>
+                <span class="font-bold tabular-nums">{{ formatKrwAuto(calc.determinedTax.value) }}</span>
               </div>
               <div class="retro-board-item">
                 <span>지방소득세 (연)</span>
-                <span class="font-semibold tabular-nums">{{ formatWon(calc.annualLocalTax.value) }}</span>
+                <span class="font-semibold tabular-nums">{{ formatKrwAuto(calc.annualLocalTax.value) }}</span>
               </div>
             </div>
           </AccordionContent>

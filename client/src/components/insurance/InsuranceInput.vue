@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { formatNumber } from "@/lib/utils";
 
 const props = defineProps<{
   mode: "reverse" | "forward";
@@ -8,7 +9,6 @@ const props = defineProps<{
   dependents: number;
   childrenUnder20: number;
   nonTaxableMonthly: number;
-  presets: readonly number[];
 }>();
 
 const emit = defineEmits<{
@@ -22,7 +22,7 @@ const emit = defineEmits<{
 
 // 천단위 콤마 포맷 (건보료, 원 단위)
 const formattedHealthFee = computed(() =>
-  props.healthInsuranceFee.toLocaleString("ko-KR")
+  formatNumber(props.healthInsuranceFee)
 );
 
 function onHealthFeeInput(event: Event): void {
@@ -33,50 +33,25 @@ function onHealthFeeInput(event: Event): void {
   }
 }
 
-// 증감 버튼 (건보료)
-const HEALTH_STEPS = [
-  { label: "-5만", delta: -50_000 },
-  { label: "-2만", delta: -20_000 },
-  { label: "-1만", delta: -10_000 },
-  { label: "+1만", delta: 10_000 },
-  { label: "+2만", delta: 20_000 },
-  { label: "+5만", delta: 50_000 },
-] as const;
-
-function adjustHealthFee(delta: number): void {
-  const next = Math.max(0, Math.min(5_000_000, props.healthInsuranceFee + delta));
-  emit("update:healthInsuranceFee", next);
-}
-
-// 천단위 콤마 포맷 (연봉, 만원 단위)
-const annualGrossManWon = computed(() =>
-  Math.floor(props.annualGross / 10_000)
-);
+// 연봉 입력값 만원 단위로 변환 (SalaryInputPanel 동일 패턴)
+const annualGrossManWon = computed({
+  get: () => Math.round(props.annualGross / 10_000),
+  set: (value: number) => {
+    const safe = Math.max(1_000, Math.min(300_000, Math.floor(value || 0)));
+    emit("update:annualGross", safe * 10_000);
+  },
+});
 
 const formattedGrossManWon = computed(() =>
-  annualGrossManWon.value.toLocaleString("ko-KR")
+  formatNumber(annualGrossManWon.value)
 );
 
 function onGrossInput(event: Event): void {
   const raw = (event.target as HTMLInputElement).value.replace(/[^0-9]/g, "");
   const value = parseInt(raw, 10);
   if (Number.isFinite(value)) {
-    const safe = Math.max(0, Math.min(1_000_000, value));
-    emit("update:annualGross", safe * 10_000);
+    annualGrossManWon.value = value;
   }
-}
-
-// 증감 버튼 (연봉 만원 단위)
-const GROSS_STEPS = [
-  { label: "-500만", delta: -500 },
-  { label: "-100만", delta: -100 },
-  { label: "+100만", delta: 100 },
-  { label: "+500만", delta: 500 },
-] as const;
-
-function adjustGross(delta: number): void {
-  const next = Math.max(0, Math.min(1_000_000, annualGrossManWon.value + delta));
-  emit("update:annualGross", next * 10_000);
 }
 
 // 비과세
@@ -106,11 +81,21 @@ function updateChildren(value: number): void {
 
 const inputIds = {
   reverseHealthInsurance: "insurance-health-fee",
+  reverseHealthInsuranceRange: "insurance-health-fee-range",
   forwardAnnualGross: "insurance-annual-gross",
+  forwardAnnualGrossRange: "insurance-annual-gross-range",
   dependents: "insurance-dependents",
   children: "insurance-children",
   nonTaxableMonthly: "insurance-nontaxable-monthly",
 } as const;
+
+function onHealthFeeRangeInput(event: Event): void {
+  const value = parseInt((event.target as HTMLInputElement).value, 10);
+  if (Number.isFinite(value)) {
+    emit("update:healthInsuranceFee", Math.max(0, Math.min(500_000, value)));
+  }
+}
+
 </script>
 
 <template>
@@ -120,90 +105,125 @@ const inputIds = {
     </div>
 
     <div class="retro-panel-content space-y-4">
-      <div class="flex gap-2">
+      <div class="flex gap-2.5 border-b border-border/40 pb-4">
         <button
           type="button"
-          class="touch-target rounded border px-3 py-1.5 text-caption font-semibold transition-colors"
+          class="touch-target min-w-0 flex-1 rounded-xl border px-2 py-1.5 text-caption font-semibold transition-colors"
           :class="mode === 'reverse' ? 'border-primary bg-primary text-primary-foreground' : 'border-border text-muted-foreground hover:text-foreground'"
           @click="emit('update:mode', 'reverse')"
         >
-          건보료 → 연봉 추정
+          건보료 → 연봉
         </button>
         <button
           type="button"
-          class="touch-target rounded border px-3 py-1.5 text-caption font-semibold transition-colors"
+          class="touch-target min-w-0 flex-1 rounded-xl border px-2 py-1.5 text-caption font-semibold transition-colors"
           :class="mode === 'forward' ? 'border-primary bg-primary text-primary-foreground' : 'border-border text-muted-foreground hover:text-foreground'"
           @click="emit('update:mode', 'forward')"
         >
-          연봉 → 건보료 계산
+          연봉 → 건보료
         </button>
       </div>
 
-      <!-- 건보료 → 연봉 추정 모드 -->
-      <div v-if="mode === 'reverse'" class="space-y-3">
-        <label :for="inputIds.reverseHealthInsurance" class="block text-caption font-semibold text-foreground">
+      <Transition name="slide-fade" mode="out-in">
+        <!-- 건보료 → 연봉 추정 모드 -->
+        <div v-if="mode === 'reverse'" key="reverse" class="space-y-3">
+        <label :for="inputIds.reverseHealthInsurance" class="mb-0.5 block text-caption font-semibold text-foreground">
           월 건강보험료 (원)
         </label>
-        <input
-          :id="inputIds.reverseHealthInsurance"
-          :value="formattedHealthFee"
-          type="text"
-          inputmode="numeric"
-          class="retro-input text-heading font-bold tabular-nums"
-          @input="onHealthFeeInput"
-        />
-
-        <div class="flex flex-wrap gap-1.5">
-          <button
-            v-for="step in HEALTH_STEPS"
-            :key="step.delta"
-            type="button"
-            class="touch-target rounded border border-border px-3 py-1.5 text-caption font-semibold transition-colors"
-            :class="step.delta < 0 ? 'text-muted-foreground hover:border-destructive/50 hover:text-destructive' : 'text-muted-foreground hover:border-primary hover:text-primary'"
-            :disabled="step.delta < 0 && healthInsuranceFee + step.delta < 0"
-            @click="adjustHealthFee(step.delta)"
-          >
-            {{ step.label }}
-          </button>
-        </div>
-
         <p class="text-caption text-muted-foreground">
           급여명세서의 <strong>건강보험(근로자 부담분)</strong>만 입력하세요.
         </p>
-      </div>
-
-      <!-- 연봉 → 건보료 계산 모드 -->
-      <div v-else class="space-y-3">
-        <label :for="inputIds.forwardAnnualGross" class="block text-caption font-semibold text-foreground">
-          연봉 (만원)
-        </label>
-        <input
-          :id="inputIds.forwardAnnualGross"
-          :value="formattedGrossManWon"
-          type="text"
-          inputmode="numeric"
-          class="retro-input text-heading font-bold tabular-nums"
-          @input="onGrossInput"
-        />
-
-        <div class="flex flex-wrap gap-1.5">
-          <button
-            v-for="step in GROSS_STEPS"
-            :key="step.delta"
-            type="button"
-            class="touch-target rounded border border-border px-3 py-1.5 text-caption font-semibold transition-colors"
-            :class="step.delta < 0 ? 'text-muted-foreground hover:border-destructive/50 hover:text-destructive' : 'text-muted-foreground hover:border-primary hover:text-primary'"
-            :disabled="step.delta < 0 && annualGrossManWon + step.delta < 0"
-            @click="adjustGross(step.delta)"
-          >
-            {{ step.label }}
-          </button>
+        <div class="space-y-2">
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
+              class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+              aria-label="1만원 감소"
+              @click="emit('update:healthInsuranceFee', Math.max(0, healthInsuranceFee - 10_000))"
+            >
+              −
+            </button>
+            <input
+              :id="inputIds.reverseHealthInsurance"
+              :value="formattedHealthFee"
+              type="text"
+              inputmode="numeric"
+              class="retro-input min-w-0 flex-1 text-center text-heading font-bold tabular-nums"
+              @input="onHealthFeeInput"
+            />
+            <button
+              type="button"
+              class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+              aria-label="1만원 증가"
+              @click="emit('update:healthInsuranceFee', Math.min(5_000_000, healthInsuranceFee + 10_000))"
+            >
+              +
+            </button>
+          </div>
+          <input
+            :id="inputIds.reverseHealthInsuranceRange"
+            :value="healthInsuranceFee"
+            type="range"
+            min="0"
+            max="500000"
+            step="1000"
+            class="retro-range"
+            aria-label="건보료 슬라이더"
+            @input="onHealthFeeRangeInput"
+          />
         </div>
       </div>
 
-      <details class="rounded-xl border border-border/60 bg-muted/20 overflow-hidden">
-        <summary class="cursor-pointer px-3 py-2 text-caption font-semibold text-foreground">
-          상세 설정
+        <!-- 연봉 → 건보료 계산 모드 -->
+        <div v-else key="forward" class="space-y-3">
+        <label :for="inputIds.forwardAnnualGross" class="mb-0.5 block text-caption font-semibold text-foreground">
+          연봉 (만원)
+        </label>
+        <div class="space-y-2">
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
+              class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+              aria-label="100만원 감소"
+              @click="annualGrossManWon = Math.max(1000, annualGrossManWon - 100)"
+            >
+              −
+            </button>
+            <input
+              :id="inputIds.forwardAnnualGross"
+              :value="formattedGrossManWon"
+              type="text"
+              inputmode="numeric"
+              class="retro-input min-w-0 flex-1 text-center text-heading font-bold tabular-nums"
+              @input="onGrossInput"
+            />
+            <button
+              type="button"
+              class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+              aria-label="100만원 증가"
+              @click="annualGrossManWon = Math.min(20000, annualGrossManWon + 100)"
+            >
+              +
+            </button>
+          </div>
+          <input
+            :id="inputIds.forwardAnnualGrossRange"
+            v-model.number="annualGrossManWon"
+            type="range"
+            min="1000"
+            max="20000"
+            step="100"
+            class="retro-range"
+            aria-label="연봉 슬라이더"
+          />
+        </div>
+        </div>
+      </Transition>
+
+      <details class="retro-details">
+        <summary class="retro-details-summary">
+          <span>상세 설정 보기</span>
+          <span class="retro-details-chevron" aria-hidden="true">▾</span>
         </summary>
         <div class="grid grid-cols-1 gap-3 p-3 sm:grid-cols-3">
           <label class="space-y-1" :for="inputIds.dependents">

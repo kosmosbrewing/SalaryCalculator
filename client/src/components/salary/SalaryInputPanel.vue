@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { Minus, Plus } from "lucide-vue-next";
-import { formatManWon } from "@/lib/utils";
+import { formatNumber } from "@/lib/utils";
 
 const props = defineProps<{
   annualGross: number;
@@ -18,16 +17,6 @@ const emit = defineEmits<{
   "update:nonTaxableMonthly": [value: number];
   "update:retirementIncluded": [value: boolean];
 }>();
-
-// 빠른 선택 버튼 (만원 단위 표시, 실제값은 원)
-const quickAmounts = [
-  20_000_000,
-  30_000_000,
-  40_000_000,
-  50_000_000,
-  70_000_000,
-  100_000_000,
-] as const;
 
 const inputIds = {
   annualGross: "salary-annual-gross",
@@ -46,7 +35,7 @@ const grossInManWon = computed({
 
 // 천단위 콤마 포맷
 const formattedGrossManWon = computed(() =>
-  grossInManWon.value.toLocaleString("ko-KR")
+  formatNumber(grossInManWon.value)
 );
 
 function onGrossInput(event: Event): void {
@@ -64,10 +53,6 @@ const nonTaxableManWon = computed({
     emit("update:nonTaxableMonthly", safe * 10_000);
   },
 });
-
-function setQuickAmount(value: number): void {
-  emit("update:annualGross", value);
-}
 
 function adjustDependents(delta: number): void {
   const next = Math.max(1, Math.min(20, props.dependents + delta));
@@ -98,70 +83,72 @@ function updateRetirementIncluded(value: boolean): void {
 
     <div class="retro-panel-content space-y-4">
       <div>
-        <label :for="inputIds.annualGross" class="mb-2 block text-caption font-semibold text-foreground">
+        <label :for="inputIds.annualGross" class="mb-0.5 block text-caption font-semibold text-foreground">
           연봉 (만원)
         </label>
         <div class="space-y-2">
-          <input
-            :id="inputIds.annualGross"
-            :value="formattedGrossManWon"
-            type="text"
-            class="retro-input text-heading font-bold tabular-nums"
-            placeholder="3,000"
-            inputmode="numeric"
-            @input="onGrossInput"
-          />
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
+              class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+              aria-label="100만원 감소"
+              @click="grossInManWon = Math.max(1000, grossInManWon - 100)"
+            >
+              −
+            </button>
+            <input
+              :id="inputIds.annualGross"
+              :value="formattedGrossManWon"
+              type="text"
+              class="retro-input min-w-0 flex-1 text-center text-heading font-bold tabular-nums"
+              placeholder="3,000"
+              inputmode="numeric"
+              @input="onGrossInput"
+            />
+            <button
+              type="button"
+              class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+              aria-label="100만원 증가"
+              @click="grossInManWon = Math.min(20000, grossInManWon + 100)"
+            >
+              +
+            </button>
+          </div>
           <input
             :id="inputIds.annualGrossRange"
             v-model.number="grossInManWon"
             type="range"
             min="1000"
-            max="300000"
+            max="20000"
             step="100"
-            class="h-3 w-full cursor-pointer appearance-none rounded bg-muted"
+            class="retro-range"
             aria-label="연봉 슬라이더"
           />
         </div>
-
-        <div class="mt-3 flex flex-wrap gap-1.5">
-          <button
-            v-for="item in quickAmounts"
-            :key="item"
-            type="button"
-            :class="[
-              'touch-target rounded border px-3 py-1.5 text-caption font-semibold transition-colors',
-              props.annualGross === item
-                ? 'border-primary bg-primary text-primary-foreground'
-                : 'border-border text-muted-foreground hover:border-primary hover:text-primary',
-            ]"
-            @click="setQuickAmount(item)"
-          >
-            {{ formatManWon(item) }}
-          </button>
-        </div>
       </div>
 
-      <details class="rounded-xl border border-border/60 bg-muted/20 overflow-hidden" open>
-        <summary class="cursor-pointer px-3 py-2 text-caption font-semibold text-foreground">
-          상세 설정
+      <details class="retro-details" open>
+        <summary class="retro-details-summary">
+          <span>상세 설정 보기</span>
+          <span class="retro-details-chevron" aria-hidden="true">▾</span>
         </summary>
 
         <div class="space-y-3 p-3">
           <div>
-            <span class="mb-2 block text-caption font-semibold text-foreground">퇴직금 포함 여부</span>
-            <div class="flex gap-2">
+            <span class="mb-0.5 block text-caption font-semibold text-foreground">퇴직금 포함 여부</span>
+            <div class="flex gap-2.5">
               <button
                 type="button"
-                class="touch-target rounded border px-3 py-1.5 text-caption font-semibold"
-                :class="!props.retirementIncluded ? 'border-primary bg-primary text-primary-foreground' : 'border-border text-muted-foreground'"
+                class="touch-target rounded-xl border px-3 py-1.5 text-caption font-semibold transition-colors"
+                :class="!props.retirementIncluded ? 'border-primary bg-primary text-primary-foreground' : 'border-border text-muted-foreground hover:text-foreground'"
                 @click="updateRetirementIncluded(false)"
               >
                 퇴직금 별도
               </button>
               <button
                 type="button"
-                class="touch-target rounded border px-3 py-1.5 text-caption font-semibold"
-                :class="props.retirementIncluded ? 'border-primary bg-primary text-primary-foreground' : 'border-border text-muted-foreground'"
+                class="touch-target rounded-xl border px-3 py-1.5 text-caption font-semibold transition-colors"
+                :class="props.retirementIncluded ? 'border-primary bg-primary text-primary-foreground' : 'border-border text-muted-foreground hover:text-foreground'"
                 @click="updateRetirementIncluded(true)"
               >
                 퇴직금 포함
@@ -171,57 +158,57 @@ function updateRetirementIncluded(value: boolean): void {
 
           <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div>
-              <p class="mb-2 block text-caption font-semibold text-foreground">
+              <p class="mb-0.5 block text-caption font-semibold text-foreground">
                 부양가족 수 (본인 포함)
               </p>
-              <div class="flex items-center gap-3">
+              <div class="flex items-center gap-2">
                 <button
                   type="button"
-                  class="inline-flex touch-target h-11 w-11 items-center justify-center rounded border border-border text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+                  class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-primary hover:text-primary"
                   aria-label="부양가족 수 감소"
                   @click="adjustDependents(-1)"
                 >
-                  <Minus class="h-4 w-4" />
+                  −
                 </button>
                 <span class="w-12 text-center text-heading font-bold tabular-nums">{{ props.dependents }}</span>
                 <button
                   type="button"
-                  class="inline-flex touch-target h-11 w-11 items-center justify-center rounded border border-border text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+                  class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-primary hover:text-primary"
                   aria-label="부양가족 수 증가"
                   @click="adjustDependents(1)"
                 >
-                  <Plus class="h-4 w-4" />
+                  +
                 </button>
               </div>
             </div>
 
             <div>
-              <p class="mb-2 block text-caption font-semibold text-foreground">
+              <p class="mb-0.5 block text-caption font-semibold text-foreground">
                 8~20세 자녀 수
               </p>
-              <div class="flex items-center gap-3">
+              <div class="flex items-center gap-2">
                 <button
                   type="button"
-                  class="inline-flex touch-target h-11 w-11 items-center justify-center rounded border border-border text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+                  class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-primary hover:text-primary"
                   aria-label="8~20세 자녀 수 감소"
                   @click="adjustChildren(-1)"
                 >
-                  <Minus class="h-4 w-4" />
+                  −
                 </button>
                 <span class="w-12 text-center text-heading font-bold tabular-nums">{{ props.childrenUnder20 }}</span>
                 <button
                   type="button"
-                  class="inline-flex touch-target h-11 w-11 items-center justify-center rounded border border-border text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+                  class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-primary hover:text-primary"
                   aria-label="8~20세 자녀 수 증가"
                   @click="adjustChildren(1)"
                 >
-                  <Plus class="h-4 w-4" />
+                  +
                 </button>
               </div>
             </div>
 
             <div>
-              <label :for="inputIds.nonTaxableMonthly" class="mb-2 block text-caption font-semibold text-foreground">
+              <label :for="inputIds.nonTaxableMonthly" class="mb-0.5 block text-caption font-semibold text-foreground">
                 비과세 금액 (만원/월)
               </label>
               <input

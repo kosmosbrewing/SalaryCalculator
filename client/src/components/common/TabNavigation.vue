@@ -5,17 +5,19 @@ import { useRoute, RouterLink } from "vue-router";
 const route = useRoute();
 
 const tabs = [
-  { label: "연봉 추정", to: "/insurance", startsWith: "/insurance" },
+  { label: "건보료 역산", to: "/insurance", startsWith: "/insurance" },
   { label: "실수령액", to: "/salary", startsWith: "/salary" },
+  { label: "종합소득세", to: "/comprehensive-tax", startsWith: "/comprehensive-tax" },
   { label: "이직 비교", to: "/compare", startsWith: "/compare" },
-  { label: "퇴사 시뮬레이터", to: "/quit", startsWith: "/quit" },
+  { label: "퇴사 계산", to: "/quit", startsWith: "/quit" },
+  { label: "원천세 역산", to: "/withholding", startsWith: "/withholding" },
 ] as const;
 
 const activePath = computed(() => route.path);
 </script>
 
 <template>
-  <nav class="sticky top-0 z-50 border-b border-primary/20 bg-gradient-to-r from-primary/95 via-primary/80 to-primary/65 shadow-sm" aria-label="주요 메뉴">
+  <nav class="sticky top-0 z-50 border-b border-primary/20 bg-primary shadow-sm" aria-label="주요 메뉴">
     <div class="container">
       <div class="flex h-12 items-center gap-2 overflow-x-auto" style="scrollbar-width: none">
         <RouterLink

@@ -6,7 +6,7 @@ const props = withDefaults(
   defineProps<{
     title: string;
     description: string;
-    jsonLd?: Record<string, unknown>;
+    jsonLd?: Record<string, unknown> | Record<string, unknown>[];
     noindex?: boolean;
   }>(),
   {

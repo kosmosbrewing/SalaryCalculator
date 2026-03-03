@@ -6,7 +6,6 @@ import SEOHead from "@/components/common/SEOHead.vue";
 
 import CompareInput from "@/components/compare/CompareInput.vue";
 import CompareResult from "@/components/compare/CompareResult.vue";
-import CompareDiffTable from "@/components/compare/CompareDiffTable.vue";
 
 import AdSlot from "@/components/common/AdSlot.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
@@ -20,14 +19,13 @@ import {
   formatManWonValue,
   formatWon,
 } from "@/lib/utils";
+import { DEFAULT_SITE_URL } from "@/lib/site";
 import { showAlert } from "@/composables/useAlert";
 import { addEntry } from "@/composables/useRecentCalcs";
 
 type CompanyState = {
   annualGross: number;
   nonTaxableMonthly: number;
-  bonusAnnual: number;
-  welfareMonthly: number;
   retirementIncluded: boolean;
 };
 
@@ -43,16 +41,12 @@ const initialized = ref(false);
 const companyA = ref<CompanyState>({
   annualGross: 40_000_000,
   nonTaxableMonthly: 200_000,
-  bonusAnnual: 0,
-  welfareMonthly: 0,
   retirementIncluded: false,
 });
 
 const companyB = ref<CompanyState>({
   annualGross: 50_000_000,
   nonTaxableMonthly: 200_000,
-  bonusAnnual: 0,
-  welfareMonthly: 0,
   retirementIncluded: false,
 });
 
@@ -114,10 +108,6 @@ onMounted(() => {
   if (q.b) companyB.value.annualGross = parseIntSafe(q.b, 5000) * 10_000;
   if (q.na) companyA.value.nonTaxableMonthly = parseIntSafe(q.na, 20) * 10_000;
   if (q.nb) companyB.value.nonTaxableMonthly = parseIntSafe(q.nb, 20) * 10_000;
-  if (q.ba) companyA.value.bonusAnnual = parseIntSafe(q.ba, 0) * 10_000;
-  if (q.bb) companyB.value.bonusAnnual = parseIntSafe(q.bb, 0) * 10_000;
-  if (q.wa) companyA.value.welfareMonthly = parseIntSafe(q.wa, 0) * 10_000;
-  if (q.wb) companyB.value.welfareMonthly = parseIntSafe(q.wb, 0) * 10_000;
   if (q.ra) companyA.value.retirementIncluded = String(q.ra) === "1";
   if (q.rb) companyB.value.retirementIncluded = String(q.rb) === "1";
 
@@ -139,10 +129,6 @@ watch(
 
     if (a.nonTaxableMonthly !== 200_000) query.na = String(Math.floor(a.nonTaxableMonthly / 10_000));
     if (b.nonTaxableMonthly !== 200_000) query.nb = String(Math.floor(b.nonTaxableMonthly / 10_000));
-    if (a.bonusAnnual !== 0) query.ba = String(Math.floor(a.bonusAnnual / 10_000));
-    if (b.bonusAnnual !== 0) query.bb = String(Math.floor(b.bonusAnnual / 10_000));
-    if (a.welfareMonthly !== 0) query.wa = String(Math.floor(a.welfareMonthly / 10_000));
-    if (b.welfareMonthly !== 0) query.wb = String(Math.floor(b.welfareMonthly / 10_000));
     if (a.retirementIncluded) query.ra = "1";
     if (b.retirementIncluded) query.rb = "1";
     if (dep !== 1) query.dep = String(dep);
@@ -161,8 +147,22 @@ const seoTitle = computed(
 );
 
 const seoDescription = computed(
-  () => `현재 ${formatManWon(companyA.value.annualGross)}에서 ${formatManWon(companyB.value.annualGross)}로 이직 시 월 실수령 차이는 ${formatWon(monthlyNetDiff.value)}입니다.`
+  () => `연봉 ${formatManWon(companyA.value.annualGross)}에서 ${formatManWon(companyB.value.annualGross)}로 이직하면 월 실수령은 ${formatWon(monthlyNetDiff.value)} 차이. 4대보험·세금 반영 실수령 비교를 즉시 확인하세요.`
 );
+
+const breadcrumbJsonLd = computed(() => ({
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "홈", item: `${DEFAULT_SITE_URL}/` },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: "이직 연봉 비교 계산기",
+      item: `${DEFAULT_SITE_URL}${route.path}`,
+    },
+  ],
+}));
 
 function compareShareUrl(): string {
   const params = new URLSearchParams(route.query as Record<string, string>);
@@ -225,9 +225,9 @@ watch(
 
 <template>
   <div class="container space-y-4 py-6">
-    <SEOHead :title="seoTitle" :description="seoDescription" />
+    <SEOHead :title="seoTitle" :description="seoDescription" :json-ld="breadcrumbJsonLd" />
 
-    <h1 class="text-h1 font-title">이직 연봉 비교기</h1>
+    <h1 class="text-h1 font-title">이직 연봉 비교 계산기</h1>
 
     <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div class="space-y-4 order-1">
@@ -236,16 +236,15 @@ watch(
           v-model:company-b="companyB"
           v-model:dependents="dependents"
           v-model:children-under20="childrenUnder20"
-        />
-
-        <CompareResult
-          :calc-a="calcA"
-          :calc-b="calcB"
-          :welfare-a="{ bonusAnnual: companyA.bonusAnnual, welfareMonthly: companyA.welfareMonthly }"
-          :welfare-b="{ bonusAnnual: companyB.bonusAnnual, welfareMonthly: companyB.welfareMonthly }"
-        />
-
-        <CompareDiffTable :calc-a="calcA" :calc-b="calcB" />
+        >
+          <template #result>
+            <CompareResult
+              embedded
+              :calc-a="calcA"
+              :calc-b="calcB"
+            />
+          </template>
+        </CompareInput>
 
         <button type="button" class="retro-button-subtle" @click="shareCompare">공유</button>
 

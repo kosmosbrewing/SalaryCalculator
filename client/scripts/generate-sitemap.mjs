@@ -12,7 +12,9 @@ const today = new Date().toISOString().split("T")[0];
 function resolvePriority(route) {
   if (route === "/" || route === "/insurance") return "1.0";
   if (route.startsWith("/insurance/")) return "0.8";
-  if (route === "/salary" || route.startsWith("/salary/")) return "0.75";
+  if (route === "/salary") return "0.9";
+  if (route.startsWith("/salary/")) return "0.75";
+  if (route === "/comprehensive-tax") return "0.6";
   if (route === "/compare" || route.startsWith("/compare/") || route === "/quit" || route.startsWith("/quit/")) return "0.6";
   return "0.4";
 }

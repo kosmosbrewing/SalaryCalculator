@@ -1,0 +1,25 @@
+import {
+  BUSINESS_WITHHOLDING_RATE,
+  OTHER_INCOME_WITHHOLDING_RATE,
+} from "@/data/freelanceTaxRates";
+
+export const STANDARD_TAX_CREDIT_COMPREHENSIVE = 70_000;
+
+// 임대소득(주택임대) 소득금액 비율
+export const RENTAL_REGISTERED_INCOME_RATE = 0.5;
+export const RENTAL_UNREGISTERED_INCOME_RATE = 0.426;
+
+// 기타소득 필요경비율
+export const OTHER_INCOME_EXPENSE_RATE = 0.6;
+
+// 분리과세 요건
+export const RENTAL_SEPARATE_MAX_REVENUE = 20_000_000;
+export const OTHER_SEPARATE_MAX_INCOME_AMOUNT = 3_000_000;
+
+// 분리과세 세율
+export const RENTAL_SEPARATE_TAX_RATE = 0.14;
+
+// 원천징수율
+export const BUSINESS_WITHHOLDING = BUSINESS_WITHHOLDING_RATE;
+export const OTHER_WITHHOLDING = OTHER_INCOME_WITHHOLDING_RATE;
+export const RENTAL_WITHHOLDING = 0;

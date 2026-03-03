@@ -9,6 +9,8 @@ const { entries, clearAll } = useRecentCalcs();
 const TYPE_CONFIG: Record<string, { label: string; class: string }> = {
   salary: { label: "연봉", class: "bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400" },
   insurance: { label: "건보", class: "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400" },
+  "comprehensive-tax": { label: "종합", class: "bg-cyan-50 text-cyan-600 dark:bg-cyan-950/50 dark:text-cyan-400" },
+  freelance: { label: "프리", class: "bg-cyan-50 text-cyan-600 dark:bg-cyan-950/50 dark:text-cyan-400" },
   compare: { label: "비교", class: "bg-violet-50 text-violet-600 dark:bg-violet-950/50 dark:text-violet-400" },
   quit: { label: "퇴사", class: "bg-amber-50 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400" },
 };
@@ -35,6 +37,7 @@ async function handleClear(): Promise<void> {
 </script>
 
 <template>
+  <Transition name="fade">
   <section v-if="hasEntries" class="retro-panel overflow-hidden">
     <div class="retro-titlebar">
       <div class="flex items-center gap-1.5">
@@ -71,4 +74,5 @@ async function handleClear(): Promise<void> {
       </RouterLink>
     </div>
   </section>
+  </Transition>
 </template>

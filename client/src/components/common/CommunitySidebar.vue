@@ -90,7 +90,6 @@ watch(() => props.pageKey, () => loadFeedback(), { immediate: true });
 
     <MiniCommentPanel
       :page-key="props.pageKey"
-      show-sort-tabs
       title="익명 게시판"
       :max-length="300"
     />

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { QuitReason } from "@/data/unemploymentTable";
 import { computed } from "vue";
+import DateRangePicker from "@/components/common/DateRangePicker.vue";
+import { formatNumber } from "@/lib/utils";
 
 const props = defineProps<{
   startDate: string;
@@ -19,6 +21,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   "update:startDate": [value: string];
   "update:endDate": [value: string];
+  "range-apply": [range: { startDate: string; endDate: string }];
   "update:monthlySalary": [value: number];
   "update:nonTaxableMonthly": [value: number];
   "update:age": [value: number];
@@ -55,9 +58,9 @@ const livingCostManWon = computed({
 });
 
 // 천단위 콤마 포맷 (주요 금액 입력)
-const formattedSalary = computed(() => salaryManWon.value.toLocaleString("ko-KR"));
-const formattedBonus = computed(() => bonusManWon.value.toLocaleString("ko-KR"));
-const formattedLivingCost = computed(() => livingCostManWon.value.toLocaleString("ko-KR"));
+const formattedSalary = computed(() => formatNumber(salaryManWon.value));
+const formattedBonus = computed(() => formatNumber(bonusManWon.value));
+const formattedLivingCost = computed(() => formatNumber(livingCostManWon.value));
 
 function onFormattedInput(setter: (v: number) => void, event: Event): void {
   const raw = (event.target as HTMLInputElement).value.replace(/[^0-9]/g, "");
@@ -79,9 +82,13 @@ function updateChildren(value: number): void {
   emit("update:childrenUnder20", clampInt(value, 0, maxChildren));
 }
 
+function applyDateRange(range: { startDate: string; endDate: string }): void {
+  emit("range-apply", range);
+  emit("update:startDate", range.startDate);
+  emit("update:endDate", range.endDate);
+}
+
 const inputIds = {
-  startDate: "quit-start-date",
-  endDate: "quit-end-date",
   monthlySalary: "quit-monthly-salary",
   nonTaxableMonthly: "quit-nontaxable-monthly",
   age: "quit-age",
@@ -100,15 +107,13 @@ const inputIds = {
     </div>
 
     <div class="retro-panel-content space-y-4">
-      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <label class="space-y-1" :for="inputIds.startDate">
-          <span class="text-caption text-muted-foreground">입사일</span>
-          <input :id="inputIds.startDate" :value="startDate" type="date" class="retro-input" @input="emit('update:startDate', ($event.target as HTMLInputElement).value)" />
-        </label>
-        <label class="space-y-1" :for="inputIds.endDate">
-          <span class="text-caption text-muted-foreground">퇴사일</span>
-          <input :id="inputIds.endDate" :value="endDate" type="date" class="retro-input" @input="emit('update:endDate', ($event.target as HTMLInputElement).value)" />
-        </label>
+      <div class="space-y-1">
+        <span class="text-caption text-muted-foreground">근속 기간</span>
+        <DateRangePicker
+          :start-date="startDate"
+          :end-date="endDate"
+          @apply="applyDateRange"
+        />
       </div>
 
       <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -129,15 +134,30 @@ const inputIds = {
       <div class="space-y-2 rounded-xl border border-border/60 bg-muted/20 p-3">
         <span class="text-caption font-semibold">퇴사 사유</span>
         <div class="flex flex-wrap gap-2 text-caption">
-          <label class="inline-flex items-center gap-1.5"><input type="radio" name="quit-reason" value="layoff" :checked="quitReason === 'layoff'" @change="emit('update:quitReason', 'layoff')" />권고사직</label>
-          <label class="inline-flex items-center gap-1.5"><input type="radio" name="quit-reason" value="dismissal" :checked="quitReason === 'dismissal'" @change="emit('update:quitReason', 'dismissal')" />해고</label>
-          <label class="inline-flex items-center gap-1.5"><input type="radio" name="quit-reason" value="contract_end" :checked="quitReason === 'contract_end'" @change="emit('update:quitReason', 'contract_end')" />계약만료</label>
-          <label class="inline-flex items-center gap-1.5"><input type="radio" name="quit-reason" value="voluntary" :checked="quitReason === 'voluntary'" @change="emit('update:quitReason', 'voluntary')" />자발적 퇴사</label>
+          <label class="inline-flex items-center gap-1.5">
+            <input class="retro-radio" type="radio" name="quit-reason" value="layoff" :checked="quitReason === 'layoff'" @change="emit('update:quitReason', 'layoff')" />
+            권고사직
+          </label>
+          <label class="inline-flex items-center gap-1.5">
+            <input class="retro-radio" type="radio" name="quit-reason" value="dismissal" :checked="quitReason === 'dismissal'" @change="emit('update:quitReason', 'dismissal')" />
+            해고
+          </label>
+          <label class="inline-flex items-center gap-1.5">
+            <input class="retro-radio" type="radio" name="quit-reason" value="contract_end" :checked="quitReason === 'contract_end'" @change="emit('update:quitReason', 'contract_end')" />
+            계약만료
+          </label>
+          <label class="inline-flex items-center gap-1.5">
+            <input class="retro-radio" type="radio" name="quit-reason" value="voluntary" :checked="quitReason === 'voluntary'" @change="emit('update:quitReason', 'voluntary')" />
+            자발적 퇴사
+          </label>
         </div>
       </div>
 
-      <details class="rounded-xl border border-border/60 bg-muted/20 overflow-hidden">
-        <summary class="touch-target cursor-pointer px-3 py-2 text-caption font-semibold">상세 설정</summary>
+      <details class="retro-details">
+        <summary class="retro-details-summary">
+          <span>상세 설정 보기</span>
+          <span class="retro-details-chevron" aria-hidden="true">▾</span>
+        </summary>
         <div class="grid grid-cols-1 gap-3 p-3 sm:grid-cols-3">
           <label class="space-y-1" :for="inputIds.dependents">
             <span class="text-caption text-muted-foreground">부양가족 수</span>

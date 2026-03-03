@@ -49,6 +49,7 @@ function tierSalaryLabel(salary: number): string {
 </script>
 
 <template>
+  <Transition name="fade">
   <section v-if="myPremium > 0" class="retro-panel overflow-hidden">
     <div class="retro-titlebar">
       <h2 class="retro-title">직장인 소득 랭킹</h2>
@@ -113,4 +114,5 @@ function tierSalaryLabel(salary: number): string {
       </p>
     </div>
   </section>
+  </Transition>
 </template>

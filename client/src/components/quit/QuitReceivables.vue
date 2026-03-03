@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { formatWon } from "@/lib/utils";
+import { formatKrwAuto, formatWon } from "@/lib/utils";
 
 defineProps<{
   servicePeriodLabel: string;
@@ -30,13 +30,13 @@ defineProps<{
         <div class="retro-board-item flex-col items-start gap-1">
           <span>① 퇴직금</span>
           <div class="w-full flex items-center justify-between tabular-nums">
-            <span class="text-muted-foreground">총액</span><strong>{{ formatWon(retirementGross) }}</strong>
+            <span class="text-muted-foreground">총액</span><strong>{{ formatKrwAuto(retirementGross) }}</strong>
           </div>
           <div class="w-full flex items-center justify-between tabular-nums">
             <span class="text-muted-foreground">퇴직소득세(추정)</span><span>{{ formatWon(retirementTax) }}</span>
           </div>
           <div class="w-full flex items-center justify-between tabular-nums font-semibold">
-            <span>세후 수령</span><span>{{ formatWon(retirementNet) }}</span>
+            <span>세후 수령</span><span>{{ formatKrwAuto(retirementNet) }}</span>
           </div>
         </div>
 
@@ -52,7 +52,7 @@ defineProps<{
             <span class="text-muted-foreground">수급 기간</span><span>{{ unemploymentDurationDays }}일</span>
           </div>
           <div class="w-full flex items-center justify-between tabular-nums font-semibold">
-            <span>총 수급액</span><span>{{ formatWon(unemploymentTotal) }}</span>
+            <span>총 수급액</span><span>{{ formatKrwAuto(unemploymentTotal) }}</span>
           </div>
           <div class="w-full flex items-center justify-between tabular-nums">
             <span class="text-muted-foreground">종료일</span><span>{{ unemploymentEndDateLabel }}</span>
@@ -72,7 +72,7 @@ defineProps<{
 
       <div class="border-t border-border pt-2 flex items-center justify-between text-body font-semibold tabular-nums">
         <span>받을 돈 합계</span>
-        <span>{{ formatWon(totalReceivables) }}</span>
+        <span>{{ formatKrwAuto(totalReceivables) }}</span>
       </div>
     </div>
   </section>

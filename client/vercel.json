@@ -1,4 +1,8 @@
 {
+  "redirects": [
+    { "source": "/freelance/:amount(\\d+)", "destination": "/comprehensive-tax?biz=:amount", "permanent": true },
+    { "source": "/freelance", "destination": "/comprehensive-tax", "permanent": true }
+  ],
   "headers": [
     {
       "source": "/(.*)",

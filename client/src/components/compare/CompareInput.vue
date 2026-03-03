@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { formatNumber } from "@/lib/utils";
 
 type CompanyInput = {
   annualGross: number;
   nonTaxableMonthly: number;
-  bonusAnnual: number;
-  welfareMonthly: number;
   retirementIncluded: boolean;
 };
 
@@ -73,34 +72,9 @@ const nonTaxBManWon = computed({
     }),
 });
 
-const bonusAManWon = computed({
-  get: () => Math.floor(props.companyA.bonusAnnual / 10_000),
-  set: (value: number) =>
-    updateCompany("companyA", { bonusAnnual: clampInt(value, 0, 100_000) * 10_000 }),
-});
-
-const bonusBManWon = computed({
-  get: () => Math.floor(props.companyB.bonusAnnual / 10_000),
-  set: (value: number) =>
-    updateCompany("companyB", { bonusAnnual: clampInt(value, 0, 100_000) * 10_000 }),
-});
-
-const welfareAManWon = computed({
-  get: () => Math.floor(props.companyA.welfareMonthly / 10_000),
-  set: (value: number) =>
-    updateCompany("companyA", { welfareMonthly: clampInt(value, 0, 1_000) * 10_000 }),
-});
-
-const welfareBManWon = computed({
-  get: () => Math.floor(props.companyB.welfareMonthly / 10_000),
-  set: (value: number) =>
-    updateCompany("companyB", { welfareMonthly: clampInt(value, 0, 1_000) * 10_000 }),
-});
-
 // 천단위 콤마 포맷 (연봉)
-const formattedAnnualA = computed(() => annualAManWon.value.toLocaleString("ko-KR"));
-const formattedAnnualB = computed(() => annualBManWon.value.toLocaleString("ko-KR"));
-
+const formattedAnnualA = computed(() => formatNumber(annualAManWon.value));
+const formattedAnnualB = computed(() => formatNumber(annualBManWon.value));
 function onAnnualInput(key: "companyA" | "companyB", event: Event): void {
   const raw = (event.target as HTMLInputElement).value.replace(/[^0-9]/g, "");
   const value = parseInt(raw, 10);
@@ -126,12 +100,8 @@ function updateChildren(value: number): void {
 const inputIds = {
   annualA: "compare-annual-a",
   nonTaxA: "compare-nontax-a",
-  bonusA: "compare-bonus-a",
-  welfareA: "compare-welfare-a",
   annualB: "compare-annual-b",
   nonTaxB: "compare-nontax-b",
-  bonusB: "compare-bonus-b",
-  welfareB: "compare-welfare-b",
   dependents: "compare-dependents",
   children: "compare-children",
 } as const;
@@ -140,35 +110,43 @@ const inputIds = {
 <template>
   <section class="retro-panel overflow-hidden">
     <div class="retro-titlebar">
-      <h2 class="retro-title">A사 vs B사 입력</h2>
+      <h2 class="retro-title">연봉 비교 입력</h2>
     </div>
 
     <div class="retro-panel-content space-y-4">
       <div class="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_56px_minmax(0,1fr)] md:items-stretch">
-        <div class="rounded-xl border border-border/60 p-3 space-y-3 bg-muted/20">
-          <h3 class="text-caption font-semibold">현재 회사 (A사)</h3>
+        <div class="rounded-xl border-2 border-status-info/35 bg-status-info/10 p-3 space-y-3">
+          <div class="rounded-lg border border-status-info/35 bg-background/60 px-2.5 py-2">
+            <div class="flex items-center justify-between gap-2">
+              <p class="text-caption font-semibold text-status-info">현재 회사</p>
+              <span class="retro-kbd border-status-info/45 bg-status-info/10 px-2 py-0.5 text-status-info">STEP 1</span>
+            </div>
+          </div>
           <label class="block space-y-1" :for="inputIds.annualA">
             <span class="text-caption text-muted-foreground">연봉 (만원)</span>
-            <input :id="inputIds.annualA" :value="formattedAnnualA" type="text" inputmode="numeric" class="retro-input tabular-nums font-bold" @input="onAnnualInput('companyA', $event)" />
+            <input
+              :id="inputIds.annualA"
+              :value="formattedAnnualA"
+              type="text"
+              inputmode="numeric"
+              class="retro-input tabular-nums font-bold border-status-info/35 focus:border-status-info focus:ring-status-info"
+              @input="onAnnualInput('companyA', $event)"
+            />
           </label>
           <label class="block space-y-1" :for="inputIds.nonTaxA">
             <span class="text-caption text-muted-foreground">비과세 (만원/월)</span>
             <input :id="inputIds.nonTaxA" v-model.number="nonTaxAManWon" type="number" min="0" max="500" class="retro-input" inputmode="numeric" />
           </label>
-          <details class="rounded-xl border border-border/60 bg-muted/20 overflow-hidden">
-            <summary class="touch-target cursor-pointer px-2 py-1.5 text-caption font-semibold">상세</summary>
+          <details class="retro-details border-status-info/30 bg-background/60">
+            <summary class="retro-details-summary text-status-info">
+              <span>상세 설정 보기</span>
+              <span class="retro-details-chevron" aria-hidden="true">▾</span>
+            </summary>
             <div class="space-y-2 p-2">
-              <label class="block space-y-1" :for="inputIds.bonusA">
-                <span class="text-caption text-muted-foreground">성과급 (만원/연)</span>
-                <input :id="inputIds.bonusA" v-model.number="bonusAManWon" type="number" min="0" max="100000" class="retro-input" inputmode="numeric" />
-              </label>
-              <label class="block space-y-1" :for="inputIds.welfareA">
-                <span class="text-caption text-muted-foreground">복지포인트 (만원/월)</span>
-                <input :id="inputIds.welfareA" v-model.number="welfareAManWon" type="number" min="0" max="1000" class="retro-input" inputmode="numeric" />
-              </label>
               <label class="inline-flex items-center gap-2 text-caption">
                 <input
                   type="checkbox"
+                  class="retro-checkbox"
                   :checked="companyA.retirementIncluded"
                   @change="updateCompany('companyA', { retirementIncluded: ($event.target as HTMLInputElement).checked })"
                 />
@@ -180,37 +158,45 @@ const inputIds = {
 
         <div class="flex md:hidden items-center justify-center -my-1">
           <div class="h-px flex-1 bg-border/60" />
-          <span class="retro-kbd mx-3 px-3 py-1 font-extrabold">VS</span>
+          <span class="retro-kbd mx-3 px-3 py-1 font-extrabold">비교</span>
           <div class="h-px flex-1 bg-border/60" />
         </div>
         <div class="hidden md:flex items-center justify-center">
-          <span class="retro-kbd px-3 py-1 font-extrabold">VS</span>
+          <span class="retro-kbd px-3 py-1 font-extrabold">비교</span>
         </div>
 
-        <div class="rounded-xl border border-border/60 p-3 space-y-3 bg-muted/20">
-          <h3 class="text-caption font-semibold">이직 회사 (B사)</h3>
+        <div class="rounded-xl border-2 border-status-success/35 bg-status-success/10 p-3 space-y-3">
+          <div class="rounded-lg border border-status-success/35 bg-background/60 px-2.5 py-2">
+            <div class="flex items-center justify-between gap-2">
+              <p class="text-caption font-semibold text-status-success">이직 회사</p>
+              <span class="retro-kbd border-status-success/45 bg-status-success/10 px-2 py-0.5 text-status-success">STEP 2</span>
+            </div>
+          </div>
           <label class="block space-y-1" :for="inputIds.annualB">
             <span class="text-caption text-muted-foreground">연봉 (만원)</span>
-            <input :id="inputIds.annualB" :value="formattedAnnualB" type="text" inputmode="numeric" class="retro-input tabular-nums font-bold" @input="onAnnualInput('companyB', $event)" />
+            <input
+              :id="inputIds.annualB"
+              :value="formattedAnnualB"
+              type="text"
+              inputmode="numeric"
+              class="retro-input tabular-nums font-bold border-status-success/35 focus:border-status-success focus:ring-status-success"
+              @input="onAnnualInput('companyB', $event)"
+            />
           </label>
           <label class="block space-y-1" :for="inputIds.nonTaxB">
             <span class="text-caption text-muted-foreground">비과세 (만원/월)</span>
             <input :id="inputIds.nonTaxB" v-model.number="nonTaxBManWon" type="number" min="0" max="500" class="retro-input" inputmode="numeric" />
           </label>
-          <details class="rounded-xl border border-border/60 bg-muted/20 overflow-hidden">
-            <summary class="touch-target cursor-pointer px-2 py-1.5 text-caption font-semibold">상세</summary>
+          <details class="retro-details border-status-success/30 bg-background/60">
+            <summary class="retro-details-summary text-status-success">
+              <span>상세 설정 보기</span>
+              <span class="retro-details-chevron" aria-hidden="true">▾</span>
+            </summary>
             <div class="space-y-2 p-2">
-              <label class="block space-y-1" :for="inputIds.bonusB">
-                <span class="text-caption text-muted-foreground">성과급 (만원/연)</span>
-                <input :id="inputIds.bonusB" v-model.number="bonusBManWon" type="number" min="0" max="100000" class="retro-input" inputmode="numeric" />
-              </label>
-              <label class="block space-y-1" :for="inputIds.welfareB">
-                <span class="text-caption text-muted-foreground">복지포인트 (만원/월)</span>
-                <input :id="inputIds.welfareB" v-model.number="welfareBManWon" type="number" min="0" max="1000" class="retro-input" inputmode="numeric" />
-              </label>
               <label class="inline-flex items-center gap-2 text-caption">
                 <input
                   type="checkbox"
+                  class="retro-checkbox"
                   :checked="companyB.retirementIncluded"
                   @change="updateCompany('companyB', { retirementIncluded: ($event.target as HTMLInputElement).checked })"
                 />
@@ -248,6 +234,10 @@ const inputIds = {
             @input="updateChildren(parseInt(($event.target as HTMLInputElement).value, 10))"
           />
         </label>
+      </div>
+
+      <div v-if="$slots.result" class="border-t border-border/60 pt-4">
+        <slot name="result" />
       </div>
     </div>
   </section>

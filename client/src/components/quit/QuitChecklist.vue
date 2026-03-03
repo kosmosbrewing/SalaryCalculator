@@ -93,7 +93,7 @@ function resetAll() {
               <input
                 type="checkbox"
                 :checked="checkedIds.has(item.id)"
-                class="size-4 shrink-0 rounded accent-[hsl(var(--primary))] pointer-events-auto"
+                class="retro-checkbox pointer-events-auto"
                 tabindex="0"
                 @click.stop="toggle(item.id)"
                 @keydown.enter.prevent="toggle(item.id)"

@@ -2,8 +2,21 @@
 import { useSEO } from "@/composables/useSEO";
 
 useSEO({
-  title: "개인정보처리방침 | 연봉 계산기",
+  title: "개인정보처리방침 | 연봉 실수령액 계산기",
   description: "연봉 실수령액 계산기 서비스의 개인정보 처리 원칙을 안내합니다.",
+  jsonLd: {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "홈", item: "https://finance.shakilabs.com/" },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "개인정보처리방침",
+        item: "https://finance.shakilabs.com/privacy",
+      },
+    ],
+  },
 });
 </script>
 

@@ -22,8 +22,11 @@ import { useShare } from "@/composables/useShare";
 import { addEntry } from "@/composables/useRecentCalcs";
 
 import { formatManWon, formatWon } from "@/lib/utils";
-import { watch } from "vue";
+import { DEFAULT_SITE_URL } from "@/lib/site";
+import { computed, watch } from "vue";
+import { useRoute } from "vue-router";
 
+const route = useRoute();
 const calc = useSalaryCalc();
 useUrlParams(calc);
 
@@ -36,6 +39,20 @@ const {
   shareKakao,
   copyLink,
 } = useShare(calc);
+
+const breadcrumbJsonLd = computed(() => ({
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "홈", item: `${DEFAULT_SITE_URL}/` },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: "연봉 실수령액 계산기",
+      item: `${DEFAULT_SITE_URL}${route.path}`,
+    },
+  ],
+}));
 
 // 최근 계산 자동 저장 (2초 디바운스)
 let recentCalcTimer: ReturnType<typeof setTimeout> | null = null;
@@ -60,10 +77,11 @@ watch(
   <div class="container space-y-4 py-6">
     <SEOHead
       title="2026 연봉 실수령액 계산기 | 4대보험 + 소득세 자동 계산"
-      description="연봉을 입력하면 4대보험과 소득세, 지방소득세를 반영한 월 실수령액을 즉시 계산합니다."
+      description="2026년 연봉 실수령액을 즉시 계산하세요. 국민연금·건보료·소득세 공제 후 실제 통장에 들어오는 월급을 확인합니다."
+      :json-ld="breadcrumbJsonLd"
     />
 
-    <h1 class="text-h1 font-title">연봉 실수령액 계산기</h1>
+    <h1 class="text-h1 font-title">2026 연봉 실수령액 계산기</h1>
 
     <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div class="space-y-4 order-1">

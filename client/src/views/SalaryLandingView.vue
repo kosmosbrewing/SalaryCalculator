@@ -23,7 +23,8 @@ import { useSalaryCalc } from "@/composables/useSalaryCalc";
 import { useShare } from "@/composables/useShare";
 import { addEntry } from "@/composables/useRecentCalcs";
 
-import { formatManWonValue, formatWon } from "@/lib/utils";
+import { formatManWonValue, formatPercent, formatWon } from "@/lib/utils";
+import { DEFAULT_SITE_URL } from "@/lib/site";
 
 const route = useRoute();
 const calc = useSalaryCalc();
@@ -48,11 +49,55 @@ const amountLabel = computed(() => {
 });
 
 const pageTitle = computed(
-  () => `연봉 ${amountLabel.value} 실수령액 · 2026 4대보험 계산기`
+  () => `연봉 ${amountLabel.value} 실수령액 | 2026 월급 실수령 계산기`
 );
 const pageDesc = computed(
-  () => `2026년 기준 연봉 ${amountLabel.value}의 월 실수령액은 ${formatWon(calc.monthlyNet.value)}입니다.`
+  () => `2026년 연봉 ${amountLabel.value} 월 실수령액은 ${formatWon(calc.monthlyNet.value)}입니다. 4대보험·소득세 공제 내역과 부양가족별 계산도 확인하세요.`
 );
+
+const faqItems = computed(() => [
+  {
+    q: `연봉 ${amountLabel.value}의 월 실수령액은 얼마인가요?`,
+    a: `2026년 기준 연봉 ${amountLabel.value}(부양가족 ${calc.dependents.value}인, 비과세 월 ${formatWon(calc.nonTaxableMonthly.value)})의 월 실수령액은 약 ${formatWon(calc.monthlyNet.value)}입니다. 4대보험 ${formatWon(calc.totalInsurance.value)}과 세금 ${formatWon(calc.totalTax.value)}이 공제됩니다.`,
+  },
+  {
+    q: `연봉 ${amountLabel.value}의 4대보험료는 얼마인가요?`,
+    a: `월 기준 국민연금 ${formatWon(calc.nationalPension.value)}, 건강보험 ${formatWon(calc.healthInsurance.value)}, 장기요양보험 ${formatWon(calc.longTermCare.value)}, 고용보험 ${formatWon(calc.employmentInsurance.value)}으로 총 ${formatWon(calc.totalInsurance.value)}입니다.`,
+  },
+  {
+    q: `연봉 ${amountLabel.value}의 실효세율은 얼마인가요?`,
+    a: `4대보험과 세금을 합산한 실효세율은 약 ${formatPercent(calc.effectiveTaxRate.value, 1)}입니다.`,
+  },
+]);
+
+const faqJsonLd = computed(() => ({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqItems.value.map((item) => ({
+    "@type": "Question",
+    name: item.q,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: item.a,
+    },
+  })),
+}));
+
+const breadcrumbJsonLd = computed(() => ({
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "홈", item: `${DEFAULT_SITE_URL}/` },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: "연봉 실수령액 계산기",
+      item: `${DEFAULT_SITE_URL}${route.path}`,
+    },
+  ],
+}));
+
+const seoJsonLd = computed(() => [faqJsonLd.value, breadcrumbJsonLd.value]);
 
 const {
   showShareModal,
@@ -85,9 +130,9 @@ watch(
 
 <template>
   <div class="container space-y-4 py-6">
-    <SEOHead :title="pageTitle" :description="pageDesc" />
+    <SEOHead :title="pageTitle" :description="pageDesc" :json-ld="seoJsonLd" />
 
-    <h1 class="text-h1 font-title">연봉 {{ amountLabel }} 실수령액</h1>
+    <h1 class="text-h1 font-title">연봉 {{ amountLabel }} 실수령액 (2026년 기준)</h1>
 
     <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div class="space-y-4 order-1">

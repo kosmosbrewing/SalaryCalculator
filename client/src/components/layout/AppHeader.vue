@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from "vue";
 import { Moon, Sun } from "lucide-vue-next";
-import { useRoute } from "vue-router";
+import { RouterLink, useRoute } from "vue-router";
 import TickerBar from "@/components/common/TickerBar.vue";
 import {
   insuranceTickerMessages,
@@ -42,19 +42,41 @@ onMounted(() => {
 </script>
 
 <template>
-  <header class="border-b border-border/80 bg-background">
-    <div class="container grid grid-cols-[2rem_1fr_2rem] items-center gap-2 py-2">
-      <div></div>
-      <TickerBar :key="route.path" :messages="tickerMessages" />
-      <button
-        type="button"
-        class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground"
-        :aria-label="theme === 'dark' ? '라이트 모드로 전환' : '다크 모드로 전환'"
-        @click="toggleTheme"
-      >
-        <Moon v-if="theme === 'dark'" class="h-3.5 w-3.5" />
-        <Sun v-else class="h-3.5 w-3.5" />
-      </button>
+  <header class="border-b border-border bg-background">
+    <div class="container pt-2.5 pb-2.5">
+      <div class="overflow-hidden">
+        <div class="retro-titlebar h-11 border-b-0 px-2 bg-transparent">
+          <div class="flex h-full w-full items-center gap-4">
+            <RouterLink
+              to="/"
+              aria-label="ShakiLabs 홈"
+              class="inline-flex h-8 w-8 sm:w-auto shrink-0 items-center justify-center sm:justify-start gap-1.5 px-0.5 text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <span
+                class="inline-flex h-6 w-6 items-center justify-center rounded-md bg-muted/60 ring-1 ring-border/60"
+                aria-hidden="true"
+              >
+                <img src="/logo.png" alt="" class="h-4 w-4 shrink-0" />
+              </span>
+              <span class="hidden sm:inline text-tiny font-semibold tracking-wide text-foreground/90">
+                ShakiLabs
+              </span>
+            </RouterLink>
+            <div class="flex h-full flex-1 items-center justify-center text-center font-title text-caption sm:text-body overflow-hidden">
+              <TickerBar :key="route.path" :messages="tickerMessages" />
+            </div>
+            <button
+              type="button"
+              class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded border border-border/70 bg-transparent text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+              :aria-label="theme === 'dark' ? '라이트 모드로 전환' : '다크 모드로 전환'"
+              @click="toggleTheme"
+            >
+              <Moon v-if="theme === 'dark'" class="h-4 w-4" />
+              <Sun v-else class="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </header>
 </template>

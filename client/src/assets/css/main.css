@@ -119,7 +119,178 @@
   }
 
   .retro-input {
-    @apply w-full rounded-xl border border-input bg-background px-3 py-2.5 text-body placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary;
+    @apply w-full rounded-xl border border-input bg-card dark:bg-background px-3 py-2.5 text-body placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors;
+    box-shadow: inset 0 1px 2px hsl(var(--foreground) / 0.04);
+  }
+
+  .retro-details {
+    @apply overflow-hidden rounded-xl border border-border/60 bg-muted/20;
+  }
+
+  .retro-details-summary {
+    @apply touch-target flex list-none cursor-pointer items-center justify-between gap-2 px-3 py-2 text-caption font-semibold text-foreground transition-colors;
+  }
+
+  .retro-details-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .retro-details-summary:hover {
+    @apply bg-background/40;
+  }
+
+  .retro-details-chevron {
+    @apply text-tiny text-muted-foreground transition-transform duration-200;
+  }
+
+  details[open] > .retro-details-summary {
+    @apply border-b border-border/60 bg-background/35;
+  }
+
+  details[open] > .retro-details-summary .retro-details-chevron {
+    @apply rotate-180;
+  }
+
+  .retro-checkbox {
+    -webkit-appearance: none;
+    appearance: none;
+    @apply inline-grid h-4 w-4 shrink-0 place-content-center rounded-md border border-input bg-background align-middle transition-colors;
+  }
+
+  .retro-checkbox::before {
+    content: "";
+    width: 0.6rem;
+    height: 0.6rem;
+    transform: scale(0);
+    transition: transform 0.16s ease-in-out;
+    clip-path: polygon(14% 52%, 0 66%, 40% 100%, 100% 18%, 84% 4%, 38% 68%);
+    background: hsl(var(--primary-foreground));
+  }
+
+  .retro-checkbox:checked {
+    border-color: hsl(var(--primary));
+    background: hsl(var(--primary));
+  }
+
+  .retro-checkbox:checked::before {
+    transform: scale(1);
+  }
+
+  .retro-checkbox:hover:not(:disabled) {
+    border-color: hsl(var(--primary) / 0.65);
+  }
+
+  .retro-checkbox:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  .retro-checkbox:disabled {
+    @apply cursor-not-allowed opacity-45;
+  }
+
+  .retro-radio {
+    -webkit-appearance: none;
+    appearance: none;
+    @apply inline-grid h-4 w-4 shrink-0 place-content-center rounded-full border border-input bg-background align-middle transition-colors;
+  }
+
+  .retro-radio::before {
+    content: "";
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 9999px;
+    transform: scale(0);
+    transition: transform 0.16s ease-in-out;
+    background: hsl(var(--primary-foreground));
+  }
+
+  .retro-radio:checked {
+    border-color: hsl(var(--primary));
+    background: hsl(var(--primary));
+  }
+
+  .retro-radio:checked::before {
+    transform: scale(1);
+  }
+
+  .retro-radio:hover:not(:disabled) {
+    border-color: hsl(var(--primary) / 0.65);
+  }
+
+  .retro-radio:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  .retro-radio:disabled {
+    @apply cursor-not-allowed opacity-45;
+  }
+
+  .retro-range {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 1.125rem;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .retro-range:focus {
+    outline: none;
+  }
+
+  .retro-range::-webkit-slider-runnable-track {
+    height: 0.5rem;
+    border-radius: 9999px;
+    border: 1px solid hsl(var(--border) / 0.75);
+    background: hsl(var(--muted));
+  }
+
+  .retro-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 0.95rem;
+    height: 0.95rem;
+    border-radius: 9999px;
+    margin-top: -0.235rem;
+    background: hsl(var(--background));
+    border: 2px solid hsl(var(--primary));
+    box-shadow: 0 1px 2px hsl(var(--foreground) / 0.12);
+  }
+
+  .retro-range:focus-visible::-webkit-slider-thumb {
+    box-shadow:
+      0 0 0 3px hsl(var(--ring) / 0.28),
+      0 1px 2px hsl(var(--foreground) / 0.12);
+  }
+
+  .retro-range::-moz-range-track {
+    height: 0.5rem;
+    border-radius: 9999px;
+    border: 1px solid hsl(var(--border) / 0.75);
+    background: hsl(var(--muted));
+  }
+
+  .retro-range::-moz-range-progress {
+    height: 0.5rem;
+    border-radius: 9999px;
+    background: hsl(var(--primary) / 0.35);
+  }
+
+  .retro-range::-moz-range-thumb {
+    width: 0.95rem;
+    height: 0.95rem;
+    border: 2px solid hsl(var(--primary));
+    border-radius: 9999px;
+    background: hsl(var(--background));
+    box-shadow: 0 1px 2px hsl(var(--foreground) / 0.12);
+  }
+
+  .retro-range:focus-visible::-moz-range-thumb {
+    box-shadow:
+      0 0 0 3px hsl(var(--ring) / 0.28),
+      0 1px 2px hsl(var(--foreground) / 0.12);
   }
 
   .touch-target {
@@ -165,4 +336,61 @@
   .retro-board-item {
     @apply flex items-center justify-between gap-3 px-4 py-3 sm:px-5 sm:py-3.5 text-body transition-colors hover:bg-accent/25;
   }
+
+  /* 레트로 차트 — 사이트 디자인 시스템 통합 */
+  .retro-chart {
+    @apply rounded-xl border border-border/60 bg-muted/20 p-3.5 space-y-3;
+  }
+
+  .retro-chart-header {
+    @apply flex items-center justify-between text-caption;
+  }
+
+  .retro-chart-bar {
+    @apply flex h-5 gap-px overflow-hidden rounded-lg border border-border/40 bg-background/60;
+  }
+
+  .retro-chart-segment {
+    @apply transition-all duration-300;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.08);
+  }
+
+  .retro-chart-legend {
+    @apply grid grid-cols-2 gap-x-4 gap-y-1.5;
+  }
+
+  .retro-chart-legend-item {
+    @apply flex items-center justify-between gap-1.5 text-caption;
+  }
+
+  .retro-chart-dot {
+    @apply inline-block h-2.5 w-2.5 shrink-0 rounded-sm;
+  }
+}
+
+/* Vue Transition — 공통 전환 애니메이션 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.15s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.slide-fade-enter-active,
+.slide-fade-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.slide-fade-enter-from {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+
+.slide-fade-leave-to {
+  opacity: 0;
+  transform: translateY(6px);
 }

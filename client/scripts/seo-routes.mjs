@@ -38,7 +38,21 @@ export const SALARY_AMOUNTS = [
   50000,
 ];
 
+export const COMPREHENSIVE_TAX_AMOUNTS = [
+  1000,
+  2000,
+  3000,
+  4000,
+  5000,
+  6000,
+  8000,
+  10000,
+  15000,
+  20000,
+];
+
 export const COMPARE_PAIRS = [
+  [3000, 5000],
   [3000, 4000],
   [4000, 5000],
   [5000, 6000],
@@ -49,16 +63,24 @@ export const COMPARE_PAIRS = [
 
 export const QUIT_YEARS = [1, 3, 5, 10];
 
+export const WITHHOLDING_AMOUNTS = [
+  30_000, 50_000, 100_000, 150_000, 200_000, 300_000, 500_000,
+];
+
 export const SEO_ROUTES = [
   "/",
   "/insurance",
   "/salary",
+  "/comprehensive-tax",
   "/compare",
   "/quit",
   "/about",
   "/privacy",
   ...INSURANCE_AMOUNTS.map((amount) => `/insurance/${amount}`),
   ...SALARY_AMOUNTS.map((amount) => `/salary/${amount}`),
+  ...COMPREHENSIVE_TAX_AMOUNTS.map((amount) => `/comprehensive-tax/${amount}`),
   ...COMPARE_PAIRS.map(([a, b]) => `/compare/${a}-vs-${b}`),
   ...QUIT_YEARS.map((years) => `/quit/${years}years`),
+  "/withholding",
+  ...WITHHOLDING_AMOUNTS.map((amount) => `/withholding/${amount}`),
 ];

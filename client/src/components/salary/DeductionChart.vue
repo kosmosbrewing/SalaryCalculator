@@ -75,7 +75,8 @@ const chartDescription = computed(() =>
       <h2 class="retro-title">공제 비율</h2>
     </div>
     <div class="retro-panel-content">
-      <div v-if="arcs.length > 0" class="flex flex-col sm:flex-row items-center gap-6">
+      <Transition name="fade" mode="out-in">
+      <div v-if="arcs.length > 0" key="chart" class="flex flex-col sm:flex-row items-center gap-6">
         <!-- 도넛 차트 -->
         <svg
           :viewBox="`0 0 ${SIZE} ${SIZE}`"
@@ -123,9 +124,10 @@ const chartDescription = computed(() =>
         </div>
       </div>
 
-      <div v-else class="text-center py-8">
+      <div v-else key="empty" class="text-center py-8">
         <p class="text-caption text-muted-foreground">연봉을 입력하면 차트가 표시됩니다.</p>
       </div>
+      </Transition>
     </div>
   </section>
 </template>

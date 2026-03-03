@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { formatManWonValue, formatPercent, formatWon } from "@/lib/utils";
+import { formatKrwAuto, formatManWonValue, formatPercent, formatWon } from "@/lib/utils";
 import type { SalaryCalcResult } from "@/composables/useSalaryCalc";
 import { getBracketInsights } from "@/data/bracketInsights";
 
@@ -42,7 +42,7 @@ const faqItems = computed(() => [
         <strong class="text-primary">{{ formatWon(calc.monthlyNet.value) }}</strong>입니다.
         월 급여 {{ formatWon(calc.monthlyGross.value) }}에서 4대보험 {{ formatWon(calc.totalInsurance.value) }}과
         세금 {{ formatWon(calc.totalTax.value) }}이 공제됩니다.
-        연간 실수령액은 {{ formatWon(calc.annualNet.value) }}이며, 실효세율은 {{ formatPercent(calc.effectiveTaxRate.value, 1) }}입니다.
+        연간 실수령액은 {{ formatKrwAuto(calc.annualNet.value) }}이며, 실효세율은 {{ formatPercent(calc.effectiveTaxRate.value, 1) }}입니다.
       </p>
     </div>
 

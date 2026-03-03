@@ -6,7 +6,9 @@ type SEOOptions = {
   description: MaybeRefOrGetter<string>;
   ogImage?: MaybeRefOrGetter<string | undefined>;
   noindex?: MaybeRefOrGetter<boolean | undefined>;
-  jsonLd?: MaybeRefOrGetter<Record<string, unknown> | undefined>;
+  jsonLd?: MaybeRefOrGetter<
+    Record<string, unknown> | Record<string, unknown>[] | undefined
+  >;
 };
 
 export function useSEO({
@@ -22,6 +24,14 @@ export function useSEO({
     const resolvedNoindex = Boolean(toValue(noindex));
     const resolvedOgImage = toValue(ogImage);
     const resolvedJsonLd = toValue(jsonLd);
+    const resolvedJsonLdArray = Array.isArray(resolvedJsonLd)
+      ? resolvedJsonLd.filter(
+          (entry): entry is Record<string, unknown> =>
+            Boolean(entry) && typeof entry === "object"
+        )
+      : resolvedJsonLd && typeof resolvedJsonLd === "object"
+        ? [resolvedJsonLd]
+        : [];
     const currentUrl =
       typeof window !== "undefined"
         ? (() => {
@@ -54,15 +64,11 @@ export function useSEO({
             ]
           : []),
       ],
-      script: resolvedJsonLd
-        ? [
-            {
-              key: "json-ld",
-              type: "application/ld+json",
-              children: JSON.stringify(resolvedJsonLd),
-            },
-          ]
-        : [],
+      script: resolvedJsonLdArray.map((entry, index) => ({
+        key: `json-ld-${index}`,
+        type: "application/ld+json",
+        children: JSON.stringify(entry),
+      })),
     };
   });
 }
