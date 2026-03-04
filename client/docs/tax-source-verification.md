@@ -1,6 +1,6 @@
 # 2026 연봉 계산 근거 및 검증 절차
 
-Last verified: 2026-02-23 (KST)
+Last verified: 2026-03-04 (KST)
 
 ## 공식 출처
 
@@ -26,8 +26,12 @@ Last verified: 2026-02-23 (KST)
 
 ## 코드 매핑
 
-- 상수 파일: `src/lib/tax-constants.ts`
-- 계산 로직: `src/composables/useSalaryCalc.ts`
+- 세율/요율 상수 (Single Source of Truth): `src/data/taxRates2026.ts`
+- 누진세 구간: `src/data/taxBrackets.ts`
+- 4대보험·공제 집계 호환: `src/lib/tax-constants.ts`
+- 근로소득 계산 로직: `src/composables/useSalaryCalc.ts`
+- 종합소득세·임대소득 로직: `src/composables/useComprehensiveTaxCalc.ts`
+- 임대소득 세율 규칙: `src/data/comprehensiveTaxRules.ts`
 
 ## 검증 체크리스트
 
@@ -35,6 +39,24 @@ Last verified: 2026-02-23 (KST)
 2. 상수 변경 후 `npm run typecheck && npm run build` 실행
 3. 샘플 케이스(3,000/5,000/8,000/10,000만원, 부양가족 1~4명, 비과세 0/20만원) 비교 검증
 4. 운영 배포 전 변경 이력(값, 근거 URL, 시행일) 기록
+
+## 변경 이력
+
+### 2026-03-04 — 주택임대소득 분리과세 계산 오류 수정
+
+**수정 파일:** `src/data/comprehensiveTaxRules.ts`, `src/composables/useComprehensiveTaxCalc.ts`
+
+**수정 내용:**
+- `RENTAL_REGISTERED_INCOME_RATE`: 0.5 → **0.4** (소득율 40% = 필요경비 60%)
+- `RENTAL_UNREGISTERED_INCOME_RATE`: 0.426 → **0.5** (소득율 50% = 필요경비 50%)
+- 기본공제 누락 추가: 등록 400만원, 미등록 200만원 (타종합소득 2천만원 이하 조건부)
+
+**근거:** 국세청 주택임대소득 과세 안내 (소득세법 §64의2②)
+- 등록임대: 필요경비율 60%, 기본공제 400만원
+- 미등록임대: 필요경비율 50%, 기본공제 200만원
+- 기본공제 적용 조건: 타종합소득금액 합계 ≤ 2,000만원
+
+**검증:** 8개 케이스, 23개 단언 전부 통과 (`/tmp/rental_check.mjs`)
 
 ## 주의
 

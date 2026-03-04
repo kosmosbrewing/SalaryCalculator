@@ -11,10 +11,14 @@
 ## 1. Current Baseline (Already Implemented)
 
 - 라우트
-  - `/insurance`, `/salary`, `/compare`, `/quit` + 상세 SEO 라우트
+  - `/insurance`, `/salary`, `/compare`, `/quit`, `/comprehensive-tax`, `/freelance`, `/withholding` + 상세 SEO 라우트
   - `/` 는 `/insurance`로 리다이렉트
 - 핵심 composables
-  - `useInsuranceReverse.ts`, `useRetirementCalc.ts`, `useUnemploymentCalc.ts`, `useSurvivalCalc.ts`, `useSalaryCalc.ts` 등
+  - `useInsuranceCalc.ts`, `useInsuranceReverse.ts`, `useSalaryCalc.ts`
+  - `useRetirementCalc.ts`, `useUnemploymentCalc.ts`, `useSurvivalCalc.ts`
+  - `useComprehensiveTaxCalc.ts`, `useFreelanceCalc.ts`, `useWithholdingReverse.ts`
+  - `useIncomeTax.ts`, `useHeadlineMessages.ts`, `useRecentCalcs.ts`
+  - `useAlert.ts`, `useModal.ts`, `useSEO.ts`, `useShare.ts`, `useUrlParams.ts`
 - 공통 컴포넌트
   - `TickerBar`, `TabNavigation`, `FreshBadge`, `ShareModal`, `AdSlot`, `VisitorCounter`, `MiniCommentPanel`
 - SEO/SSG
@@ -77,6 +81,12 @@ Supabase 키(`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`)는 현재 기본 경
 - `/insurance/:amount(\\d+)`
 - `/salary`
 - `/salary/:amount`
+- `/comprehensive-tax`
+- `/comprehensive-tax/:amount(\\d+)`
+- `/freelance`  (children: `/comprehensive-tax`)
+- `/freelance/:amount(\\d+)`  (children: `/comprehensive-tax`)
+- `/withholding`
+- `/withholding/:amount(\\d+)`
 - `/compare`
 - `/compare/:a(\\d+)-vs-:b(\\d+)`
 - `/quit`
@@ -95,16 +105,22 @@ client/src/
     types.ts
   composables/
     useAlert.ts
+    useComprehensiveTaxCalc.ts
+    useFreelanceCalc.ts
+    useHeadlineMessages.ts
+    useIncomeTax.ts
     useInsuranceCalc.ts
     useInsuranceReverse.ts
+    useModal.ts
+    useRecentCalcs.ts
     useRetirementCalc.ts
     useSalaryCalc.ts
-    useShare.ts
     useSEO.ts
+    useShare.ts
     useSurvivalCalc.ts
     useUnemploymentCalc.ts
     useUrlParams.ts
-    ...
+    useWithholdingReverse.ts
   components/
     common/
     insurance/
