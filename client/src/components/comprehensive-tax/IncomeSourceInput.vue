@@ -147,7 +147,7 @@ const separateHint = computed(() => {
 
     <div v-show="enabled" class="retro-panel-content space-y-4">
       <label :for="inputIds.revenue" class="mb-0.5 block text-caption font-semibold text-foreground">
-        연 수입 (원)
+        연 수입 (만원 단위)
       </label>
       <div class="space-y-2">
         <div class="flex items-center gap-2">

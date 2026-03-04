@@ -31,6 +31,7 @@ const router = useRouter();
 
 const monthlyIncomeTax = ref(100_000);
 const dependents = ref(1);
+const childrenUnder20 = ref(0);
 const nonTaxableMonthly = ref(200_000);
 const initialized = ref(false);
 const applyingRoute = ref(false);
@@ -39,7 +40,7 @@ const applyingRoute = ref(false);
 watch(
   () => props.initialAmountWon,
   (v) => {
-    if (typeof v === "number" && Number.isFinite(v) && v > 0) {
+    if (typeof v === "number" && Number.isFinite(v) && v >= 0) {
       monthlyIncomeTax.value = Math.min(v, 10_000_000);
     }
   },
@@ -54,16 +55,22 @@ watch(
     const hasPathAmount =
       typeof initialAmount === "number" &&
       Number.isFinite(initialAmount) &&
-      initialAmount > 0;
+      initialAmount >= 0;
 
     const taxFromQuery = parseQueryInt(query.tax);
-    if (!hasPathAmount && taxFromQuery !== null && taxFromQuery > 0) {
+    if (!hasPathAmount && taxFromQuery !== null && taxFromQuery >= 0) {
       monthlyIncomeTax.value = Math.min(taxFromQuery, 10_000_000);
     }
 
     const depFromQuery = parseQueryInt(query.dep);
     if (depFromQuery !== null) {
       dependents.value = Math.max(1, Math.min(20, depFromQuery));
+    }
+
+    const childFromQuery = parseQueryInt(query.child);
+    if (childFromQuery !== null) {
+      const maxChildren = Math.max(0, dependents.value - 1);
+      childrenUnder20.value = Math.max(0, Math.min(maxChildren, childFromQuery));
     }
 
     const nonTaxFromQuery = parseQueryInt(query.nontax);
@@ -80,6 +87,7 @@ watch(
 const { estimatedAnnualGross, calc } = useWithholdingReverse({
   monthlyIncomeTax,
   dependents,
+  childrenUnder20,
   nonTaxableMonthly,
 });
 
@@ -110,16 +118,17 @@ function buildWithholdingRouteState(): {
   query: Record<string, string>;
 } {
   return {
-    path: `/withholding/${Math.max(1, Math.floor(monthlyIncomeTax.value))}`,
+    path: `/withholding/${Math.max(0, Math.floor(monthlyIncomeTax.value))}`,
     query: buildQuery({
       dep: dependents.value !== 1 ? dependents.value : null,
+      child: childrenUnder20.value !== 0 ? childrenUnder20.value : null,
       nontax: nonTaxableMonthly.value !== 200_000 ? nonTaxableMonthly.value : null,
     }),
   };
 }
 
 watch(
-  [monthlyIncomeTax, dependents, nonTaxableMonthly],
+  [monthlyIncomeTax, dependents, childrenUnder20, nonTaxableMonthly],
   () => {
     if (!initialized.value || applyingRoute.value) return;
 
@@ -175,10 +184,13 @@ watch(
     if (recentCalcTimer) clearTimeout(recentCalcTimer);
     recentCalcTimer = setTimeout(() => {
       if (monthlyIncomeTax.value <= 0) return;
+      const nextRoute = buildWithholdingRouteState();
+      const qs = new URLSearchParams(nextRoute.query).toString();
+      const routePath = qs ? `${nextRoute.path}?${qs}` : nextRoute.path;
       addEntry({
         type: "withholding",
         label: `소득세 ${formatWon(monthlyIncomeTax.value)}`,
-        path: "/withholding",
+        path: routePath,
         summary: `추정 연봉 ${formatManWon(estimatedAnnualGross.value)}`,
       });
     }, 2000);
@@ -197,6 +209,7 @@ watch(
         <WithholdingInput
           v-model:monthly-income-tax="monthlyIncomeTax"
           v-model:dependents="dependents"
+          v-model:children-under20="childrenUnder20"
           v-model:non-taxable-monthly="nonTaxableMonthly"
         />
 

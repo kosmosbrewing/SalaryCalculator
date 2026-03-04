@@ -132,14 +132,14 @@ watch(
 
     const healthFromQuery = parseQueryInt(query.health);
     if (!hasPathHealth && healthFromQuery !== null && healthFromQuery > 0) {
-      healthInsuranceFee.value = Math.max(0, Math.min(5_000_000, healthFromQuery));
+      healthInsuranceFee.value = Math.max(0, Math.min(1_000_000, healthFromQuery));
     }
 
     const grossFromQuery = parseQueryInt(query.gross);
     if (grossFromQuery !== null && grossFromQuery > 0) {
       forwardCalc.annualGross.value = Math.max(
         0,
-        Math.min(200_000_000, grossFromQuery)
+        Math.min(300_000_000, grossFromQuery)
       );
     }
 

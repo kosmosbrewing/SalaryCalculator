@@ -61,7 +61,21 @@ export function useRetirementCalc(input: MaybeRefOrGetter<RetirementInput>) {
 
     const dayMs = 24 * 60 * 60 * 1000;
     const serviceDays = Math.floor((endDate.getTime() - startDate.getTime()) / dayMs) + 1;
-    const serviceYears = Math.max(1, Math.floor(serviceDays / 365));
+
+    // 퇴직금 지급 요건: 계속근로 1년 이상 (근로기준법 제34조)
+    if (serviceDays < 365) {
+      return {
+        serviceDays,
+        serviceYears: 0,
+        servicePeriodLabel: formatPeriod(serviceDays),
+        averageDailyWage: 0,
+        severanceGross: 0,
+        retirementTax: 0,
+        severanceNet: 0,
+      };
+    }
+
+    const serviceYears = Math.floor(serviceDays / 365); // serviceDays >= 365이므로 항상 >= 1
 
     // 평균임금: 최근 3개월 임금 + 상여 3/12를 92일로 나눈 간이 계산
     const threeMonthSalary = Math.max(0, resolved.monthlySalary) * 3;

@@ -41,7 +41,7 @@ function taxationLabel(source: SourceResult): string {
   <section class="retro-panel overflow-hidden">
     <div class="retro-titlebar">
       <h2 class="retro-title">종합소득세 계산 결과</h2>
-      <span class="retro-kbd">공제 비율 {{ formatPercent(result.effectiveRate, 1) }}</span>
+      <span class="retro-kbd">실효세율 {{ formatPercent(result.effectiveRate, 1) }}</span>
     </div>
 
     <div class="retro-panel-content space-y-3">

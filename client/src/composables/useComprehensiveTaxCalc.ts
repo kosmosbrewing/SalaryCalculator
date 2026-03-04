@@ -5,9 +5,12 @@ import {
   OTHER_INCOME_EXPENSE_RATE,
   OTHER_SEPARATE_MAX_INCOME_AMOUNT,
   OTHER_WITHHOLDING,
+  RENTAL_BASIC_DEDUCTION_THRESHOLD,
+  RENTAL_REGISTERED_BASIC_DEDUCTION,
   RENTAL_REGISTERED_INCOME_RATE,
   RENTAL_SEPARATE_MAX_REVENUE,
   RENTAL_SEPARATE_TAX_RATE,
+  RENTAL_UNREGISTERED_BASIC_DEDUCTION,
   RENTAL_UNREGISTERED_INCOME_RATE,
   RENTAL_WITHHOLDING,
   STANDARD_TAX_CREDIT_COMPREHENSIVE,
@@ -124,7 +127,8 @@ function buildBusinessSource(input: BusinessInput): SourceResult | null {
   };
 }
 
-function buildRentalSource(input: RentalInput): SourceResult | null {
+// otherComprehensiveIncome: 임대소득 제외 종합소득금액 — 기본공제 적용 조건 판단용
+function buildRentalSource(input: RentalInput, otherComprehensiveIncome: number): SourceResult | null {
   if (!input.enabled) return null;
 
   const revenue = toWon(input.revenue);
@@ -145,9 +149,17 @@ function buildRentalSource(input: RentalInput): SourceResult | null {
   const separateEligible = revenue <= RENTAL_SEPARATE_MAX_REVENUE;
   const taxation =
     separateEligible && input.preferSeparate ? "separate" : "comprehensive";
+
+  // 기본공제: 소득세법 §64의2② — 임대소득 외 종합소득금액 2천만원 이하인 경우만 적용
+  const basicDeduction =
+    otherComprehensiveIncome <= RENTAL_BASIC_DEDUCTION_THRESHOLD
+      ? (input.registered ? RENTAL_REGISTERED_BASIC_DEDUCTION : RENTAL_UNREGISTERED_BASIC_DEDUCTION)
+      : 0;
   const separateTax =
     taxation === "separate"
-      ? Math.floor(incomeAmount * RENTAL_SEPARATE_TAX_RATE * (1 + LOCAL_INCOME_TAX_RATE))
+      ? Math.floor(
+          Math.max(0, incomeAmount - basicDeduction) * RENTAL_SEPARATE_TAX_RATE * (1 + LOCAL_INCOME_TAX_RATE)
+        )
       : 0;
 
   return {
@@ -226,11 +238,17 @@ export function calculateComprehensiveTax(
 ): ComprehensiveTaxResult {
   const dependents = clampInt(input.dependents, 1, 20);
 
-  const sources = [
-    buildBusinessSource(input.business),
-    buildRentalSource(input.rental),
-    buildOtherSource(input.other),
-  ].filter((value): value is SourceResult => value !== null);
+  // 임대소득 기본공제 조건 판단을 위해 임대 외 소득원 먼저 계산
+  const businessSource = buildBusinessSource(input.business);
+  const otherSource = buildOtherSource(input.other);
+  const otherComprehensiveIncome = [businessSource, otherSource]
+    .filter((s): s is SourceResult => s !== null && s.taxation === "comprehensive")
+    .reduce((sum, s) => sum + s.incomeAmount, 0);
+
+  const rentalSource = buildRentalSource(input.rental, otherComprehensiveIncome);
+  const sources = [businessSource, rentalSource, otherSource].filter(
+    (value): value is SourceResult => value !== null
+  );
 
   const comprehensiveSources = sources.filter(
     (source) => source.taxation === "comprehensive"
@@ -266,7 +284,6 @@ export function calculateComprehensiveTax(
   const totalRevenue = sources.reduce((sum, source) => sum + source.revenue, 0);
   const effectiveRate = totalRevenue > 0 ? totalTax / totalRevenue : 0;
 
-  const rentalSource = sources.find((source) => source.type === "rental") ?? null;
   let rentalCompare: { comprehensive: number; separate: number } | null = null;
   if (
     rentalSource &&
@@ -286,17 +303,21 @@ export function calculateComprehensiveTax(
       personalDeduction,
       pensionDeduction,
     }).total;
+    // 비교 시 기본공제: baseIncome이 2천만원 이하인 경우에만 적용
+    const compareBasicDeduction =
+      baseIncome <= RENTAL_BASIC_DEDUCTION_THRESHOLD
+        ? (input.rental.registered ? RENTAL_REGISTERED_BASIC_DEDUCTION : RENTAL_UNREGISTERED_BASIC_DEDUCTION)
+        : 0;
     rentalCompare = {
       comprehensive: Math.max(0, withComprehensive - withoutSource),
       separate: Math.floor(
-        rentalSource.incomeAmount *
+        Math.max(0, rentalSource.incomeAmount - compareBasicDeduction) *
           RENTAL_SEPARATE_TAX_RATE *
           (1 + LOCAL_INCOME_TAX_RATE)
       ),
     };
   }
 
-  const otherSource = sources.find((source) => source.type === "other") ?? null;
   let otherCompare: { comprehensive: number; separate: number } | null = null;
   if (
     otherSource &&

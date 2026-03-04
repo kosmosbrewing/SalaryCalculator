@@ -3,7 +3,7 @@ import { computed } from "vue";
 import { RouterLink } from "vue-router";
 import { SALARY_TABLE_PRESETS } from "@/data/insurancePresets";
 import { calculateSalaryBreakdown } from "@/utils/calculator";
-import { formatManWon, formatPercent, formatWon } from "@/lib/utils";
+import { formatManWon, formatPercent, formatWon, deductionToneClass } from "@/lib/utils";
 
 const rows = computed(() =>
   SALARY_TABLE_PRESETS.map((annualSalary) => {
@@ -24,12 +24,6 @@ const rows = computed(() =>
     };
   })
 );
-
-function deductionToneClass(rate: number): string {
-  if (rate >= 0.32) return "bg-status-danger/10 text-status-danger border-status-danger/20";
-  if (rate >= 0.24) return "bg-status-caution/10 text-status-caution border-status-caution/20";
-  return "bg-status-success/10 text-status-success border-status-success/20";
-}
 </script>
 
 <template>

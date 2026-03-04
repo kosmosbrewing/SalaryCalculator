@@ -5,12 +5,14 @@ import { formatNumber } from "@/lib/utils";
 const props = defineProps<{
   monthlyIncomeTax: number;
   dependents: number;
+  childrenUnder20: number;
   nonTaxableMonthly: number;
 }>();
 
 const emit = defineEmits<{
   "update:monthlyIncomeTax": [value: number];
   "update:dependents": [value: number];
+  "update:childrenUnder20": [value: number];
   "update:nonTaxableMonthly": [value: number];
 }>();
 
@@ -41,12 +43,21 @@ function onNonTaxableInput(event: Event): void {
 function updateDependents(value: number): void {
   const safe = Math.max(1, Math.min(20, Math.floor(value || 1)));
   emit("update:dependents", safe);
+  const maxChildren = Math.max(0, safe - 1);
+  if (props.childrenUnder20 > maxChildren) {
+    emit("update:childrenUnder20", maxChildren);
+  }
+}
+
+function updateChildren(value: number): void {
+  const maxChildren = Math.max(0, props.dependents - 1);
+  emit("update:childrenUnder20", Math.max(0, Math.min(maxChildren, Math.floor(value || 0))));
 }
 
 function onTaxRangeInput(event: Event): void {
   const value = parseInt((event.target as HTMLInputElement).value, 10);
   if (Number.isFinite(value)) {
-    emit("update:monthlyIncomeTax", Math.max(0, Math.min(1_000_000, value)));
+    emit("update:monthlyIncomeTax", Math.max(0, Math.min(MAX_TAX, value)));
   }
 }
 
@@ -54,6 +65,7 @@ const inputIds = {
   monthlyIncomeTax: "withholding-income-tax",
   monthlyIncomeTaxRange: "withholding-income-tax-range",
   dependents: "withholding-dependents",
+  children: "withholding-children",
   nonTaxable: "withholding-nontaxable",
 } as const;
 </script>
@@ -105,7 +117,7 @@ const inputIds = {
             :value="monthlyIncomeTax"
             type="range"
             min="0"
-            max="1000000"
+            max="10000000"
             step="5000"
             class="retro-range"
             aria-label="소득세 슬라이더"
@@ -133,6 +145,19 @@ const inputIds = {
               max="20"
               class="retro-input"
               @input="updateDependents(parseInt(($event.target as HTMLInputElement).value, 10))"
+            />
+          </label>
+          <label class="space-y-1" :for="inputIds.children">
+            <span class="text-caption text-muted-foreground">8~20세 자녀 수</span>
+            <input
+              :id="inputIds.children"
+              :value="childrenUnder20"
+              type="number"
+              inputmode="numeric"
+              min="0"
+              max="20"
+              class="retro-input"
+              @input="updateChildren(parseInt(($event.target as HTMLInputElement).value, 10))"
             />
           </label>
           <label class="space-y-1" :for="inputIds.nonTaxable">

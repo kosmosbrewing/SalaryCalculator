@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watchEffect } from "vue";
 import type { SalaryCalcResult } from "@/composables/useSalaryCalc";
-import { formatKrwAuto, formatWon, formatPercent } from "@/lib/utils";
+import { formatKrwAuto, formatWon, formatPercent, deductionTextClass } from "@/lib/utils";
 import { RATES_2026 } from "@/data/taxRates2026";
 
 const props = defineProps<{
@@ -115,11 +115,11 @@ onUnmounted(() => {
         </div>
         <div class="retro-stat p-2.5">
           <p class="retro-stat-label">공제 합계</p>
-          <p class="retro-stat-value text-deduction">{{ formatWon(calc.totalDeduction.value) }}</p>
+          <p class="retro-stat-value" :class="deductionTextClass(calc.effectiveTaxRate.value)">{{ formatWon(calc.totalDeduction.value) }}</p>
         </div>
         <div class="retro-stat p-2.5">
           <p class="retro-stat-label">공제 비율</p>
-          <p class="retro-stat-value">{{ formatPercent(calc.effectiveTaxRate.value, 1) }}</p>
+          <p class="retro-stat-value" :class="deductionTextClass(calc.effectiveTaxRate.value)">{{ formatPercent(calc.effectiveTaxRate.value, 1) }}</p>
         </div>
       </div>
 

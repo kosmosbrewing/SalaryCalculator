@@ -117,26 +117,31 @@ onMounted(() => {
     const legacyIndustry = queryFirst(query.industry);
     const modernIndustry = queryFirst(query.ind);
 
-    business.value.enabled = false;
-    other.value.enabled = false;
-    rental.value.enabled = false;
+    const incomeSourceKeys = new Set(["biz", "gross", "type", "ren", "oth"]);
+    const hasIncomeSourceQuery = Object.keys(query).some((key) => incomeSourceKeys.has(key));
 
-    // 레거시 /freelance?type=other 링크는 기타소득으로 매핑
-    if (legacyType === "other" && biz !== null && oth === null) {
-      other.value.enabled = true;
-      other.value.revenue = clampInt(biz, 50, 10_000);
-      other.value.preferSeparate = false;
-    } else {
-      business.value.enabled = biz !== null;
-      if (biz !== null) business.value.revenue = clampInt(biz, 100, 50_000);
+    if (hasIncomeSourceQuery) {
+      business.value.enabled = false;
+      other.value.enabled = false;
+      rental.value.enabled = false;
 
-      other.value.enabled = oth !== null;
-      if (oth !== null) other.value.revenue = clampInt(oth, 50, 10_000);
-    }
+      // 레거시 /freelance?type=other 링크는 기타소득으로 매핑
+      if (legacyType === "other" && biz !== null && oth === null) {
+        other.value.enabled = true;
+        other.value.revenue = clampInt(biz, 50, 10_000);
+        other.value.preferSeparate = false;
+      } else {
+        business.value.enabled = biz !== null;
+        if (biz !== null) business.value.revenue = clampInt(biz, 100, 50_000);
 
-    if (ren !== null) {
-      rental.value.enabled = true;
-      rental.value.revenue = clampInt(ren, 100, 30_000);
+        other.value.enabled = oth !== null;
+        if (oth !== null) other.value.revenue = clampInt(oth, 50, 10_000);
+      }
+
+      if (ren !== null) {
+        rental.value.enabled = true;
+        rental.value.revenue = clampInt(ren, 100, 30_000);
+      }
     }
 
     const industry = modernIndustry ?? legacyIndustry;

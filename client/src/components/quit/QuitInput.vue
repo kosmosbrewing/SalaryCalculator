@@ -188,7 +188,9 @@ function onSalaryInput(event: Event): void {
   const raw = (event.target as HTMLInputElement).value.replace(/[^0-9]/g, "");
   const value = parseInt(raw, 10);
   if (Number.isFinite(value)) {
-    emit("update:monthlySalary", clampInt(value, 1_000_000, 100_000_000));
+    // URL이 만원 단위(?salary=350)이므로 만원 단위로 반올림해 round-trip 손실 방지
+    const clamped = clampInt(value, 1_000_000, 100_000_000);
+    emit("update:monthlySalary", Math.round(clamped / 10_000) * 10_000);
   }
 }
 
@@ -196,7 +198,8 @@ function onNonTaxInput(event: Event): void {
   const raw = (event.target as HTMLInputElement).value.replace(/[^0-9]/g, "");
   const value = parseInt(raw, 10);
   if (Number.isFinite(value)) {
-    emit("update:nonTaxableMonthly", clampInt(value, 0, 5_000_000));
+    const clamped = clampInt(value, 0, 5_000_000);
+    emit("update:nonTaxableMonthly", Math.round(clamped / 10_000) * 10_000);
   }
 }
 
@@ -204,7 +207,8 @@ function onBonusInput(event: Event): void {
   const raw = (event.target as HTMLInputElement).value.replace(/[^0-9]/g, "");
   const value = parseInt(raw, 10);
   if (Number.isFinite(value)) {
-    emit("update:annualBonus", clampInt(value, 0, 1_000_000_000));
+    const clamped = clampInt(value, 0, 1_000_000_000);
+    emit("update:annualBonus", Math.round(clamped / 10_000) * 10_000);
   }
 }
 
@@ -212,7 +216,8 @@ function onLivingCostInput(event: Event): void {
   const raw = (event.target as HTMLInputElement).value.replace(/[^0-9]/g, "");
   const value = parseInt(raw, 10);
   if (Number.isFinite(value)) {
-    emit("update:monthlyLivingCost", clampInt(value, 1_000_000, 100_000_000));
+    const clamped = clampInt(value, 1_000_000, 100_000_000);
+    emit("update:monthlyLivingCost", Math.round(clamped / 10_000) * 10_000);
   }
 }
 

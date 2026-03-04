@@ -31,7 +31,7 @@ function onGrossInput(event: Event): void {
   const raw = (event.target as HTMLInputElement).value.replace(/[^0-9]/g, "");
   const value = parseInt(raw, 10);
   if (Number.isFinite(value)) {
-    emit("update:annualGross", Math.max(10_000_000, Math.min(200_000_000, value)));
+    emit("update:annualGross", Math.max(10_000_000, Math.min(300_000_000, value)));
   }
 }
 
@@ -107,7 +107,7 @@ function updateRetirementIncluded(value: boolean): void {
               type="button"
               class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-primary hover:text-primary"
               aria-label="100만원 증가"
-              @click="emit('update:annualGross', Math.min(200_000_000, annualGross + 1_000_000))"
+              @click="emit('update:annualGross', Math.min(300_000_000, annualGross + 1_000_000))"
             >
               +
             </button>
@@ -117,7 +117,7 @@ function updateRetirementIncluded(value: boolean): void {
             :value="annualGross"
             type="range"
             min="10000000"
-            max="200000000"
+            max="300000000"
             step="1000000"
             class="retro-range"
             aria-label="연봉 슬라이더"

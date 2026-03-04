@@ -116,18 +116,18 @@ watch(
       Number.isFinite(initialB) &&
       initialB > 0
     ) {
-      companyA.value.annualGross = Math.floor(initialA * 10_000);
-      companyB.value.annualGross = Math.floor(initialB * 10_000);
+      companyA.value.annualGross = Math.max(10_000_000, Math.min(300_000_000, Math.floor(initialA * 10_000)));
+      companyB.value.annualGross = Math.max(10_000_000, Math.min(300_000_000, Math.floor(initialB * 10_000)));
     }
 
     const a = parseQueryInt(query.a);
     if (a !== null && a > 0) {
-      companyA.value.annualGross = Math.floor(a * 10_000);
+      companyA.value.annualGross = Math.max(10_000_000, Math.min(300_000_000, Math.floor(a * 10_000)));
     }
 
     const b = parseQueryInt(query.b);
     if (b !== null && b > 0) {
-      companyB.value.annualGross = Math.floor(b * 10_000);
+      companyB.value.annualGross = Math.max(10_000_000, Math.min(300_000_000, Math.floor(b * 10_000)));
     }
 
     const na = parseQueryInt(query.na);
@@ -280,10 +280,13 @@ watch(
     recentCalcTimer = setTimeout(() => {
       const aManWon = Math.floor(companyA.value.annualGross / 10_000);
       const bManWon = Math.floor(companyB.value.annualGross / 10_000);
+      const nextRoute = buildCompareRouteState();
+      const qs = new URLSearchParams(nextRoute.query).toString();
+      const routePath = qs ? `${nextRoute.path}?${qs}` : nextRoute.path;
       addEntry({
         type: "compare",
         label: `${formatManWonValue(aManWon)} vs ${formatManWonValue(bManWon)}`,
-        path: `/compare?a=${aManWon}&b=${bManWon}`,
+        path: routePath,
         summary: `차이 월 ${formatWon(Math.abs(monthlyNetDiff.value))}`,
       });
     }, 2000);

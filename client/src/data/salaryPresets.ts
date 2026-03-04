@@ -13,4 +13,5 @@ export const SALARY_PRESETS = [
   120_000_000,
   150_000_000,
   200_000_000,
+  300_000_000,
 ] as const;

@@ -34,7 +34,7 @@ export const withholdingTickerMessages = [
 
 export const comprehensiveTaxTickerMessages = [
   "종합소득세는 모든 소득을 합산해 신고합니다.",
-  "2026년 6단계 누진세율 기준으로 계산 중이에요.",
+  "2026년 8단계 누진세율 기준으로 계산 중이에요.",
   "소득공제 항목을 잘 챙기면 세금이 크게 줄어요.",
   "프리랜서·사업자라면 필요경비 공제가 핵심입니다.",
   "분리과세와 종합과세 중 유리한 방식을 비교해보세요.",

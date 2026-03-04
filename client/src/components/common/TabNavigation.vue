@@ -34,13 +34,17 @@ function isActiveTab(key: (typeof tabs)[number]["key"]): boolean {
           :key="tab.key"
           :to="tab.to"
           :class="[
-            'touch-target inline-flex h-11 shrink-0 items-center rounded-lg px-3 text-body font-semibold transition-all duration-200',
+            'touch-target relative inline-flex h-12 shrink-0 items-center px-3 text-body font-semibold transition-all duration-200',
             isActiveTab(tab.key)
-              ? 'bg-white/20 text-primary-foreground shadow-sm'
-              : 'text-primary-foreground/90 hover:bg-white/15 hover:text-primary-foreground',
+              ? 'text-primary-foreground'
+              : 'text-primary-foreground/70 hover:text-primary-foreground/90',
           ]"
         >
           {{ tab.label }}
+          <span
+            v-if="isActiveTab(tab.key)"
+            class="absolute inset-x-1 bottom-0 h-[3px] rounded-full bg-white"
+          />
         </RouterLink>
       </div>
     </div>

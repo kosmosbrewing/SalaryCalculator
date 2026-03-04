@@ -70,6 +70,20 @@ export function formatPercent(rate: number | null | undefined, decimals = 2): st
   return `${(rate * 100).toFixed(decimals)}%`;
 }
 
+// 공제비율 색상 클래스: 테이블 뱃지 (bg + text + border)
+export function deductionToneClass(rate: number): string {
+  if (rate >= 0.32) return "bg-status-danger/10 text-status-danger border-status-danger/20";
+  if (rate >= 0.24) return "bg-status-caution/10 text-status-caution border-status-caution/20";
+  return "bg-status-success/10 text-status-success border-status-success/20";
+}
+
+// 공제비율 텍스트 색상만: 결과 카드 stat 값 공용
+export function deductionTextClass(rate: number): string {
+  if (rate >= 0.32) return "text-status-danger";
+  if (rate >= 0.24) return "text-status-caution";
+  return "text-status-success";
+}
+
 // 통화 포맷: (14900, "KRW") → "₩14,900"
 export function formatCurrency(amount: number | null | undefined, currency: string): string {
   if (amount == null) return "-";

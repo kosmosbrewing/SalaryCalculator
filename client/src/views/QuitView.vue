@@ -75,15 +75,16 @@ watch(
   ([query, initialYears]) => {
     applyingRoute.value = true;
 
+    // 날짜 검증: YYYY-MM-DD 형식만 허용 (비정상 문자열 방지)
     const start = queryFirst(query.start);
-    if (start) startDate.value = start;
+    if (start && /^\d{4}-\d{2}-\d{2}$/.test(start)) startDate.value = start;
 
     const end = queryFirst(query.end);
-    if (end) endDate.value = end;
+    if (end && /^\d{4}-\d{2}-\d{2}$/.test(end)) endDate.value = end;
 
     const salary = parseQueryInt(query.salary);
     if (salary !== null && salary > 0) {
-      monthlySalary.value = Math.floor(salary * 10_000);
+      monthlySalary.value = Math.max(1_000_000, Math.min(100_000_000, salary * 10_000));
     }
 
     const reason = queryFirst(query.reason) as QuitReason | null;
@@ -92,6 +93,36 @@ watch(
       ["layoff", "dismissal", "contract_end", "voluntary"].includes(reason)
     ) {
       quitReason.value = reason;
+    }
+
+    const nontax = parseQueryInt(query.nontax);
+    if (nontax !== null && nontax >= 0) {
+      nonTaxableMonthly.value = Math.max(0, Math.min(5_000_000, nontax * 10_000));
+    }
+
+    const ageFromQuery = parseQueryInt(query.age);
+    if (ageFromQuery !== null) age.value = Math.max(20, Math.min(80, ageFromQuery));
+
+    const dep = parseQueryInt(query.dep);
+    if (dep !== null) dependents.value = Math.max(1, Math.min(20, dep));
+
+    const child = parseQueryInt(query.child);
+    if (child !== null) {
+      const maxChildren = Math.max(0, dependents.value - 1);
+      childrenUnder20.value = Math.max(0, Math.min(maxChildren, child));
+    }
+
+    const leave = parseQueryInt(query.leave);
+    if (leave !== null) unusedLeaveDays.value = Math.max(0, Math.min(60, leave));
+
+    const bonus = parseQueryInt(query.bonus);
+    if (bonus !== null && bonus >= 0) {
+      annualBonus.value = Math.max(0, Math.min(1_000_000_000, bonus * 10_000));
+    }
+
+    const living = parseQueryInt(query.living);
+    if (living !== null && living >= 0) {
+      monthlyLivingCost.value = Math.max(1_000_000, Math.min(100_000_000, living * 10_000));
     }
 
     if (
@@ -218,13 +249,20 @@ function buildQuitQuery(): Record<string, string> {
   return buildQuery({
     start: startDate.value,
     end: endDate.value,
-    salary: Math.max(1, Math.floor(monthlySalary.value / 10_000)),
+    salary: Math.floor(monthlySalary.value / 10_000),
     reason: quitReason.value,
+    nontax: nonTaxableMonthly.value !== 200_000 ? Math.floor(nonTaxableMonthly.value / 10_000) : null,
+    age: age.value !== 35 ? age.value : null,
+    dep: dependents.value !== 1 ? dependents.value : null,
+    child: childrenUnder20.value !== 0 ? childrenUnder20.value : null,
+    leave: unusedLeaveDays.value !== 12 ? unusedLeaveDays.value : null,
+    bonus: annualBonus.value !== 4_000_000 ? Math.floor(annualBonus.value / 10_000) : null,
+    living: monthlyLivingCost.value !== 2_500_000 ? Math.floor(monthlyLivingCost.value / 10_000) : null,
   });
 }
 
 watch(
-  [startDate, endDate, monthlySalary, quitReason],
+  [startDate, endDate, monthlySalary, quitReason, nonTaxableMonthly, age, dependents, childrenUnder20, unusedLeaveDays, annualBonus, monthlyLivingCost],
   () => {
     if (!initialized.value || applyingRoute.value) return;
 
@@ -263,6 +301,22 @@ async function copyQuitLink(): Promise<void> {
   }
 }
 
+async function shareQuit(): Promise<void> {
+  if (typeof navigator.share === "function") {
+    try {
+      await navigator.share({
+        title: seoTitle.value,
+        text: seoDescription.value,
+        url: getShareUrl(),
+      });
+      return;
+    } catch {
+      // 사용자가 공유를 취소한 경우
+    }
+  }
+  await copyQuitLink();
+}
+
 // 최근 계산 자동 저장 (2초 디바운스)
 let recentCalcTimer: ReturnType<typeof setTimeout> | null = null;
 watch(
@@ -270,10 +324,13 @@ watch(
   () => {
     if (recentCalcTimer) clearTimeout(recentCalcTimer);
     recentCalcTimer = setTimeout(() => {
+      const nextQuery = buildQuitQuery();
+      const qs = new URLSearchParams(nextQuery).toString();
+      const routePath = qs ? `/quit?${qs}` : "/quit";
       addEntry({
         type: "quit",
         label: `${insuranceYears.value}년 근속 퇴사`,
-        path: "/quit",
+        path: routePath,
         summary: `퇴직금 ${formatWon(retirement.value.severanceNet)}`,
       });
     }, 2000);
@@ -357,7 +414,7 @@ watch(
       </div>
 
       <div class="space-y-4 order-2 lg:sticky lg:top-20 lg:self-start">
-        <CommunitySidebar page-key="quit-main" @share-request="copyQuitLink" />
+        <CommunitySidebar page-key="quit-main" @share-request="shareQuit" />
         <RecentCalcPanel />
       </div>
     </section>

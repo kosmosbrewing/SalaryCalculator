@@ -42,7 +42,7 @@ const routes: RouteRecordRaw[] = [
     name: "Insurance",
     component: () => import("@/views/InsuranceView.vue"),
     props: { initialMode: "reverse" },
-    meta: { title: "2026 건강보험료로 연봉 계산기 | 4대보험" },
+    meta: { title: "2026 건강보험료 연봉 계산기 | 4대보험" },
   },
   {
     path: "/insurance/:amount(\\d+)",
@@ -59,7 +59,7 @@ const routes: RouteRecordRaw[] = [
     name: "SalaryHome",
     component: () => import("@/views/InsuranceView.vue"),
     props: { initialMode: "forward" },
-    meta: { title: "2026 연봉 실수령액 계산기 | 4대보험 계산" },
+    meta: { title: "2026 연봉 실수령액 계산기 | 4대보험 + 소득세 자동 계산" },
   },
   {
     path: "/salary/:amount",
@@ -149,19 +149,19 @@ const routes: RouteRecordRaw[] = [
     path: "/about",
     name: "About",
     component: () => import("@/views/AboutView.vue"),
-    meta: { title: "서비스 소개 | 2026 연봉·세금 계산기" },
+    meta: { title: "서비스 안내 | 2026 연봉·건보료 계산기" },
   },
   {
     path: "/privacy",
     name: "Privacy",
     component: () => import("@/views/PrivacyView.vue"),
-    meta: { title: "개인정보처리방침 | 연봉 실수령액 계산기" },
+    meta: { title: "개인정보 처리방침 | 2026 연봉 실수령액 계산기" },
   },
   {
     path: "/:pathMatch(.*)*",
     name: "NotFound",
     component: () => import("@/views/NotFoundView.vue"),
-    meta: { title: "페이지를 찾을 수 없습니다 | finance.shakilabs.com" },
+    meta: { title: "페이지를 찾을 수 없습니다 | ShakiLabs" },
   },
 ];
 

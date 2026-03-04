@@ -54,7 +54,9 @@ function onAnnualInput(key: "companyA" | "companyB", event: Event): void {
   const raw = (event.target as HTMLInputElement).value.replace(/[^0-9]/g, "");
   const value = parseInt(raw, 10);
   if (Number.isFinite(value)) {
-    updateCompany(key, { annualGross: clampInt(value, 10_000_000, 3_000_000_000) });
+    // URL이 만원 단위(/compare/4000-vs-5000)이므로 만원 단위로 반올림해 round-trip 손실 방지
+    const clamped = clampInt(value, 10_000_000, 300_000_000);
+    updateCompany(key, { annualGross: Math.round(clamped / 10_000) * 10_000 });
   }
 }
 
@@ -62,7 +64,9 @@ function onNonTaxInput(key: "companyA" | "companyB", event: Event): void {
   const raw = (event.target as HTMLInputElement).value.replace(/[^0-9]/g, "");
   const value = parseInt(raw, 10);
   if (Number.isFinite(value)) {
-    updateCompany(key, { nonTaxableMonthly: clampInt(value, 0, 5_000_000) });
+    // URL이 만원 단위(?na=20)이므로 만원 단위로 반올림해 round-trip 손실 방지
+    const clamped = clampInt(value, 0, 5_000_000);
+    updateCompany(key, { nonTaxableMonthly: Math.round(clamped / 10_000) * 10_000 });
   }
 }
 
