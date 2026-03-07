@@ -20,6 +20,7 @@ import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
 import CalcSourceBox from "@/components/salary/CalcSourceBox.vue";
 import { useInsuranceReverse } from "@/composables/useInsuranceReverse";
 import { useSalaryCalc } from "@/composables/useSalaryCalc";
+import type { SalaryCalcResult } from "@/composables/useSalaryCalc";
 import { useShare } from "@/composables/useShare";
 import { DEFAULT_INSURANCE_PRESET } from "@/data/insurancePresets";
 
@@ -101,29 +102,31 @@ const {
   getCalc: () => activeCalc.value,
   getShareUrl: () => getShareUrl(),
   getShareText: (calc) => {
+    const currentCalc = calc as SalaryCalcResult;
     if (isForwardMode.value) {
-      const retireLabel = calc.retirementIncluded.value ? "· 퇴직금 포함" : "";
-      return `연봉 ${formatManWon(calc.annualGross.value)} 실수령액: 월 ${formatWon(calc.monthlyNet.value)} ${retireLabel} (2026년 기준)`;
+      const retireLabel = currentCalc.retirementIncluded.value ? "· 퇴직금 포함" : "";
+      return `연봉 ${formatManWon(currentCalc.annualGross.value)} 실수령액: 월 ${formatWon(currentCalc.monthlyNet.value)} ${retireLabel} (2026년 기준)`;
     }
 
     return `건보료 ${formatWon(healthInsuranceFee.value)} 기준 추정 연봉: ${formatManWon(reverse.estimatedAnnualGross.value)} · 월 실수령 ${formatWon(reverse.calc.monthlyNet.value)} (2026년 기준)`;
   },
   getShareSummary: (calc) => {
+    const currentCalc = calc as SalaryCalcResult;
     if (isForwardMode.value) {
       const parts = [
-        `연봉 ${formatManWon(calc.annualGross.value)}`,
-        `부양가족 ${calc.dependents.value}명`,
-        `자녀 ${calc.childrenUnder20.value}명`,
+        `연봉 ${formatManWon(currentCalc.annualGross.value)}`,
+        `부양가족 ${currentCalc.dependents.value}명`,
+        `자녀 ${currentCalc.childrenUnder20.value}명`,
       ];
 
-      if (calc.nonTaxableMonthly.value > 0) {
-        parts.push(`비과세 월 ${formatWon(calc.nonTaxableMonthly.value)}`);
+      if (currentCalc.nonTaxableMonthly.value > 0) {
+        parts.push(`비과세 월 ${formatWon(currentCalc.nonTaxableMonthly.value)}`);
       }
-      if (calc.retirementIncluded.value) {
+      if (currentCalc.retirementIncluded.value) {
         parts.push("퇴직금 포함");
       }
 
-      parts.push(`월 실수령 ${formatWon(calc.monthlyNet.value)}`);
+      parts.push(`월 실수령 ${formatWon(currentCalc.monthlyNet.value)}`);
       return parts.join(" · ");
     }
 
@@ -388,6 +391,7 @@ watch(
             :estimated-taxable-monthly="reverse.estimatedTaxableMonthly.value"
             :estimated-annual-gross="reverse.estimatedAnnualGross.value"
             :calc="activeCalc"
+            @share-request="handleSidebarShare"
           />
         </div>
 

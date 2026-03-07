@@ -28,22 +28,22 @@ function isActiveTab(key: (typeof tabs)[number]["key"]): boolean {
 <template>
   <nav class="sticky top-0 z-50 border-b border-primary/20 bg-primary shadow-sm" aria-label="주요 메뉴">
     <div class="container">
-      <div class="flex h-12 items-center gap-2 overflow-x-auto" style="scrollbar-width: none">
+      <div class="grid grid-cols-3 gap-x-1 sm:flex sm:h-12 sm:items-center sm:gap-2 sm:overflow-x-auto" style="scrollbar-width: none">
         <RouterLink
           v-for="tab in tabs"
           :key="tab.key"
           :to="tab.to"
           :class="[
-            'touch-target relative inline-flex h-12 shrink-0 items-center px-3 text-body font-semibold transition-all duration-200',
+            'touch-target relative inline-flex min-w-0 items-center justify-center px-2 py-3 text-center text-[0.82rem] font-semibold leading-tight transition-all duration-200 sm:h-12 sm:shrink-0 sm:justify-start sm:px-3 sm:py-0 sm:text-body',
             isActiveTab(tab.key)
               ? 'text-primary-foreground'
               : 'text-primary-foreground/70 hover:text-primary-foreground/90',
           ]"
         >
-          {{ tab.label }}
+          <span class="break-keep">{{ tab.label }}</span>
           <span
             v-if="isActiveTab(tab.key)"
-            class="absolute inset-x-1 bottom-0 h-[3px] rounded-full bg-white"
+            class="absolute inset-x-2 bottom-0 h-[3px] rounded-full bg-white sm:inset-x-1"
           />
         </RouterLink>
       </div>

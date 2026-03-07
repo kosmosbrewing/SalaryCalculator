@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watchEffect } from "vue";
 import type { SalaryCalcResult } from "@/composables/useSalaryCalc";
-import { formatKrwAuto, formatWon, formatPercent, deductionTextClass } from "@/lib/utils";
+import { formatKrwAuto, formatKrwCompact, formatWon, formatPercent, deductionTextClass } from "@/lib/utils";
 import { RATES_2026 } from "@/data/taxRates2026";
+import SectionShareButton from "@/components/common/SectionShareButton.vue";
 
 const props = defineProps<{
   mode: "reverse" | "forward";
@@ -10,6 +11,10 @@ const props = defineProps<{
   estimatedTaxableMonthly: number;
   estimatedAnnualGross: number;
   calc: SalaryCalcResult;
+}>();
+
+const emit = defineEmits<{
+  shareRequest: [];
 }>();
 
 // 역산 모드: 건강보험 표시값은 사용자 입력값 그대로 사용 (재계산 오차 1원 제거)
@@ -90,6 +95,7 @@ onUnmounted(() => {
   <section class="retro-panel overflow-hidden">
     <div class="retro-titlebar">
       <h2 class="retro-title">{{ title }}</h2>
+      <SectionShareButton @click="emit('shareRequest')" />
     </div>
 
     <div class="retro-panel-content space-y-3">
@@ -109,17 +115,23 @@ onUnmounted(() => {
 
       <!-- 요약 stat-grid (3열) -->
       <div class="grid grid-cols-3 gap-1.5">
-        <div class="retro-stat p-2.5">
+        <div class="retro-stat flex min-h-[74px] flex-col justify-center p-2 text-center sm:min-h-0 sm:p-2.5">
           <p class="retro-stat-label">월 급여</p>
-          <p class="retro-stat-value">{{ formatWon(calc.monthlyGross.value) }}</p>
+          <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">
+            <span class="sm:hidden">{{ formatKrwCompact(calc.monthlyGross.value) }}</span>
+            <span class="hidden sm:inline">{{ formatWon(calc.monthlyGross.value) }}</span>
+          </p>
         </div>
-        <div class="retro-stat p-2.5">
+        <div class="retro-stat flex min-h-[74px] flex-col justify-center p-2 text-center sm:min-h-0 sm:p-2.5">
           <p class="retro-stat-label">공제 합계</p>
-          <p class="retro-stat-value" :class="deductionTextClass(calc.effectiveTaxRate.value)">{{ formatWon(calc.totalDeduction.value) }}</p>
+          <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading" :class="deductionTextClass(calc.effectiveTaxRate.value)">
+            <span class="sm:hidden">{{ formatKrwCompact(calc.totalDeduction.value) }}</span>
+            <span class="hidden sm:inline">{{ formatWon(calc.totalDeduction.value) }}</span>
+          </p>
         </div>
-        <div class="retro-stat p-2.5">
+        <div class="retro-stat flex min-h-[74px] flex-col justify-center p-2 text-center sm:min-h-0 sm:p-2.5">
           <p class="retro-stat-label">공제 비율</p>
-          <p class="retro-stat-value" :class="deductionTextClass(calc.effectiveTaxRate.value)">{{ formatPercent(calc.effectiveTaxRate.value, 1) }}</p>
+          <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading" :class="deductionTextClass(calc.effectiveTaxRate.value)">{{ formatPercent(calc.effectiveTaxRate.value, 1) }}</p>
         </div>
       </div>
 

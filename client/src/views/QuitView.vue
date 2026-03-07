@@ -8,6 +8,7 @@ import QuitReceivables from "@/components/quit/QuitReceivables.vue";
 import QuitExpenses from "@/components/quit/QuitExpenses.vue";
 import SurvivalSimulation from "@/components/quit/SurvivalSimulation.vue";
 import QuitChecklist from "@/components/quit/QuitChecklist.vue";
+import ShareModal from "@/components/share/ShareModal.vue";
 
 import AdSlot from "@/components/common/AdSlot.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
@@ -17,17 +18,16 @@ import { useSalaryCalc } from "@/composables/useSalaryCalc";
 import { useRetirementCalc } from "@/composables/useRetirementCalc";
 import { useUnemploymentCalc } from "@/composables/useUnemploymentCalc";
 import { useSurvivalCalc } from "@/composables/useSurvivalCalc";
+import { useShare } from "@/composables/useShare";
 
 import { formatManWon, formatWon } from "@/lib/utils";
 import { DEFAULT_SITE_URL } from "@/lib/site";
-import { showAlert } from "@/composables/useAlert";
 import { addEntry } from "@/composables/useRecentCalcs";
 import type { QuitReason } from "@/data/unemploymentTable";
 import { useRoute, useRouter } from "vue-router";
 import {
   buildAbsoluteUrl,
   buildQuery,
-  copyToClipboard,
   isSameQuery,
   parseQueryInt,
   queryFirst,
@@ -231,6 +231,28 @@ const seoDescription = computed(
     `퇴사하면 얼마나 버틸 수 있을까? 받을 돈 총 ${formatManWon(totalReceivables.value)}, 월 고정비 ${formatManWon(monthlyFixedCost.value)}. 실업급여·생존기간까지 한 번에 계산합니다.`
 );
 
+const {
+  showShareModal,
+  kakaoBusy,
+  shareSummary,
+  openShare,
+  closeShare,
+  shareKakao,
+  copyLink,
+} = useShare(salaryCalc, {
+  getShareUrl: () => getShareUrl(),
+  getShareText: () => seoTitle.value,
+  getShareSummary: () =>
+    [
+      `${insuranceYears.value}년 근속`,
+      `퇴직금 ${formatWon(retirement.value.severanceNet)}`,
+      `실업급여 ${formatWon(unemployment.value.totalBenefit)}`,
+      `총 수령액 ${formatWon(totalReceivables.value)}`,
+    ].join(" · "),
+  getDescription: () => seoDescription.value,
+  getButtonTitle: () => "퇴사 계산 결과 보기",
+});
+
 const breadcrumbJsonLd = computed(() => ({
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
@@ -288,35 +310,6 @@ function handleRangeApply(range: { startDate: string; endDate: string }): void {
   }, 500);
 }
 
-async function copyQuitLink(): Promise<void> {
-  try {
-    const link = getShareUrl();
-    const copied = await copyToClipboard(link);
-    if (!copied) {
-      throw new Error("clipboard unavailable");
-    }
-    showAlert("퇴사 시뮬레이션 링크를 복사했습니다");
-  } catch {
-    showAlert("링크 복사에 실패했습니다", { type: "error" });
-  }
-}
-
-async function shareQuit(): Promise<void> {
-  if (typeof navigator.share === "function") {
-    try {
-      await navigator.share({
-        title: seoTitle.value,
-        text: seoDescription.value,
-        url: getShareUrl(),
-      });
-      return;
-    } catch {
-      // 사용자가 공유를 취소한 경우
-    }
-  }
-  await copyQuitLink();
-}
-
 // 최근 계산 자동 저장 (2초 디바운스)
 let recentCalcTimer: ReturnType<typeof setTimeout> | null = null;
 watch(
@@ -342,11 +335,14 @@ watch(
   <div class="container space-y-4 py-6">
     <SEOHead :title="seoTitle" :description="seoDescription" :json-ld="breadcrumbJsonLd" />
 
-    <div class="flex items-center justify-between gap-2">
-      <h1 class="text-h1 font-brand">2026 퇴사 계산기 — 퇴직금·실업급여·생존기간</h1>
+    <div class="flex items-start justify-between gap-2 sm:items-center">
+      <h1 class="min-w-0 flex-1 font-brand text-[1.22rem] leading-[1.2] sm:text-h1">
+        <span class="sm:hidden">2026 퇴사 계산기</span>
+        <span class="hidden sm:inline">2026 퇴사 계산기 — 퇴직금·실업급여·생존기간</span>
+      </h1>
       <span
         v-if="isRangeUpdating"
-        class="text-caption text-muted-foreground"
+        class="shrink-0 pt-0.5 text-caption text-muted-foreground sm:pt-0"
         role="status"
         aria-live="polite"
       >
@@ -387,6 +383,7 @@ watch(
           :total-receivables="totalReceivables"
           :unemployment-end-date-label="unemployment.endDateLabel"
           :quit-reason="quitReason"
+          @share-request="openShare"
         />
 
         <AdSlot slot="140002" label="광고 · middle" />
@@ -414,9 +411,18 @@ watch(
       </div>
 
       <div class="space-y-4 order-2 lg:sticky lg:top-20 lg:self-start">
-        <CommunitySidebar page-key="quit-main" @share-request="shareQuit" />
+        <CommunitySidebar page-key="quit-main" @share-request="openShare" />
         <RecentCalcPanel />
       </div>
     </section>
+
+    <ShareModal
+      :show="showShareModal"
+      :kakao-busy="kakaoBusy"
+      :summary-text="shareSummary"
+      @close="closeShare"
+      @share-kakao="shareKakao"
+      @copy-link="copyLink"
+    />
   </div>
 </template>

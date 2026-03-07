@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { formatKrwAuto, formatWon } from "@/lib/utils";
+import SectionShareButton from "@/components/common/SectionShareButton.vue";
 
 import type { QuitReason } from "@/data/unemploymentTable";
 
@@ -19,6 +20,10 @@ defineProps<{
   quitReason: QuitReason;
 }>();
 
+const emit = defineEmits<{
+  shareRequest: [];
+}>();
+
 const eligibleLabel: Record<string, string> = {
   layoff: "수급 가능 (권고사직)",
   dismissal: "수급 가능 (해고)",
@@ -31,7 +36,10 @@ const eligibleLabel: Record<string, string> = {
   <section class="retro-panel overflow-hidden">
     <div class="retro-titlebar">
       <h2 class="retro-title">받을 돈</h2>
-      <span class="retro-kbd">{{ servicePeriodLabel }}</span>
+      <div class="flex items-center gap-2">
+        <span class="retro-kbd">{{ servicePeriodLabel }}</span>
+        <SectionShareButton @click="emit('shareRequest')" />
+      </div>
     </div>
 
     <div class="retro-panel-content space-y-3">

@@ -4,20 +4,20 @@ import { useRoute, useRouter } from "vue-router";
 import SEOHead from "@/components/common/SEOHead.vue";
 import WithholdingInput from "@/components/withholding/WithholdingInput.vue";
 import WithholdingResult from "@/components/withholding/WithholdingResult.vue";
+import ShareModal from "@/components/share/ShareModal.vue";
 import AdSlot from "@/components/common/AdSlot.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
 import CommunitySidebar from "@/components/common/CommunitySidebar.vue";
 import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
 import CalcSourceBox from "@/components/salary/CalcSourceBox.vue";
 import { useWithholdingReverse } from "@/composables/useWithholdingReverse";
+import { useShare } from "@/composables/useShare";
 import { formatManWon, formatWon } from "@/lib/utils";
 import { DEFAULT_SITE_URL } from "@/lib/site";
-import { showAlert } from "@/composables/useAlert";
 import { addEntry } from "@/composables/useRecentCalcs";
 import {
   buildAbsoluteUrl,
   buildQuery,
-  copyToClipboard,
   isSameQuery,
   parseQueryInt,
 } from "@/lib/routeState";
@@ -91,6 +91,27 @@ const { estimatedAnnualGross, calc } = useWithholdingReverse({
   nonTaxableMonthly,
 });
 
+const {
+  showShareModal,
+  kakaoBusy,
+  shareSummary,
+  openShare,
+  closeShare,
+  shareKakao,
+  copyLink,
+} = useShare(calc, {
+  getShareUrl: () => getShareUrl(),
+  getShareText: () => seoTitle.value,
+  getShareSummary: () =>
+    [
+      `소득세 ${formatWon(monthlyIncomeTax.value)}`,
+      `추정 연봉 ${formatManWon(estimatedAnnualGross.value)}`,
+      `월 실수령 ${formatWon(calc.monthlyNet.value)}`,
+    ].join(" · "),
+  getDescription: () => seoDescription.value,
+  getButtonTitle: () => "원천세 계산 결과 보기",
+});
+
 const seoTitle = computed(() =>
   `소득세 ${formatWon(monthlyIncomeTax.value)} → 연봉 계산 | 2026 원천세 계산기`
 );
@@ -147,35 +168,6 @@ function getShareUrl(): string {
   return buildAbsoluteUrl(nextRoute.path, nextRoute.query);
 }
 
-async function copyWithholdingLink(): Promise<void> {
-  try {
-    const link = getShareUrl();
-    const copied = await copyToClipboard(link);
-    if (!copied) {
-      throw new Error("clipboard unavailable");
-    }
-    showAlert("링크를 복사했습니다");
-  } catch {
-    showAlert("링크 복사에 실패했습니다", { type: "error" });
-  }
-}
-
-async function shareWithholding(): Promise<void> {
-  if (typeof navigator.share === "function") {
-    try {
-      await navigator.share({
-        title: seoTitle.value,
-        text: seoDescription.value,
-        url: getShareUrl(),
-      });
-      return;
-    } catch {
-      // 사용자가 공유를 취소한 경우
-    }
-  }
-  await copyWithholdingLink();
-}
-
 // 최근 계산 자동 저장 (2초 디바운스)
 let recentCalcTimer: ReturnType<typeof setTimeout> | null = null;
 watch(
@@ -217,6 +209,7 @@ watch(
           :monthly-income-tax="monthlyIncomeTax"
           :estimated-annual-gross="estimatedAnnualGross"
           :calc="calc"
+          @share-request="openShare"
         />
 
         <AdSlot slot="160001" label="광고 · top" />
@@ -228,9 +221,18 @@ watch(
       </div>
 
       <div class="space-y-4 order-2 lg:sticky lg:top-20 lg:self-start">
-        <CommunitySidebar page-key="withholding-main" @share-request="shareWithholding" />
+        <CommunitySidebar page-key="withholding-main" @share-request="openShare" />
         <RecentCalcPanel />
       </div>
     </section>
+
+    <ShareModal
+      :show="showShareModal"
+      :kakao-busy="kakaoBusy"
+      :summary-text="shareSummary"
+      @close="closeShare"
+      @share-kakao="shareKakao"
+      @copy-link="copyLink"
+    />
   </div>
 </template>

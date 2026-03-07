@@ -5,6 +5,7 @@ import SEOHead from "@/components/common/SEOHead.vue";
 import IncomeSourceInput from "@/components/comprehensive-tax/IncomeSourceInput.vue";
 import ComprehensiveTaxResult from "@/components/comprehensive-tax/ComprehensiveTaxResult.vue";
 import SeparateTaxCompare from "@/components/comprehensive-tax/SeparateTaxCompare.vue";
+import ShareModal from "@/components/share/ShareModal.vue";
 import CalcSourceBox from "@/components/salary/CalcSourceBox.vue";
 import AdSlot from "@/components/common/AdSlot.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
@@ -18,12 +19,11 @@ import {
 } from "@/data/freelanceTaxRates";
 import { addEntry } from "@/composables/useRecentCalcs";
 import { useComprehensiveTaxCalc } from "@/composables/useComprehensiveTaxCalc";
-import { showAlert } from "@/composables/useAlert";
+import { useShare } from "@/composables/useShare";
 import { formatManWonValue, formatWon } from "@/lib/utils";
 import { DEFAULT_SITE_URL } from "@/lib/site";
 import {
   buildAbsoluteUrl,
-  copyToClipboard,
   isSameQuery,
   parseQueryFloat,
   parseQueryInt,
@@ -223,6 +223,28 @@ const seoDescription = computed(() => {
   return `프리랜서·사업자·임대소득자를 위한 종합소득세 계산. ${netLabel.value}. 분리과세 비교까지 한 번에 확인하세요.`;
 });
 
+const {
+  showShareModal,
+  kakaoBusy,
+  shareSummary,
+  openShare,
+  closeShare,
+  shareKakao,
+  copyLink,
+} = useShare(result.value, {
+  getCalc: () => result.value,
+  getShareUrl: () => getShareUrl(),
+  getShareText: () => seoTitle.value,
+  getShareSummary: () =>
+    [
+      `총수입 ${formatWon(result.value.totalRevenue)}`,
+      `과세표준 ${formatWon(result.value.taxableBase)}`,
+      netLabel.value,
+    ].join(" · "),
+  getDescription: () => seoDescription.value,
+  getButtonTitle: () => "종합소득세 결과 보기",
+});
+
 const breadcrumbJsonLd = computed(() => ({
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
@@ -290,36 +312,6 @@ watch(
 
 function getShareUrl(): string {
   return buildAbsoluteUrl("/comprehensive-tax", buildComprehensiveQuery());
-}
-
-async function copyShareLink(): Promise<void> {
-  try {
-    const shareUrl = getShareUrl();
-    const copied = await copyToClipboard(shareUrl);
-    if (!copied) {
-      throw new Error("clipboard unavailable");
-    }
-    showAlert("공유 링크를 복사했습니다");
-  } catch {
-    showAlert("링크 복사에 실패했습니다", { type: "error" });
-  }
-}
-
-async function shareComprehensiveTax(): Promise<void> {
-  if (typeof navigator.share === "function") {
-    try {
-      await navigator.share({
-        title: seoTitle.value,
-        text: seoDescription.value,
-        url: getShareUrl(),
-      });
-      return;
-    } catch {
-      // 사용자가 취소한 경우 포함
-    }
-  }
-
-  await copyShareLink();
 }
 
 let recentCalcTimer: ReturnType<typeof setTimeout> | null = null;
@@ -422,7 +414,7 @@ watch(
           </div>
         </section>
 
-        <ComprehensiveTaxResult :result="result" />
+        <ComprehensiveTaxResult :result="result" @share-request="openShare" />
 
         <SeparateTaxCompare
           v-if="result.rentalCompare || result.otherCompare"
@@ -442,9 +434,18 @@ watch(
       </div>
 
       <div class="space-y-4 order-2 lg:sticky lg:top-20 lg:self-start">
-        <CommunitySidebar page-key="comprehensive-tax-main" @share-request="shareComprehensiveTax" />
+        <CommunitySidebar page-key="comprehensive-tax-main" @share-request="openShare" />
         <RecentCalcPanel />
       </div>
     </section>
+
+    <ShareModal
+      :show="showShareModal"
+      :kakao-busy="kakaoBusy"
+      :summary-text="shareSummary"
+      @close="closeShare"
+      @share-kakao="shareKakao"
+      @copy-link="copyLink"
+    />
   </div>
 </template>

@@ -6,12 +6,14 @@ import SEOHead from "@/components/common/SEOHead.vue";
 
 import CompareInput from "@/components/compare/CompareInput.vue";
 import CompareResult from "@/components/compare/CompareResult.vue";
+import ShareModal from "@/components/share/ShareModal.vue";
 
 import AdSlot from "@/components/common/AdSlot.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
 import CommunitySidebar from "@/components/common/CommunitySidebar.vue";
 import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
 import { useSalaryCalc } from "@/composables/useSalaryCalc";
+import { useShare } from "@/composables/useShare";
 
 import {
   formatManWon,
@@ -19,12 +21,10 @@ import {
   formatWon,
 } from "@/lib/utils";
 import { DEFAULT_SITE_URL } from "@/lib/site";
-import { showAlert } from "@/composables/useAlert";
 import { addEntry } from "@/composables/useRecentCalcs";
 import {
   buildAbsoluteUrl,
   buildQuery,
-  copyToClipboard,
   isSameQuery,
   parseQueryBoolean,
   parseQueryInt,
@@ -222,6 +222,27 @@ const seoDescription = computed(
   () => `연봉 ${formatManWon(companyA.value.annualGross)}에서 ${formatManWon(companyB.value.annualGross)}로 이직하면 월 실수령은 ${formatWon(monthlyNetDiff.value)} 차이. 4대보험·세금 반영 실수령 비교를 즉시 확인하세요.`
 );
 
+const {
+  showShareModal,
+  kakaoBusy,
+  shareSummary,
+  openShare,
+  closeShare,
+  shareKakao,
+  copyLink,
+} = useShare(calcA, {
+  getShareUrl: () => compareShareUrl(),
+  getShareText: () => seoTitle.value,
+  getShareSummary: () =>
+    [
+      `${formatManWon(companyA.value.annualGross)} vs ${formatManWon(companyB.value.annualGross)}`,
+      `월 실수령 차이 ${formatWon(Math.abs(monthlyNetDiff.value))}`,
+      `부양가족 ${dependents.value}명`,
+    ].join(" · "),
+  getDescription: () => seoDescription.value,
+  getButtonTitle: () => "이직 비교 결과 보기",
+});
+
 const breadcrumbJsonLd = computed(() => ({
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
@@ -239,36 +260,6 @@ const breadcrumbJsonLd = computed(() => ({
 function compareShareUrl(): string {
   const nextRoute = buildCompareRouteState();
   return buildAbsoluteUrl(nextRoute.path, nextRoute.query);
-}
-
-async function copyCompareLink(): Promise<void> {
-  try {
-    const link = compareShareUrl();
-    const copied = await copyToClipboard(link);
-    if (!copied) {
-      throw new Error("clipboard unavailable");
-    }
-    showAlert("비교 링크를 복사했습니다");
-  } catch {
-    showAlert("링크 복사에 실패했습니다", { type: "error" });
-  }
-}
-
-async function shareCompare(): Promise<void> {
-  if (typeof navigator.share === "function") {
-    try {
-      await navigator.share({
-        title: seoTitle.value,
-        text: seoDescription.value,
-        url: compareShareUrl(),
-      });
-      return;
-    } catch {
-      // 사용자가 공유를 취소한 경우도 여기로 들어올 수 있음
-    }
-  }
-
-  await copyCompareLink();
 }
 
 // 최근 계산 자동 저장 (2초 디바운스)
@@ -313,6 +304,7 @@ watch(
               embedded
               :calc-a="calcA"
               :calc-b="calcB"
+              @share-request="openShare"
             />
           </template>
         </CompareInput>
@@ -328,9 +320,18 @@ watch(
       </div>
 
       <div class="space-y-4 order-2 lg:sticky lg:top-20 lg:self-start">
-        <CommunitySidebar page-key="compare-main" @share-request="shareCompare" />
+        <CommunitySidebar page-key="compare-main" @share-request="openShare" />
         <RecentCalcPanel />
       </div>
     </section>
+
+    <ShareModal
+      :show="showShareModal"
+      :kakao-busy="kakaoBusy"
+      :summary-text="shareSummary"
+      @close="closeShare"
+      @share-kakao="shareKakao"
+      @copy-link="copyLink"
+    />
   </div>
 </template>

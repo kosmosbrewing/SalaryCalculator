@@ -3,11 +3,16 @@ import { computed } from "vue";
 import CompareDiffTable from "@/components/compare/CompareDiffTable.vue";
 import { formatKrwAuto, formatWon } from "@/lib/utils";
 import type { SalaryCalcResult } from "@/composables/useSalaryCalc";
+import SectionShareButton from "@/components/common/SectionShareButton.vue";
 
 const props = defineProps<{
   calcA: SalaryCalcResult;
   calcB: SalaryCalcResult;
   embedded?: boolean;
+}>();
+
+const emit = defineEmits<{
+  shareRequest: [];
 }>();
 
 const monthlyNetDiff = computed(
@@ -38,11 +43,13 @@ const diffSign = computed(() => {
   <component :is="props.embedded ? 'div' : 'section'" :class="props.embedded ? 'space-y-4' : 'retro-panel overflow-hidden'">
     <div v-if="!props.embedded" class="retro-titlebar">
       <h2 class="retro-title">비교 결과</h2>
+      <SectionShareButton @click="emit('shareRequest')" />
     </div>
 
     <div :class="props.embedded ? 'space-y-3' : 'retro-panel-content space-y-3'">
       <div v-if="props.embedded" class="flex items-center justify-between">
         <h3 class="text-caption font-semibold text-foreground">비교 결과</h3>
+        <SectionShareButton @click="emit('shareRequest')" />
       </div>
 
       <!-- 히어로: 차이 금액 -->

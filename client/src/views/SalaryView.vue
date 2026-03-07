@@ -93,7 +93,7 @@ watch(
             v-model:non-taxable-monthly="calc.nonTaxableMonthly.value"
             v-model:retirement-included="calc.retirementIncluded.value"
           />
-          <SalaryResultPanel :calc="calc" />
+          <SalaryResultPanel :calc="calc" @share-request="openShare" />
         </div>
 
         <HealthInsuranceRank :calc="calc" />

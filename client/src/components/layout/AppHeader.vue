@@ -50,11 +50,11 @@ onMounted(() => {
     <div class="container pt-2.5 pb-2.5">
       <div class="overflow-hidden">
         <div class="retro-titlebar h-11 border-b-0 px-2 bg-transparent">
-          <div class="flex h-full w-full items-center gap-4">
+          <div class="flex h-full w-full items-center gap-2 sm:gap-4">
             <RouterLink
               to="/"
               aria-label="ShakiLabs 홈"
-              class="inline-flex h-8 w-8 sm:w-auto shrink-0 items-center justify-center sm:justify-start gap-1.5 px-0.5 text-muted-foreground transition-colors hover:text-foreground"
+              class="inline-flex h-8 w-8 shrink-0 items-center justify-center gap-1 px-0.5 text-muted-foreground transition-colors hover:text-foreground sm:w-auto sm:justify-start sm:gap-1.5"
             >
               <span
                 class="inline-flex h-6 w-6 items-center justify-center rounded-md bg-muted/60 ring-1 ring-border/60"
@@ -66,7 +66,7 @@ onMounted(() => {
                 ShakiLabs
               </span>
             </RouterLink>
-            <div class="flex h-full flex-1 items-center justify-center overflow-hidden text-center font-brand text-caption tracking-[0.01em] sm:text-body">
+            <div class="flex min-w-0 flex-1 items-center justify-center overflow-hidden px-1 text-center font-brand text-[0.72rem] tracking-[-0.01em] sm:h-full sm:px-0 sm:text-body sm:tracking-[0.01em]">
               <TickerBar :key="route.path" :messages="tickerMessages" />
             </div>
             <button

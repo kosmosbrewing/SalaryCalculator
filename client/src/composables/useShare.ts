@@ -26,24 +26,30 @@ declare global {
 
 let kakaoSdkPromise: Promise<void> | null = null;
 
+type SharePayload = SalaryCalcResult | Record<string, unknown> | null | undefined;
+
 type UseShareOptions = {
-  getCalc?: () => SalaryCalcResult;
-  getShareUrl?: (calc: SalaryCalcResult) => string;
-  getShareText?: (calc: SalaryCalcResult) => string;
-  getShareSummary?: (calc: SalaryCalcResult) => string;
-  getDescription?: (calc: SalaryCalcResult) => string;
-  getImageUrl?: (calc: SalaryCalcResult) => string;
-  getButtonTitle?: (calc: SalaryCalcResult) => string;
+  getCalc?: () => SharePayload;
+  getShareUrl?: (calc: SharePayload) => string;
+  getShareText?: (calc: SharePayload) => string;
+  getShareSummary?: (calc: SharePayload) => string;
+  getDescription?: (calc: SharePayload) => string;
+  getImageUrl?: (calc: SharePayload) => string;
+  getButtonTitle?: (calc: SharePayload) => string;
 };
 
-export function useShare(calc: SalaryCalcResult, options: UseShareOptions = {}) {
+export function useShare<T extends SharePayload>(calc: T, options: UseShareOptions = {}) {
   const showShareModal = ref(false);
   const kakaoBusy = ref(false);
-  const resolveCalc = (): SalaryCalcResult => options.getCalc?.() ?? calc;
+  const resolveCalc = (): SharePayload => options.getCalc?.() ?? calc;
   const shareSummary = computed(() => {
     const currentCalc = resolveCalc();
     if (options.getShareSummary) {
       return options.getShareSummary(currentCalc);
+    }
+
+    if (!isSalaryCalcResult(currentCalc)) {
+      return "";
     }
 
     const parts = [
@@ -77,6 +83,10 @@ export function useShare(calc: SalaryCalcResult, options: UseShareOptions = {}) 
       return options.getShareUrl(currentCalc);
     }
 
+    if (!isSalaryCalcResult(currentCalc)) {
+      return buildCanonicalUrl(window.location.pathname || "/");
+    }
+
     const path = window.location.pathname || "/";
     return buildAbsoluteUrl(path, {
       gross: currentCalc.annualGross.value,
@@ -94,6 +104,10 @@ export function useShare(calc: SalaryCalcResult, options: UseShareOptions = {}) 
     const currentCalc = resolveCalc();
     if (options.getShareText) {
       return options.getShareText(currentCalc);
+    }
+
+    if (!isSalaryCalcResult(currentCalc)) {
+      return "2026 세금 계산 결과를 공유해보세요.";
     }
 
     const retireLabel = currentCalc.retirementIncluded.value ? "· 퇴직금 포함" : "";
@@ -249,4 +263,17 @@ function normalizeToCanonicalUrl(rawUrl: string): string {
   } catch {
     return canonicalBase;
   }
+}
+
+function isSalaryCalcResult(payload: SharePayload): payload is SalaryCalcResult {
+  return Boolean(
+    payload &&
+      typeof payload === "object" &&
+      "annualGross" in payload &&
+      "monthlyNet" in payload &&
+      "dependents" in payload &&
+      "childrenUnder20" in payload &&
+      "nonTaxableMonthly" in payload &&
+      "retirementIncluded" in payload
+  );
 }

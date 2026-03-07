@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { formatPercent, formatWon } from "@/lib/utils";
+import SectionShareButton from "@/components/common/SectionShareButton.vue";
 
 import type {
   ComprehensiveTaxResult,
@@ -9,6 +10,10 @@ import type {
 
 const props = defineProps<{
   result: ComprehensiveTaxResult;
+}>();
+
+const emit = defineEmits<{
+  shareRequest: [];
 }>();
 
 const hasSources = computed(() => props.result.sources.length > 0);
@@ -41,7 +46,10 @@ function taxationLabel(source: SourceResult): string {
   <section class="retro-panel overflow-hidden">
     <div class="retro-titlebar">
       <h2 class="retro-title">종합소득세 계산 결과</h2>
-      <span class="retro-kbd">실효세율 {{ formatPercent(result.effectiveRate, 1) }}</span>
+      <div class="flex items-center gap-2">
+        <span class="retro-kbd">실효세율 {{ formatPercent(result.effectiveRate, 1) }}</span>
+        <SectionShareButton @click="emit('shareRequest')" />
+      </div>
     </div>
 
     <div class="retro-panel-content space-y-3">
