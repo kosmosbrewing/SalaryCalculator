@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { Loader2, ThumbsUp } from "lucide-vue-next";
 import { apiFetch } from "@/api/helpers";
 import type { Comment } from "@/api/types";
@@ -26,7 +26,8 @@ const isSubmitting = ref(false);
 const error = ref("");
 
 // 좋아요한 댓글 ID 세트 (중복 방지)
-const likedIds = ref<Set<string>>(loadLikedIds());
+const likedIds = ref<Set<string>>(new Set());
+const hasMounted = ref(false);
 
 // 탭별 30초 캐시
 let recentFetchedAt = 0;
@@ -166,12 +167,16 @@ const commentsCountLabel = computed(() => {
 
 // pageKey 변경 시 캐시 무효화 (다른 도메인 이동 시 최신 데이터 보장)
 watch(() => props.pageKey, () => {
+  if (!hasMounted.value) return;
   recentFetchedAt = 0;
   fetchRecent(true);
 });
 
-// 초기 로드
-fetchRecent();
+onMounted(() => {
+  hasMounted.value = true;
+  likedIds.value = loadLikedIds();
+  fetchRecent();
+});
 </script>
 
 <template>

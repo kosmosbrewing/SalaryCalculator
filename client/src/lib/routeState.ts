@@ -1,5 +1,6 @@
 import type { LocationQuery, LocationQueryRaw } from "vue-router";
 import { copyUsingExecCommand } from "@/lib/utils";
+import { buildCanonicalUrl, getSiteUrl } from "@/lib/site";
 
 type QueryPrimitive = string | number | boolean | null | undefined;
 type QueryLike = LocationQuery | LocationQueryRaw | Record<string, unknown>;
@@ -97,14 +98,21 @@ export function isSameQuery(a: QueryLike, b: QueryLike): boolean {
 
 export function buildAbsoluteUrl(
   path: string,
-  query?: Record<string, QueryPrimitive>
+  query?: Record<string, QueryPrimitive>,
+  options?: { baseUrl?: string }
 ): string {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
   const queryString = query ? toQueryString(buildQuery(query)) : "";
+  const baseUrl = options?.baseUrl?.trim();
 
+  if (baseUrl === "canonical") {
+    return buildCanonicalUrl(normalizedPath, queryString);
+  }
+
+  const resolvedBaseUrl = baseUrl || getSiteUrl();
   return queryString
-    ? `${window.location.origin}${normalizedPath}?${queryString}`
-    : `${window.location.origin}${normalizedPath}`;
+    ? `${resolvedBaseUrl}${normalizedPath}?${queryString}`
+    : `${resolvedBaseUrl}${normalizedPath}`;
 }
 
 export async function copyToClipboard(text: string): Promise<boolean> {

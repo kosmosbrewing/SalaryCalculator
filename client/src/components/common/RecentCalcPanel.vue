@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, onMounted } from "vue";
 import { History, Trash2 } from "lucide-vue-next";
 import { useRecentCalcs } from "@/composables/useRecentCalcs";
 import { showDestructiveConfirm } from "@/composables/useAlert";
 
-const { entries, clearAll } = useRecentCalcs();
+const { entries, hydrated, hydrate, clearAll } = useRecentCalcs();
 
 const TYPE_CONFIG: Record<string, { label: string; class: string }> = {
   salary: { label: "연봉", class: "bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400" },
@@ -29,6 +29,10 @@ function relativeTime(ts: number): string {
 
 const hasEntries = computed(() => entries.value.length > 0);
 
+onMounted(() => {
+  hydrate();
+});
+
 async function handleClear(): Promise<void> {
   const confirmed = await showDestructiveConfirm("최근 계산 기록을 모두 삭제할까요?", {
     confirmText: "삭제",
@@ -38,8 +42,7 @@ async function handleClear(): Promise<void> {
 </script>
 
 <template>
-  <Transition name="fade">
-  <section v-if="hasEntries" class="retro-panel overflow-hidden">
+  <section class="retro-panel overflow-hidden">
     <div class="retro-titlebar">
       <div class="flex items-center gap-1.5">
         <History class="h-3.5 w-3.5" />
@@ -48,13 +51,22 @@ async function handleClear(): Promise<void> {
       <button
         type="button"
         class="inline-flex items-center gap-1 text-caption text-muted-foreground hover:text-destructive transition-colors"
+        :disabled="!hasEntries"
         @click="handleClear"
       >
         <Trash2 class="h-3 w-3" />
         지우기
       </button>
     </div>
-    <div class="divide-y divide-border/50">
+    <div v-if="!hydrated" class="space-y-3 px-4 py-4 sm:px-5 sm:py-4">
+      <div class="h-4 w-20 rounded bg-muted/70" />
+      <div class="space-y-2">
+        <div class="h-12 rounded-xl border border-border/50 bg-muted/35" />
+        <div class="h-12 rounded-xl border border-border/50 bg-muted/25" />
+      </div>
+    </div>
+
+    <div v-else-if="hasEntries" class="divide-y divide-border/50 min-h-[144px]">
       <RouterLink
         v-for="entry in entries"
         :key="`${entry.type}-${entry.timestamp}`"
@@ -74,6 +86,11 @@ async function handleClear(): Promise<void> {
         <span class="shrink-0 text-tiny text-muted-foreground">{{ relativeTime(entry.timestamp) }}</span>
       </RouterLink>
     </div>
+
+    <div v-else class="flex min-h-[144px] items-center px-4 py-4 sm:px-5 sm:py-4">
+      <p class="text-caption leading-6 text-muted-foreground">
+        계산 결과를 확인하면 최근 기록이 여기에 저장됩니다.
+      </p>
+    </div>
   </section>
-  </Transition>
 </template>

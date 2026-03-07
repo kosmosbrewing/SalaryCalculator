@@ -3,6 +3,14 @@ import { showAlert } from "./useAlert";
 import { formatWon, formatManWon } from "@/lib/utils";
 import type { SalaryCalcResult } from "./useSalaryCalc";
 import { buildAbsoluteUrl, copyToClipboard } from "@/lib/routeState";
+import {
+  buildCanonicalUrl,
+  getCanonicalHost,
+  getCanonicalSiteUrl,
+  getKakaoAllowedHosts,
+  getSiteUrl,
+  isAllowedKakaoHost,
+} from "@/lib/site";
 
 declare global {
   interface Window {
@@ -79,7 +87,7 @@ export function useShare(calc: SalaryCalcResult, options: UseShareOptions = {}) 
           ? currentCalc.nonTaxableMonthly.value
           : null,
       retire: currentCalc.retirementIncluded.value ? 1 : null,
-    });
+    }, { baseUrl: "canonical" });
   }
 
   function getShareText(): string {
@@ -99,7 +107,9 @@ export function useShare(calc: SalaryCalcResult, options: UseShareOptions = {}) 
 
   function getShareImageUrl(): string {
     const currentCalc = resolveCalc();
-    return options.getImageUrl?.(currentCalc) ?? `${window.location.origin}/favicon.png`;
+    return normalizeToCanonicalUrl(
+      options.getImageUrl?.(currentCalc) ?? `${getCanonicalSiteUrl()}/favicon.png`
+    );
   }
 
   function getShareButtonTitle(): string {
@@ -108,7 +118,7 @@ export function useShare(calc: SalaryCalcResult, options: UseShareOptions = {}) 
   }
 
   async function copyLink(): Promise<void> {
-    const shareUrl = getShareUrl();
+    const shareUrl = normalizeToCanonicalUrl(getShareUrl());
     const copied = await copyToClipboard(shareUrl);
     try {
       if (!copied) {
@@ -124,7 +134,9 @@ export function useShare(calc: SalaryCalcResult, options: UseShareOptions = {}) 
     if (window.Kakao) return;
     if (kakaoSdkPromise) return kakaoSdkPromise;
 
-    const key = (import.meta.env.VITE_KAKAO_JS_KEY || "").trim();
+    const key = (
+      import.meta.env.VITE_KAKAO_JS_KEY || import.meta.env.VITE_KAKAO_JAVASCRIPT_KEY || ""
+    ).trim();
     if (!key) throw new Error("KAKAO_JS_KEY not configured");
 
     kakaoSdkPromise = new Promise<void>((resolve, reject) => {
@@ -171,11 +183,21 @@ export function useShare(calc: SalaryCalcResult, options: UseShareOptions = {}) 
     kakaoBusy.value = true;
 
     try {
+      const runtimeHost = typeof window !== "undefined" ? window.location.hostname : "";
+      if (!isAllowedKakaoHost(runtimeHost)) {
+        const allowedHosts = getKakaoAllowedHosts().join(", ");
+        throw new Error(
+          `카카오 공유는 등록된 도메인에서만 사용할 수 있습니다. 현재 주소: ${runtimeHost || "-"} / 등록 필요 도메인: ${allowedHosts}`
+        );
+      }
+
       await ensureKakaoSdk();
 
       if (!window.Kakao?.Share) {
         throw new Error("Kakao Share not available");
       }
+
+      const shareUrl = normalizeToCanonicalUrl(getShareUrl());
 
       window.Kakao.Share.sendDefault({
         objectType: "feed",
@@ -184,22 +206,23 @@ export function useShare(calc: SalaryCalcResult, options: UseShareOptions = {}) 
           description: getShareDescription(),
           imageUrl: getShareImageUrl(),
           link: {
-            mobileWebUrl: getShareUrl(),
-            webUrl: getShareUrl(),
+            mobileWebUrl: shareUrl,
+            webUrl: shareUrl,
           },
         },
         buttons: [
           {
             title: getShareButtonTitle(),
             link: {
-              mobileWebUrl: getShareUrl(),
-              webUrl: getShareUrl(),
+              mobileWebUrl: shareUrl,
+              webUrl: shareUrl,
             },
           },
         ],
       });
-    } catch {
-      showAlert("카카오톡 공유에 실패했습니다", { type: "error" });
+    } catch (error) {
+      const fallbackMessage = `카카오톡 공유에 실패했습니다. 등록 도메인: ${getCanonicalHost()}`;
+      showAlert(error instanceof Error ? error.message : fallbackMessage, { type: "error" });
     } finally {
       kakaoBusy.value = false;
     }
@@ -214,4 +237,16 @@ export function useShare(calc: SalaryCalcResult, options: UseShareOptions = {}) 
     shareKakao,
     copyLink,
   };
+}
+
+function normalizeToCanonicalUrl(rawUrl: string): string {
+  const canonicalBase = getCanonicalSiteUrl();
+  const currentBase = getSiteUrl();
+
+  try {
+    const parsed = new URL(rawUrl, currentBase);
+    return buildCanonicalUrl(parsed.pathname, parsed.search, parsed.hash);
+  } catch {
+    return canonicalBase;
+  }
 }

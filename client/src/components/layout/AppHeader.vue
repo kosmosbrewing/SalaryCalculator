@@ -60,7 +60,7 @@ onMounted(() => {
                 class="inline-flex h-6 w-6 items-center justify-center rounded-md bg-muted/60 ring-1 ring-border/60"
                 aria-hidden="true"
               >
-                <img src="/logo.png" alt="" class="h-4 w-4 shrink-0" />
+                <img src="/logo.png" alt="" width="16" height="16" class="h-4 w-4 shrink-0" />
               </span>
               <span class="hidden sm:inline text-tiny font-semibold tracking-wide text-foreground/90">
                 ShakiLabs

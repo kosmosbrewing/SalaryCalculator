@@ -11,10 +11,13 @@ export type RecentCalcEntry = {
 const STORAGE_KEY = "recent-calcs:v1";
 const MAX_ENTRIES = 5;
 
-// 싱글톤 — useAlert.ts와 동일 패턴
-const entries = ref<RecentCalcEntry[]>(loadFromStorage());
+// 싱글톤 — hydration 이후 클라이언트 저장소와 동기화
+const entries = ref<RecentCalcEntry[]>([]);
+const hydrated = ref(false);
 
 function loadFromStorage(): RecentCalcEntry[] {
+  if (typeof window === "undefined") return [];
+
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
@@ -27,6 +30,8 @@ function loadFromStorage(): RecentCalcEntry[] {
 }
 
 function persist(): void {
+  if (typeof window === "undefined") return;
+
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(entries.value));
   } catch {
@@ -34,7 +39,14 @@ function persist(): void {
   }
 }
 
+export function hydrateRecentCalcs(): void {
+  if (hydrated.value) return;
+  entries.value = loadFromStorage();
+  hydrated.value = true;
+}
+
 export function addEntry(entry: Omit<RecentCalcEntry, "timestamp">): void {
+  hydrateRecentCalcs();
   const now = Date.now();
   // type + label 기준 중복 제거
   const filtered = entries.value.filter(
@@ -45,17 +57,22 @@ export function addEntry(entry: Omit<RecentCalcEntry, "timestamp">): void {
 }
 
 export function clearAll(): void {
+  hydrateRecentCalcs();
   entries.value = [];
   persist();
 }
 
 export function useRecentCalcs(): {
   entries: DeepReadonly<Ref<RecentCalcEntry[]>>;
+  hydrated: DeepReadonly<Ref<boolean>>;
+  hydrate: typeof hydrateRecentCalcs;
   addEntry: typeof addEntry;
   clearAll: typeof clearAll;
 } {
   return {
     entries: readonly(entries),
+    hydrated: readonly(hydrated),
+    hydrate: hydrateRecentCalcs,
     addEntry,
     clearAll,
   };
