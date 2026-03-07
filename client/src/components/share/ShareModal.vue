@@ -32,8 +32,8 @@ function handleAction(action: "kakao" | "link"): void {
       >
         <div class="absolute inset-0 bg-black/60" @click="emit('close')" />
         <div class="relative z-10 mx-4 w-full max-w-sm translate-y-[10vh] retro-panel border border-border sm:translate-y-0">
-          <div class="retro-titlebar flex items-center justify-between">
-            <h3 id="share-modal-title" class="retro-title text-[1rem]!">공유하기</h3>
+          <div class="retro-titlebar">
+            <h3 id="share-modal-title" class="retro-title-brand text-[1rem]!">공유하기</h3>
             <button class="retro-kbd text-xs" aria-label="공유 모달 닫기" @click="emit('close')">ESC</button>
           </div>
 

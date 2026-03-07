@@ -42,7 +42,7 @@ const diffSign = computed(() => {
 <template>
   <component :is="props.embedded ? 'div' : 'section'" :class="props.embedded ? 'space-y-4' : 'retro-panel overflow-hidden'">
     <div v-if="!props.embedded" class="retro-titlebar">
-      <h2 class="retro-title">비교 결과</h2>
+      <h2 class="retro-title-brand">비교 결과</h2>
       <SectionShareButton @click="emit('shareRequest')" />
     </div>
 

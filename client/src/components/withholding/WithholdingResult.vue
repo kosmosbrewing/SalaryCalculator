@@ -74,7 +74,7 @@ onUnmounted(() => {
 <template>
   <section class="retro-panel overflow-hidden">
     <div class="retro-titlebar">
-      <h2 class="retro-title">소득세 {{ formatWon(monthlyIncomeTax) }} 기준 계산 결과</h2>
+      <h2 class="retro-title-brand">소득세 {{ formatWon(monthlyIncomeTax) }} 기준 계산 결과</h2>
       <SectionShareButton @click="emit('shareRequest')" />
     </div>
 

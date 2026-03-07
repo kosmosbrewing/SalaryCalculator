@@ -35,8 +35,8 @@ const eligibleLabel: Record<string, string> = {
 <template>
   <section class="retro-panel overflow-hidden">
     <div class="retro-titlebar">
-      <h2 class="retro-title">받을 돈</h2>
-      <div class="flex items-center gap-2">
+      <h2 class="retro-title-brand">받을 돈</h2>
+      <div class="retro-titlebar-actions">
         <span class="retro-kbd">{{ servicePeriodLabel }}</span>
         <SectionShareButton @click="emit('shareRequest')" />
       </div>

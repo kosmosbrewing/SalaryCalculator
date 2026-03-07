@@ -115,7 +115,15 @@
   }
 
   .retro-title {
-    @apply text-heading font-semibold tracking-normal font-title;
+    @apply text-heading font-semibold leading-tight tracking-normal font-brand;
+  }
+
+  .retro-title-brand {
+    @apply text-heading font-semibold leading-tight tracking-normal font-brand;
+  }
+
+  .retro-titlebar-actions {
+    @apply flex shrink-0 items-center gap-2;
   }
 
   .retro-kbd {

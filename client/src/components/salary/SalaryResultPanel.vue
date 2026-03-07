@@ -68,7 +68,7 @@ onUnmounted(() => {
 <template>
   <section class="retro-panel overflow-hidden">
     <div class="retro-titlebar">
-      <h2 class="retro-title">계산 결과</h2>
+      <h2 class="retro-title-brand">계산 결과</h2>
       <SectionShareButton @click="emit('shareRequest')" />
     </div>
     <div class="retro-panel-content space-y-3">

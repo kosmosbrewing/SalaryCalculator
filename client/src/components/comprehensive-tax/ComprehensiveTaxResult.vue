@@ -45,8 +45,8 @@ function taxationLabel(source: SourceResult): string {
 <template>
   <section class="retro-panel overflow-hidden">
     <div class="retro-titlebar">
-      <h2 class="retro-title">종합소득세 계산 결과</h2>
-      <div class="flex items-center gap-2">
+      <h2 class="retro-title-brand">종합소득세 계산 결과</h2>
+      <div class="retro-titlebar-actions">
         <span class="retro-kbd">실효세율 {{ formatPercent(result.effectiveRate, 1) }}</span>
         <SectionShareButton @click="emit('shareRequest')" />
       </div>
