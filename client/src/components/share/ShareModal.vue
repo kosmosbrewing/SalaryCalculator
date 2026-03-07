@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Link, MessageCircle } from "lucide-vue-next";
+import { Link } from "lucide-vue-next";
 
 const props = defineProps<{
   show: boolean;
@@ -31,10 +31,10 @@ function handleAction(action: "kakao" | "link"): void {
         aria-labelledby="share-modal-title"
       >
         <div class="absolute inset-0 bg-black/60" @click="emit('close')" />
-        <div class="relative z-10 w-full max-w-sm mx-4 retro-panel">
+        <div class="relative z-10 w-full max-w-sm mx-4 retro-panel border border-border">
           <div class="retro-titlebar flex items-center justify-between">
-            <h3 id="share-modal-title" class="retro-title text-body">공유하기</h3>
-            <button class="retro-kbd" aria-label="공유 모달 닫기" @click="emit('close')">ESC</button>
+            <h3 id="share-modal-title" class="retro-title text-[1rem]!">공유하기</h3>
+            <button class="retro-kbd text-xs" aria-label="공유 모달 닫기" @click="emit('close')">ESC</button>
           </div>
 
           <div class="p-4 space-y-3">
@@ -45,23 +45,28 @@ function handleAction(action: "kakao" | "link"): void {
             <div class="grid grid-cols-2 gap-3">
               <!-- 카카오톡 공유 -->
               <button
-              class="flex flex-col items-center gap-2 retro-panel-muted border border-border/40 p-3 hover:border-primary/60 transition-colors disabled:opacity-50"
-              :disabled="props.kakaoBusy"
-              aria-label="카카오톡 공유"
-              @click="handleAction('kakao')"
-            >
-              <MessageCircle class="h-6 w-6 text-status-warning" />
-              <span class="text-tiny font-bold text-center leading-tight whitespace-nowrap">카카오톡 공유</span>
+                class="flex flex-col items-center gap-2 retro-panel-muted border border-border/40 p-3 hover:border-yellow-400/60 transition-colors disabled:opacity-50"
+                :disabled="props.kakaoBusy"
+                aria-label="카카오톡 공유"
+                @click="handleAction('kakao')"
+              >
+                <img
+                  src="/images/icons/kakaotalk-sharing-medium.png?v=1"
+                  alt=""
+                  aria-hidden="true"
+                  class="h-6 w-6 object-contain"
+                />
+                <span class="text-[0.72rem] font-bold text-center leading-tight whitespace-nowrap">카카오톡 공유</span>
               </button>
 
               <!-- 링크 복사 -->
               <button
-              class="flex flex-col items-center gap-2 retro-panel-muted border border-border/40 p-3 hover:border-border/80 transition-colors"
-              aria-label="공유 링크 복사"
-              @click="handleAction('link')"
-            >
-              <Link class="h-6 w-6 text-muted-foreground" />
-              <span class="text-tiny font-bold text-center leading-tight whitespace-nowrap">링크 복사</span>
+                class="flex flex-col items-center gap-2 retro-panel-muted border border-border/40 p-3 hover:border-border/80 transition-colors"
+                aria-label="공유 링크 복사"
+                @click="handleAction('link')"
+              >
+                <Link class="h-6 w-6 text-muted-foreground" />
+                <span class="text-[0.72rem] font-bold text-center leading-tight whitespace-nowrap">링크 복사</span>
               </button>
             </div>
           </div>
@@ -72,6 +77,10 @@ function handleAction(action: "kakao" | "link"): void {
 </template>
 
 <style scoped>
+.retro-title {
+  font-size: 1rem !important;
+}
+
 .modal-fade-enter-active,
 .modal-fade-leave-active {
   transition: opacity 0.2s ease, transform 0.2s ease;
