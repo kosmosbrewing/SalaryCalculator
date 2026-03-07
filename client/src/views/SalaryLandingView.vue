@@ -155,7 +155,7 @@ watch(
   <div class="container space-y-4 py-6">
     <SEOHead :title="pageTitle" :description="pageDesc" :json-ld="seoJsonLd" />
 
-    <h1 class="text-h1 font-title">연봉 {{ amountLabel }} 실수령액 (2026년 기준)</h1>
+    <h1 class="text-h1 font-brand">연봉 {{ amountLabel }} 실수령액 (2026년 기준)</h1>
 
     <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div class="space-y-4 order-1">

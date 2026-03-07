@@ -343,7 +343,7 @@ watch(
     <SEOHead :title="seoTitle" :description="seoDescription" :json-ld="breadcrumbJsonLd" />
 
     <div class="flex items-center justify-between gap-2">
-      <h1 class="text-h1 font-title">2026 퇴사 계산기 — 퇴직금·실업급여·생존기간</h1>
+      <h1 class="text-h1 font-brand">2026 퇴사 계산기 — 퇴직금·실업급여·생존기간</h1>
       <span
         v-if="isRangeUpdating"
         class="text-caption text-muted-foreground"

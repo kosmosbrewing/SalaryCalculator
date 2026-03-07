@@ -345,7 +345,7 @@ watch(
   <div class="container space-y-4 py-6">
     <SEOHead :title="seoTitle" :description="seoDescription" :json-ld="breadcrumbJsonLd" />
 
-    <h1 class="text-h1 font-title">2026 종합소득세 계산기</h1>
+    <h1 class="text-h1 font-brand">2026 종합소득세 계산기</h1>
 
     <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div class="space-y-4 order-1">

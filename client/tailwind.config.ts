@@ -28,6 +28,13 @@ const config: Config = {
           "Malgun Gothic",
           ...fontFamily.sans,
         ],
+        brand: [
+          "GmarketSans",
+          "Pretendard",
+          "Apple SD Gothic Neo",
+          "Malgun Gothic",
+          ...fontFamily.sans,
+        ],
       },
 
       fontSize: {

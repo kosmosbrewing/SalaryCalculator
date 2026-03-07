@@ -62,7 +62,7 @@ onMounted(() => {
               >
                 <img src="/logo.png" alt="" width="16" height="16" class="h-4 w-4 shrink-0" />
               </span>
-              <span class="hidden sm:inline text-tiny font-semibold tracking-wide text-foreground/90">
+              <span class="hidden sm:inline font-brand text-tiny font-semibold tracking-wide text-foreground/90">
                 ShakiLabs
               </span>
             </RouterLink>

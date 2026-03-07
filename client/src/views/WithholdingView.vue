@@ -202,7 +202,7 @@ watch(
   <div class="container space-y-4 py-6">
     <SEOHead :title="seoTitle" :description="seoDescription" :json-ld="breadcrumbJsonLd" />
 
-    <h1 class="text-h1 font-title">2026 원천세 계산기 — 소득세로 연봉 추정</h1>
+    <h1 class="text-h1 font-brand">2026 원천세 계산기 — 소득세로 연봉 추정</h1>
 
     <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div class="space-y-4 order-1">
