@@ -334,11 +334,11 @@
   }
 
   .retro-stat {
-    @apply retro-panel-muted p-3.5;
+    @apply retro-panel-muted overflow-hidden p-3.5;
   }
 
   .retro-stat-label {
-    @apply text-caption uppercase tracking-wide text-muted-foreground;
+    @apply truncate text-caption uppercase tracking-wide text-muted-foreground;
   }
 
   .retro-stat-value {
