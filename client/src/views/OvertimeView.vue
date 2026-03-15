@@ -128,7 +128,7 @@ watch(
           <div class="retro-titlebar rounded-t-2xl">
             <div class="space-y-1">
               <h1 class="retro-title">연장·야간·휴일수당 계산기</h1>
-              <p class="text-caption text-muted-foreground">월급에 포함되지 않은 추가 수당 기준으로 세전·세후 차이를 계산합니다.</p>
+              <p class="text-caption text-muted-foreground [text-wrap:balance]">월급에 포함되지 않은 추가 수당 기준으로 세전·세후 차이를 계산합니다.</p>
             </div>
             <FreshBadge message="2026 세율 반영" />
           </div>
@@ -145,19 +145,19 @@ watch(
               <div class="retro-stat-grid sm:grid-cols-2">
                 <div class="retro-stat">
                   <p class="retro-stat-label">추가 세전 수당</p>
-                  <p class="retro-stat-value">{{ formatWon(result.totalExtraGross) }}</p>
+                  <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">{{ formatWon(result.totalExtraGross) }}</p>
                 </div>
                 <div class="retro-stat">
                   <p class="retro-stat-label">월 실수령 증가</p>
-                  <p class="retro-stat-value text-status-success">+{{ formatWon(result.totalExtraNet) }}</p>
+                  <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading text-status-success">+{{ formatWon(result.totalExtraNet) }}</p>
                 </div>
                 <div class="retro-stat">
                   <p class="retro-stat-label">통상 시급</p>
-                  <p class="retro-stat-value">{{ formatWon(result.hourlyRate) }}</p>
+                  <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">{{ formatWon(result.hourlyRate) }}</p>
                 </div>
                 <div class="retro-stat">
-                  <p class="retro-stat-label">추가 수당 반영 월급</p>
-                  <p class="retro-stat-value">{{ formatWon(result.after.monthlyGross) }}</p>
+                  <p class="retro-stat-label"><span class="sm:hidden">수당 반영</span><span class="hidden sm:inline">추가 수당 반영 월급</span></p>
+                  <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">{{ formatWon(result.after.monthlyGross) }}</p>
                 </div>
               </div>
 
@@ -165,15 +165,15 @@ watch(
                 <div class="grid gap-3 sm:grid-cols-3">
                   <div>
                     <p class="text-tiny uppercase tracking-wide text-muted-foreground">연장</p>
-                    <p class="mt-1 text-body font-semibold">{{ formatWon(result.overtimePay) }}</p>
+                    <p class="mt-1 text-body font-semibold tabular-nums">{{ formatWon(result.overtimePay) }}</p>
                   </div>
                   <div>
                     <p class="text-tiny uppercase tracking-wide text-muted-foreground">야간 가산</p>
-                    <p class="mt-1 text-body font-semibold">{{ formatWon(result.nightPay) }}</p>
+                    <p class="mt-1 text-body font-semibold tabular-nums">{{ formatWon(result.nightPay) }}</p>
                   </div>
                   <div>
                     <p class="text-tiny uppercase tracking-wide text-muted-foreground">휴일</p>
-                    <p class="mt-1 text-body font-semibold">{{ formatWon(result.holidayPay) }}</p>
+                    <p class="mt-1 text-body font-semibold tabular-nums">{{ formatWon(result.holidayPay) }}</p>
                   </div>
                 </div>
                 <p class="text-caption leading-6 text-muted-foreground">

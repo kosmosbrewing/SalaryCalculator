@@ -114,7 +114,7 @@ watch(
           <div class="retro-titlebar rounded-t-2xl">
             <div class="space-y-1">
               <h1 class="retro-title">연봉 협상 인상률 실수령 계산기</h1>
-              <p class="text-caption text-muted-foreground">세전 인상률보다 실제 체감 월급이 얼마나 늘어나는지 바로 계산합니다.</p>
+              <p class="text-caption text-muted-foreground [text-wrap:balance]">세전 인상률보다 실제 체감 월급이 얼마나 늘어나는지 바로 계산합니다.</p>
             </div>
             <FreshBadge message="2026 세율 반영" />
           </div>
@@ -131,19 +131,19 @@ watch(
               <div class="retro-stat-grid sm:grid-cols-2">
                 <div class="retro-stat">
                   <p class="retro-stat-label">현재 월 실수령</p>
-                  <p class="retro-stat-value">{{ formatWon(result.current.monthlyNet) }}</p>
+                  <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">{{ formatWon(result.current.monthlyNet) }}</p>
                 </div>
                 <div class="retro-stat">
                   <p class="retro-stat-label">협상 후 월 실수령</p>
-                  <p class="retro-stat-value">{{ formatWon(result.next.monthlyNet) }}</p>
+                  <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">{{ formatWon(result.next.monthlyNet) }}</p>
                 </div>
                 <div class="retro-stat">
                   <p class="retro-stat-label">월 체감 증가</p>
-                  <p class="retro-stat-value text-status-success">+{{ formatWon(result.monthlyNetDiff) }}</p>
+                  <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading text-status-success">+{{ formatWon(result.monthlyNetDiff) }}</p>
                 </div>
                 <div class="retro-stat">
                   <p class="retro-stat-label">연간 실수령 증가</p>
-                  <p class="retro-stat-value text-status-success">+{{ formatWon(result.annualNetDiff) }}</p>
+                  <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading text-status-success">+{{ formatWon(result.annualNetDiff) }}</p>
                 </div>
               </div>
 
@@ -157,11 +157,11 @@ watch(
                 <div class="grid gap-3 sm:grid-cols-2">
                   <div>
                     <p class="text-tiny uppercase tracking-wide text-muted-foreground">추가 보험료</p>
-                    <p class="mt-1 text-body font-semibold">+{{ formatWon(result.insuranceDelta) }}/월</p>
+                    <p class="mt-1 text-body font-semibold tabular-nums">+{{ formatWon(result.insuranceDelta) }}/월</p>
                   </div>
                   <div>
                     <p class="text-tiny uppercase tracking-wide text-muted-foreground">추가 세금</p>
-                    <p class="mt-1 text-body font-semibold">+{{ formatWon(result.taxDelta) }}/월</p>
+                    <p class="mt-1 text-body font-semibold tabular-nums">+{{ formatWon(result.taxDelta) }}/월</p>
                   </div>
                 </div>
                 <Button class="w-full" @click="openShare">결과 공유</Button>

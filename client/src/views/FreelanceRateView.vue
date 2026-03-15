@@ -135,7 +135,7 @@ const incomeTypeOptions = [
           <div class="retro-titlebar rounded-t-2xl">
             <div class="space-y-1">
               <h1 class="retro-title">프리랜서 세후 단가 역산 계산기</h1>
-              <p class="text-caption text-muted-foreground">목표 실수령을 기준으로 월 청구액, 일 단가, 시급을 역산합니다.</p>
+              <p class="text-caption text-muted-foreground [text-wrap:balance]">목표 실수령을 기준으로 월 청구액, 일 단가, 시급을 역산합니다.</p>
             </div>
             <FreshBadge message="2026 종소세 기준" />
           </div>
@@ -152,19 +152,19 @@ const incomeTypeOptions = [
               <div class="retro-stat-grid sm:grid-cols-2">
                 <div class="retro-stat">
                   <p class="retro-stat-label">월 청구액</p>
-                  <p class="retro-stat-value">{{ formatWon(result.monthlyInvoice) }}</p>
+                  <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">{{ formatWon(result.monthlyInvoice) }}</p>
                 </div>
                 <div class="retro-stat">
                   <p class="retro-stat-label">일 단가</p>
-                  <p class="retro-stat-value">{{ formatWon(result.dailyRate) }}</p>
+                  <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">{{ formatWon(result.dailyRate) }}</p>
                 </div>
                 <div class="retro-stat">
                   <p class="retro-stat-label">시간당 단가</p>
-                  <p class="retro-stat-value">{{ formatWon(result.hourlyRate) }}</p>
+                  <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">{{ formatWon(result.hourlyRate) }}</p>
                 </div>
                 <div class="retro-stat">
                   <p class="retro-stat-label">실효 세율</p>
-                  <p class="retro-stat-value">{{ formatPercent(result.tax.effectiveTaxRate, 1) }}</p>
+                  <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">{{ formatPercent(result.tax.effectiveTaxRate, 1) }}</p>
                 </div>
               </div>
 
@@ -172,11 +172,11 @@ const incomeTypeOptions = [
                 <div class="grid gap-3 sm:grid-cols-2">
                   <div>
                     <p class="text-tiny uppercase tracking-wide text-muted-foreground">원천징수 후 현금흐름</p>
-                    <p class="mt-1 text-body font-semibold">{{ formatWon(result.cashAfterWithholdingMonthly) }}/월</p>
+                    <p class="mt-1 text-body font-semibold tabular-nums">{{ formatWon(result.cashAfterWithholdingMonthly) }}/월</p>
                   </div>
                   <div>
                     <p class="text-tiny uppercase tracking-wide text-muted-foreground">정산 차이</p>
-                    <p class="mt-1 text-body font-semibold">{{ result.settlementDelta >= 0 ? "추가 납부" : "환급 예상" }} {{ formatWon(Math.abs(result.settlementDelta)) }}</p>
+                    <p class="mt-1 text-body font-semibold tabular-nums">{{ result.settlementDelta >= 0 ? "추가 납부" : "환급 예상" }} {{ formatWon(Math.abs(result.settlementDelta)) }}</p>
                   </div>
                 </div>
                 <p class="text-caption leading-6 text-muted-foreground">

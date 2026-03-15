@@ -113,7 +113,7 @@ watch(
           <div class="retro-titlebar rounded-t-2xl">
             <div class="space-y-1">
               <h1 class="retro-title">성과급 실수령 계산기</h1>
-              <p class="text-caption text-muted-foreground">보너스 공제 후 실제 입금액과 체감 수령률을 한 번에 확인합니다.</p>
+              <p class="text-caption text-muted-foreground [text-wrap:balance]">보너스 공제 후 실제 입금액과 체감 수령률을 한 번에 확인합니다.</p>
             </div>
             <FreshBadge message="2026 세율 반영" />
           </div>
@@ -130,19 +130,19 @@ watch(
               <div class="retro-stat-grid sm:grid-cols-2">
                 <div class="retro-stat">
                   <p class="retro-stat-label">성과급 실수령</p>
-                  <p class="retro-stat-value text-status-success">{{ formatWon(result.netBonus) }}</p>
+                  <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading text-status-success">{{ formatWon(result.netBonus) }}</p>
                 </div>
                 <div class="retro-stat">
                   <p class="retro-stat-label">실효 수령률</p>
-                  <p class="retro-stat-value">{{ formatPercent(result.effectiveBonusRate, 1) }}</p>
+                  <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">{{ formatPercent(result.effectiveBonusRate, 1) }}</p>
                 </div>
                 <div class="retro-stat">
-                  <p class="retro-stat-label">성과급 반영 월 실수령</p>
-                  <p class="retro-stat-value">{{ formatWon(result.withBonus.monthlyNet) }}</p>
+                  <p class="retro-stat-label"><span class="sm:hidden">반영 월 실수령</span><span class="hidden sm:inline">성과급 반영 월 실수령</span></p>
+                  <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">{{ formatWon(result.withBonus.monthlyNet) }}</p>
                 </div>
                 <div class="retro-stat">
                   <p class="retro-stat-label">추가 공제 추정</p>
-                  <p class="retro-stat-value text-status-danger">{{ formatWon(result.bonusTax) }}</p>
+                  <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading text-status-danger">{{ formatWon(result.bonusTax) }}</p>
                 </div>
               </div>
 
@@ -156,11 +156,11 @@ watch(
                 <div class="grid gap-3 sm:grid-cols-2">
                   <div>
                     <p class="text-tiny uppercase tracking-wide text-muted-foreground">기본 월 실수령</p>
-                    <p class="mt-1 text-body font-semibold">{{ formatWon(result.base.monthlyNet) }}</p>
+                    <p class="mt-1 text-body font-semibold tabular-nums">{{ formatWon(result.base.monthlyNet) }}</p>
                   </div>
                   <div>
                     <p class="text-tiny uppercase tracking-wide text-muted-foreground">보너스 반영 후</p>
-                    <p class="mt-1 text-body font-semibold">{{ formatWon(result.withBonus.monthlyNet) }}</p>
+                    <p class="mt-1 text-body font-semibold tabular-nums">{{ formatWon(result.withBonus.monthlyNet) }}</p>
                   </div>
                 </div>
                 <Button class="w-full" @click="openShare">결과 공유</Button>
