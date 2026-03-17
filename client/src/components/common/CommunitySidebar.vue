@@ -1,10 +1,16 @@
 <script setup lang="ts">
 import { computed, defineAsyncComponent, onMounted, onUnmounted, ref, watch } from "vue";
 import { ThumbsUp, ThumbsDown } from "lucide-vue-next";
+import CommentPanelFallback from "@/components/comment/CommentPanelFallback.vue";
 
 type FeedbackState = "none" | "helpful" | "not-helpful";
 
-const MiniCommentPanel = defineAsyncComponent(() => import("@/components/comment/MiniCommentPanel.vue"));
+const MiniCommentPanel = defineAsyncComponent({
+  loader: () => import("@/components/comment/MiniCommentPanel.vue"),
+  suspensible: false,
+  timeout: 10000,
+  errorComponent: CommentPanelFallback,
+});
 
 const props = defineProps<{
   pageKey: string;

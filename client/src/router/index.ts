@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from "vue-router";
 import { trackPageView } from "@/lib/analytics";
 import { queryFirst } from "@/lib/routeState";
+import { clearRuntimeError } from "@/lib/runtimeError";
 
 function mapLegacyFreelanceQuery(
   query: Record<string, unknown>,
@@ -240,6 +241,7 @@ router.beforeEach((to, _from, next) => {
 
 router.afterEach((to, _from, failure) => {
   if (failure) return;
+  clearRuntimeError();
   const title = typeof to.meta.title === "string" ? to.meta.title : document.title;
   trackPageView(to.fullPath, title);
 });
