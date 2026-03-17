@@ -4,7 +4,7 @@ import vue from "@vitejs/plugin-vue";
 import tailwind from "tailwindcss";
 import autoprefixer from "autoprefixer";
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   test: {
     include: ["src/**/*.test.ts"],
   },
@@ -36,7 +36,7 @@ export default defineConfig({
     },
   },
   esbuild: {
-    drop: ["console", "debugger"],
+    drop: mode === "production" ? ["debugger"] : [],
   },
   build: {
     outDir: "dist",
@@ -65,4 +65,4 @@ export default defineConfig({
     },
     chunkSizeWarningLimit: 500,
   },
-});
+}));
