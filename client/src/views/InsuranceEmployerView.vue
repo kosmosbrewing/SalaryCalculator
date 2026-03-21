@@ -26,7 +26,7 @@ const input = computed(() =>
   })
 );
 const result = computed(() => calculateEmployerInsuranceBurden(input.value));
-const seoTitle = computed(() => "사업주 4대보험 부담금 계산기 | 2026 shakilabs.com/finance");
+const seoTitle = computed(() => "2026 사업주 4대보험 계산기 | 고용주 부담금·인건비 계산");
 const seoDescription = computed(
   () => `월급 ${formatWon(input.value.monthlySalary)} 기준 사업주 월 부담금은 ${formatWon(result.value.totalMonthlyBurden)}입니다.`
 );

@@ -62,7 +62,7 @@ const input = computed(() =>
   })
 );
 const result = computed(() => calculateOvertimeImpact(input.value));
-const seoTitle = computed(() => "연장·야간·휴일수당 계산기 | 2026 shakilabs.com/finance");
+const seoTitle = computed(() => "2026 연장·야간·휴일수당 계산기 | 초과근무 수당 계산");
 const seoDescription = computed(
   () =>
     `추가 수당 총액 ${formatWon(result.value.totalExtraGross)} 중 월 실수령 증가는 ${formatWon(

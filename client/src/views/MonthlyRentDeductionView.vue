@@ -26,7 +26,7 @@ const input = computed(() =>
   })
 );
 const result = computed(() => calculateMonthlyRentDeduction(input.value));
-const seoTitle = computed(() => "월세 세액공제 계산기 | 2026 shakilabs.com/finance");
+const seoTitle = computed(() => "2026 월세 세액공제 계산기 | 연말정산 월세 환급액");
 const seoDescription = computed(
   () => `연 월세 ${formatWon(result.value.yearlyRent)} 기준 예상 세액공제 환급액은 ${formatWon(result.value.taxCredit)}입니다.`
 );

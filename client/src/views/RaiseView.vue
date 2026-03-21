@@ -50,7 +50,7 @@ const input = computed(() =>
   })
 );
 const result = computed(() => calculateRaiseImpact(input.value));
-const seoTitle = computed(() => "연봉 협상 인상률 실수령 계산기 | 2026 shakilabs.com/finance");
+const seoTitle = computed(() => "2026 연봉 인상률 계산기 | 연봉 협상 실수령액 비교");
 const seoDescription = computed(
   () =>
     `${formatManWon(input.value.currentAnnual)}에서 ${formatPercent(

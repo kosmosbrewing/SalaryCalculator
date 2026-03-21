@@ -28,7 +28,7 @@ const input = computed(() =>
   })
 );
 const result = computed(() => calculateAnnualLeavePay(input.value));
-const seoTitle = computed(() => "연차 수당 계산기 | 2026 shakilabs.com/finance");
+const seoTitle = computed(() => "2026 연차 수당 계산기 | 미사용 연차 보상금 계산");
 const seoDescription = computed(
   () =>
     `미사용 연차 ${result.value.payableDays}일 기준 예상 연차수당은 ${formatWon(

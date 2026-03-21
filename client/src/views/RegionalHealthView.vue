@@ -37,8 +37,8 @@ const salaryLabel = computed(() =>
 
 const seoTitle = computed(() =>
   salaryLabel.value
-    ? `월급 ${salaryLabel.value} 지역가입자 건강보험료 | 퇴사 후 건보`
-    : "지역가입자 건강보험료 계산기 | 퇴사 후 건보·임의계속가입 비교",
+    ? `2026 월급 ${salaryLabel.value} 지역가입자 건강보험료 | 퇴사 후 건보`
+    : "2026 지역가입자 건강보험료 계산기 | 퇴사 후 건보·임의계속가입 비교",
 );
 const seoDescription = computed(() =>
   salaryLabel.value

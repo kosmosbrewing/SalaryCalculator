@@ -87,7 +87,7 @@ const routes: RouteRecordRaw[] = [
     path: "/freelance-rate",
     name: "FreelanceRate",
     component: () => import("@/views/FreelanceRateView.vue"),
-    meta: { title: "프리랜서 세후 단가 역산 계산기 | 2026 shakilabs.com/finance" },
+    meta: { title: "2026 프리랜서 세후 단가 역산 계산기 | 원천세 제외 실수령" },
   },
   {
     path: "/freelancer",
@@ -133,49 +133,49 @@ const routes: RouteRecordRaw[] = [
     path: "/raise",
     name: "Raise",
     component: () => import("@/views/RaiseView.vue"),
-    meta: { title: "연봉 협상 인상률 실수령 계산기 | 2026 shakilabs.com/finance" },
+    meta: { title: "2026 연봉 인상률 계산기 | 연봉 협상 실수령액 비교" },
   },
   {
     path: "/bonus",
     name: "Bonus",
     component: () => import("@/views/BonusView.vue"),
-    meta: { title: "성과급 실수령 계산기 | 2026 shakilabs.com/finance" },
+    meta: { title: "2026 성과급 실수령 계산기 | 상여금 세금·4대보험 공제" },
   },
   {
     path: "/annual-leave",
     name: "AnnualLeave",
     component: () => import("@/views/AnnualLeaveView.vue"),
-    meta: { title: "연차 수당 계산기 | 2026 shakilabs.com/finance" },
+    meta: { title: "2026 연차 수당 계산기 | 미사용 연차 보상금 계산" },
   },
   {
     path: "/overtime",
     name: "Overtime",
     component: () => import("@/views/OvertimeView.vue"),
-    meta: { title: "연장·야간·휴일수당 계산기 | 2026 shakilabs.com/finance" },
+    meta: { title: "2026 연장·야간·휴일수당 계산기 | 초과근무 수당 계산" },
   },
   {
     path: "/pension",
     name: "Pension",
     component: () => import("@/views/PensionView.vue"),
-    meta: { title: "국민연금 예상 수령액 계산기 | 2026 shakilabs.com/finance" },
+    meta: { title: "2026 국민연금 수령액 계산기 | 예상 연금액·납부액 조회" },
   },
   {
     path: "/monthly-rent-deduction",
     name: "MonthlyRentDeduction",
     component: () => import("@/views/MonthlyRentDeductionView.vue"),
-    meta: { title: "월세 세액공제 계산기 | 2026 shakilabs.com/finance" },
+    meta: { title: "2026 월세 세액공제 계산기 | 연말정산 월세 환급액" },
   },
   {
     path: "/irp",
     name: "Irp",
     component: () => import("@/views/IrpView.vue"),
-    meta: { title: "IRP 세액공제 계산기 | 2026 shakilabs.com/finance" },
+    meta: { title: "2026 IRP 세액공제 계산기 | 개인형 퇴직연금 절세 효과" },
   },
   {
     path: "/4-insurance-employer",
     name: "InsuranceEmployer",
     component: () => import("@/views/InsuranceEmployerView.vue"),
-    meta: { title: "사업주 4대보험 부담금 계산기 | 2026 shakilabs.com/finance" },
+    meta: { title: "2026 사업주 4대보험 계산기 | 고용주 부담금·인건비 계산" },
   },
   {
     path: "/compare/:a(\\d+)-vs-:b(\\d+)",
@@ -266,7 +266,7 @@ const routes: RouteRecordRaw[] = [
     path: "/regional-health",
     name: "RegionalHealth",
     component: () => import("@/views/RegionalHealthView.vue"),
-    meta: { title: "지역가입자 건강보험료 계산기 | 퇴사 후 건보 비교" },
+    meta: { title: "2026 지역가입자 건강보험료 계산기 | 퇴사 후 건보 비교" },
   },
   {
     path: "/regional-health/:amount(\\d+)",
@@ -275,7 +275,7 @@ const routes: RouteRecordRaw[] = [
     props: (route) => ({
       initialSalary: Number.parseInt(String(route.params.amount), 10) * 10_000,
     }),
-    meta: { title: "지역가입자 건보료 계산 결과 | 퇴사 후 보험료" },
+    meta: { title: "2026 지역가입자 건보료 계산 결과 | 퇴사 후 보험료" },
   },
   {
     path: "/weekly-holiday-pay",
@@ -362,7 +362,7 @@ router.beforeEach((to, _from, next) => {
   const title =
     typeof to.meta.title === "string"
       ? to.meta.title
-      : "2026 shakilabs.com/finance | 연봉·세금·수당 계산기";
+      : "2026 연봉·세금·수당 계산기 | 실수령액·4대보험 계산";
   document.title = title;
   next();
 });

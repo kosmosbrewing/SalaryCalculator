@@ -26,7 +26,7 @@ const input = computed(() =>
   })
 );
 const result = computed(() => calculatePensionEstimate(input.value));
-const seoTitle = computed(() => "국민연금 예상 수령액 계산기 | 2026 shakilabs.com/finance");
+const seoTitle = computed(() => "2026 국민연금 수령액 계산기 | 예상 연금액·납부액 조회");
 const seoDescription = computed(
   () => `가입 ${input.value.insuredYears}년 기준 예상 국민연금 월수령액은 ${formatWon(result.value.estimatedMonthlyPension)}입니다.`
 );

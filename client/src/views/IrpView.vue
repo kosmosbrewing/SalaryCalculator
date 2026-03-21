@@ -26,7 +26,7 @@ const input = computed(() =>
   })
 );
 const result = computed(() => calculateIrpTaxCredit(input.value));
-const seoTitle = computed(() => "IRP 세액공제 계산기 | 2026 shakilabs.com/finance");
+const seoTitle = computed(() => "2026 IRP 세액공제 계산기 | 개인형 퇴직연금 절세 효과");
 const seoDescription = computed(
   () => `연금저축과 IRP 납입액 기준 예상 세액공제는 ${formatWon(result.value.taxCredit)}입니다.`
 );

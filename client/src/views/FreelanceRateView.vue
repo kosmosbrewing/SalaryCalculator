@@ -61,7 +61,7 @@ const input = computed(() =>
   })
 );
 const result = computed(() => calculateFreelanceRateImpact(input.value));
-const seoTitle = computed(() => "프리랜서 세후 단가 역산 계산기 | 2026 shakilabs.com/finance");
+const seoTitle = computed(() => "2026 프리랜서 세후 단가 역산 계산기 | 원천세 제외 실수령");
 const seoDescription = computed(
   () =>
     `월 세후 목표 ${formatWon(input.value.targetMonthlyNet)}를 만들기 위해 필요한 청구액은 월 ${formatWon(
