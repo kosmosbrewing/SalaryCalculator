@@ -7,6 +7,7 @@ import ShareModal from "@/components/share/ShareModal.vue";
 import CommunitySidebar from "@/components/common/CommunitySidebar.vue";
 import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
 import { Button } from "@/components/ui/button";
+import InternalLink from "@/components/common/InternalLink.vue";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import { useShare } from "@/composables/useShare";
 import { addEntry } from "@/composables/useRecentCalcs";
@@ -49,7 +50,7 @@ const input = computed(() =>
   })
 );
 const result = computed(() => calculateBonusImpact(input.value));
-const seoTitle = computed(() => "성과급 실수령 계산기 | 2026 finance.shakilabs");
+const seoTitle = computed(() => "성과급 실수령 계산기 | 2026 shakilabs.com/finance");
 const seoDescription = computed(
   () =>
     `연봉 ${formatManWon(input.value.annualSalary)}에서 성과급 ${formatWon(
@@ -168,6 +169,7 @@ watch(
             </div>
           </div>
         </div>
+        <InternalLink current="bonus" />
       </div>
 
       <div class="space-y-4 lg:sticky lg:top-20 lg:self-start">

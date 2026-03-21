@@ -13,19 +13,19 @@ const items: RelatedServiceItem[] = [
   {
     title: "주유 할인카드 비교",
     description: "월 고정지출이 큰 주유비를 카드 혜택 기준으로 바로 비교합니다.",
-    href: "https://card.shakilabs.com/fuel-card",
+    href: "/card/fuel-card",
     icon: CreditCard,
   },
   {
     title: "개인 vs 법인 비교",
     description: "사업자로 전환할 때 세후소득과 세금 차이를 함께 봅니다.",
-    href: "https://biz.shakilabs.com/individual-vs-corp",
+    href: "/biz/individual-vs-corp",
     icon: Building2,
   },
   {
     title: "배당소득세 계산",
     description: "월급 외 투자수익까지 고려해 세후 현금흐름을 점검합니다.",
-    href: "https://invest.shakilabs.com/dividend-tax",
+    href: "/invest/dividend-tax",
     icon: TrendingUp,
   },
 ];

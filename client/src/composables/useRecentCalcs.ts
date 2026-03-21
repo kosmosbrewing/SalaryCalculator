@@ -5,13 +5,17 @@ export type RecentCalcEntry = {
     | "salary"
     | "insurance"
     | "comprehensive-tax"
+    | "freelancer"
     | "compare"
     | "quit"
     | "withholding"
     | "freelance-rate"
     | "raise"
     | "bonus"
-    | "overtime";
+    | "overtime"
+    | "weekly-holiday-pay"
+    | "wage-converter"
+    | "severance-pay";
   timestamp: number;
   label: string;
   path: string;

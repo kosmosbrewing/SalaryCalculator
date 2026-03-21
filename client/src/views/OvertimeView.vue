@@ -6,6 +6,7 @@ import FreshBadge from "@/components/common/FreshBadge.vue";
 import ShareModal from "@/components/share/ShareModal.vue";
 import CommunitySidebar from "@/components/common/CommunitySidebar.vue";
 import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
+import InternalLink from "@/components/common/InternalLink.vue";
 import { Button } from "@/components/ui/button";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import { useShare } from "@/composables/useShare";
@@ -61,7 +62,7 @@ const input = computed(() =>
   })
 );
 const result = computed(() => calculateOvertimeImpact(input.value));
-const seoTitle = computed(() => "연장·야간·휴일수당 계산기 | 2026 finance.shakilabs");
+const seoTitle = computed(() => "연장·야간·휴일수당 계산기 | 2026 shakilabs.com/finance");
 const seoDescription = computed(
   () =>
     `추가 수당 총액 ${formatWon(result.value.totalExtraGross)} 중 월 실수령 증가는 ${formatWon(
@@ -186,6 +187,7 @@ watch(
             </div>
           </div>
         </div>
+        <InternalLink current="overtime" />
       </div>
 
       <div class="space-y-4 lg:sticky lg:top-20 lg:self-start">

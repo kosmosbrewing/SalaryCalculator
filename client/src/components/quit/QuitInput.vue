@@ -67,6 +67,13 @@ function setServiceYears(years: number): void {
 
 const quickYears = [1, 3, 5, 7, 10, 15, 20];
 
+const salaryPresets = [
+  { label: "250만", value: 2_500_000 },
+  { label: "350만", value: 3_500_000 },
+  { label: "500만", value: 5_000_000 },
+  { label: "700만", value: 7_000_000 },
+];
+
 // ── 캘린더 모달 ──
 type ActiveField = "start" | "end";
 const isCalendarOpen = ref(false);
@@ -338,6 +345,19 @@ const inputIds = {
             aria-label="월급 슬라이더"
             @input="onSalaryRangeInput"
           />
+          <div class="flex flex-wrap gap-1.5">
+            <button
+              v-for="preset in salaryPresets"
+              :key="preset.value"
+              type="button"
+              class="retro-chip"
+              :class="monthlySalary === preset.value ? 'border-primary text-primary' : ''"
+              :aria-label="`월급 ${preset.label}원으로 설정`"
+              @click="emit('update:monthlySalary', preset.value)"
+            >
+              {{ preset.label }}
+            </button>
+          </div>
         </div>
       </div>
 

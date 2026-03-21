@@ -48,6 +48,30 @@ const title = computed(() => {
   return "기타소득";
 });
 
+// 프리셋 값 (만원 단위 — revenue 내부값과 동일)
+const revenuePresets = computed(() => {
+  if (props.sourceType === "business") {
+    return [
+      { label: "2,000만", value: 2_000 },
+      { label: "3,000만", value: 3_000 },
+      { label: "5,000만", value: 5_000 },
+      { label: "1억", value: 10_000 },
+    ];
+  }
+  if (props.sourceType === "rental") {
+    return [
+      { label: "1,000만", value: 1_000 },
+      { label: "2,000만", value: 2_000 },
+      { label: "5,000만", value: 5_000 },
+    ];
+  }
+  return [
+    { label: "500만", value: 500 },
+    { label: "1,000만", value: 1_000 },
+    { label: "3,000만", value: 3_000 },
+  ];
+});
+
 const rangeConfig = computed(() => {
   if (props.sourceType === "business") {
     return { min: 100, max: 50000, step: 100 };
@@ -187,6 +211,19 @@ const separateHint = computed(() => {
           :aria-label="`${title} 연수입 슬라이더`"
           @input="updateRevenue(parseInt(($event.target as HTMLInputElement).value, 10))"
         />
+        <div class="flex flex-wrap gap-1.5">
+          <button
+            v-for="preset in revenuePresets"
+            :key="preset.value"
+            type="button"
+            class="retro-chip"
+            :class="revenue === preset.value ? 'border-primary text-primary' : ''"
+            :aria-label="`${title} ${preset.label}원으로 설정`"
+            @click="updateRevenue(preset.value)"
+          >
+            {{ preset.label }}
+          </button>
+        </div>
       </div>
 
       <div v-if="sourceType === 'business'" class="space-y-1">

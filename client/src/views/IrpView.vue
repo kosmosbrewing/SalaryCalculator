@@ -6,6 +6,7 @@ import CommunitySidebar from "@/components/common/CommunitySidebar.vue";
 import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
+import InternalLink from "@/components/common/InternalLink.vue";
 import BenefitStatGrid from "@/components/benefits/BenefitStatGrid.vue";
 import { irpFaqs } from "@/data/benefitFaqs";
 import { buildFaqJsonLd } from "@/lib/faqSeo";
@@ -25,7 +26,7 @@ const input = computed(() =>
   })
 );
 const result = computed(() => calculateIrpTaxCredit(input.value));
-const seoTitle = computed(() => "IRP 세액공제 계산기 | 2026 finance.shakilabs");
+const seoTitle = computed(() => "IRP 세액공제 계산기 | 2026 shakilabs.com/finance");
 const seoDescription = computed(
   () => `연금저축과 IRP 납입액 기준 예상 세액공제는 ${formatWon(result.value.taxCredit)}입니다.`
 );
@@ -69,6 +70,7 @@ const seoDescription = computed(
         </div>
 
         <BenefitFaqPanel :items="irpFaqs" />
+        <InternalLink current="irp" />
       </div>
 
       <div class="space-y-4 lg:sticky lg:top-20 lg:self-start">

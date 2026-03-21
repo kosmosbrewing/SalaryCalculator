@@ -19,6 +19,13 @@ import {
   withholdingTickerMessages,
   comprehensiveTaxTickerMessages,
   freelanceRateTickerMessages,
+  yearEndSettlementTickerMessages,
+  severancePayTickerMessages,
+  unemploymentTickerMessages,
+  weeklyHolidayPayTickerMessages,
+  parentalLeaveTickerMessages,
+  wageConverterTickerMessages,
+  allCalculatorsTickerMessages,
 } from "@/data/tickerMessages";
 
 const THEME_STORAGE_KEY = "salary-calc:theme:v1";
@@ -43,6 +50,14 @@ const tickerMessages = computed(() => {
   if (route.path.startsWith("/withholding")) return withholdingTickerMessages;
   if (route.path.startsWith("/freelance-rate")) return freelanceRateTickerMessages;
   if (route.path.startsWith("/comprehensive-tax")) return comprehensiveTaxTickerMessages;
+  if (route.path.startsWith("/year-end-settlement")) return yearEndSettlementTickerMessages;
+  if (route.path.startsWith("/severance-pay")) return severancePayTickerMessages;
+  if (route.path.startsWith("/unemployment")) return unemploymentTickerMessages;
+  if (route.path.startsWith("/weekly-holiday-pay")) return weeklyHolidayPayTickerMessages;
+  if (route.path.startsWith("/parental-leave")) return parentalLeaveTickerMessages;
+  if (route.path.startsWith("/wage-converter")) return wageConverterTickerMessages;
+  if (route.path.startsWith("/regional-health")) return insuranceTickerMessages;
+  if (route.path === "/all") return allCalculatorsTickerMessages;
   return salaryTickerMessages;
 });
 

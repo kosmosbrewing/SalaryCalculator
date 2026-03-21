@@ -32,6 +32,7 @@ import {
 
 const props = defineProps<{
   initialBusinessAmountManWon?: number;
+  isFreelancerRoute?: boolean;
 }>();
 
 const route = useRoute();
@@ -211,8 +212,19 @@ const netLabel = computed(() => {
   return "추가 납부/환급 없음";
 });
 
+const isFreelancer = computed(() => !!props.isFreelancerRoute);
+const basePath = computed(() => isFreelancer.value ? "/freelancer" : "/comprehensive-tax");
+const pageLabel = computed(() => isFreelancer.value ? "프리랜서 세금 계산기" : "종합소득세 계산기");
+const internalLinkKey = computed((): "freelancer" | "comprehensive-tax" => isFreelancer.value ? "freelancer" : "comprehensive-tax");
+
 const seoTitle = computed(() => {
   const totalManWon = Math.floor(result.value.totalRevenue / 10_000);
+  if (isFreelancer.value) {
+    if (totalManWon > 0) {
+      return `프리랜서 수입 ${formatManWonValue(totalManWon)} 세금 | 2026 3.3% 종합소득세`;
+    }
+    return "2026 프리랜서 세금 계산기 | 3.3% 종합소득세";
+  }
   if (totalManWon > 0) {
     return `종합소득 ${formatManWonValue(totalManWon)} 세금 계산 | 2026 종합소득세 계산기`;
   }
@@ -220,6 +232,9 @@ const seoTitle = computed(() => {
 });
 
 const seoDescription = computed(() => {
+  if (isFreelancer.value) {
+    return `프리랜서 3.3% 원천징수 후 종합소득세 정산. ${netLabel.value}. N잡러·1인사업자 세금 시뮬레이션.`;
+  }
   return `프리랜서·사업자·임대소득자를 위한 종합소득세 계산. ${netLabel.value}. 분리과세 비교까지 한 번에 확인하세요.`;
 });
 
@@ -253,8 +268,8 @@ const breadcrumbJsonLd = computed(() => ({
     {
       "@type": "ListItem",
       position: 2,
-      name: "종합소득세 계산기",
-      item: `${DEFAULT_SITE_URL}${route.path}`,
+      name: pageLabel.value,
+      item: `${DEFAULT_SITE_URL}${basePath.value}`,
     },
   ],
 }));
@@ -305,13 +320,14 @@ watch(
     lastQuery.value = nextQuery;
     // Vue Router navigation을 거치지 않고 URL만 갱신 → page-fade Transition 미발동
     const qs = new URLSearchParams(nextQuery).toString();
-    history.replaceState(history.state, "", qs ? `/comprehensive-tax?${qs}` : "/comprehensive-tax");
+    const path = basePath.value;
+    history.replaceState(history.state, "", qs ? `${path}?${qs}` : path);
   },
   { deep: true, flush: "post" }
 );
 
 function getShareUrl(): string {
-  return buildAbsoluteUrl("/comprehensive-tax", buildComprehensiveQuery());
+  return buildAbsoluteUrl(basePath.value, buildComprehensiveQuery());
 }
 
 let recentCalcTimer: ReturnType<typeof setTimeout> | null = null;
@@ -321,10 +337,13 @@ watch(
     if (recentCalcTimer) clearTimeout(recentCalcTimer);
     recentCalcTimer = setTimeout(() => {
       const query = new URLSearchParams(buildComprehensiveQuery()).toString();
+      const path = basePath.value;
+      const typeKey = isFreelancer.value ? "freelancer" : "comprehensive-tax";
+      const labelPrefix = isFreelancer.value ? "프리랜서" : "종합소득";
       addEntry({
-        type: "comprehensive-tax",
-        label: `종합소득 ${formatManWonValue(Math.floor(result.value.totalRevenue / 10_000))}`,
-        path: query ? `/comprehensive-tax?${query}` : "/comprehensive-tax",
+        type: typeKey,
+        label: `${labelPrefix} ${formatManWonValue(Math.floor(result.value.totalRevenue / 10_000))}`,
+        path: query ? `${path}?${query}` : path,
         summary: netLabel.value,
       });
     }, 2000);
@@ -337,7 +356,7 @@ watch(
   <div class="container space-y-4 py-6">
     <SEOHead :title="seoTitle" :description="seoDescription" :json-ld="breadcrumbJsonLd" />
 
-    <h1 class="text-h1 font-brand">2026 종합소득세 계산기</h1>
+    <h1 class="text-h1 font-brand">{{ isFreelancer ? '2026 프리랜서 세금 계산기' : '2026 종합소득세 계산기' }}</h1>
 
     <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div class="space-y-4 order-1">
@@ -426,7 +445,7 @@ watch(
 
         <AdSlot slot="150001" label="광고 · top" />
 
-        <InternalLink current="comprehensive-tax" />
+        <InternalLink :current="internalLinkKey" />
 
         <AdSlot slot="150002" label="광고 · middle" />
 
@@ -434,7 +453,7 @@ watch(
       </div>
 
       <div class="space-y-4 order-2 lg:sticky lg:top-20 lg:self-start">
-        <CommunitySidebar page-key="comprehensive-tax-main" @share-request="openShare" />
+        <CommunitySidebar :page-key="isFreelancer ? 'freelancer-main' : 'comprehensive-tax-main'" @share-request="openShare" />
         <RecentCalcPanel />
       </div>
     </section>

@@ -7,6 +7,7 @@ import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
 import BenefitStatGrid from "@/components/benefits/BenefitStatGrid.vue";
+import InternalLink from "@/components/common/InternalLink.vue";
 import { employerInsuranceFaqs } from "@/data/benefitFaqs";
 import { buildFaqJsonLd } from "@/lib/faqSeo";
 import { normalizeEmployerInsuranceInput } from "@/lib/benefitValidators";
@@ -25,7 +26,7 @@ const input = computed(() =>
   })
 );
 const result = computed(() => calculateEmployerInsuranceBurden(input.value));
-const seoTitle = computed(() => "사업주 4대보험 부담금 계산기 | 2026 finance.shakilabs");
+const seoTitle = computed(() => "사업주 4대보험 부담금 계산기 | 2026 shakilabs.com/finance");
 const seoDescription = computed(
   () => `월급 ${formatWon(input.value.monthlySalary)} 기준 사업주 월 부담금은 ${formatWon(result.value.totalMonthlyBurden)}입니다.`
 );
@@ -69,6 +70,7 @@ const seoDescription = computed(
         </div>
 
         <BenefitFaqPanel :items="employerInsuranceFaqs" />
+        <InternalLink current="4-insurance-employer" />
       </div>
 
       <div class="space-y-4 lg:sticky lg:top-20 lg:self-start">

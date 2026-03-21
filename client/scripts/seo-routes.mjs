@@ -51,6 +51,8 @@ export const COMPREHENSIVE_TAX_AMOUNTS = [
   20000,
 ];
 
+export const FREELANCER_AMOUNTS = [2000, 3000, 4000, 5000, 8000, 10000];
+
 export const COMPARE_PAIRS = [
   [3000, 5000],
   [3000, 4000],
@@ -67,6 +69,17 @@ export const WITHHOLDING_AMOUNTS = [
   30_000, 50_000, 100_000, 150_000, 200_000, 300_000, 500_000,
 ];
 
+export const YEAR_END_AMOUNTS = [3000, 4500, 5200, 6000, 7500, 10000];
+
+export const PARENTAL_LEAVE_AMOUNTS = [250, 300, 350, 400, 450, 500];
+
+export const UNEMPLOYMENT_AMOUNTS = [250, 350, 500];
+export const REGIONAL_HEALTH_AMOUNTS = [250, 350, 500];
+
+export const WEEKLY_HOLIDAY_PAY_AMOUNTS = [10320, 11000, 12000, 15000];
+export const WAGE_CONVERTER_AMOUNTS = [10320, 12000, 15000, 20000];
+export const SEVERANCE_PAY_AMOUNTS = [1, 3, 5, 10];
+
 export const SEO_ROUTES = [
   "/insurance",
   "/salary",
@@ -79,9 +92,12 @@ export const SEO_ROUTES = [
   "/irp",
   "/4-insurance-employer",
   "/comprehensive-tax",
+  "/freelancer",
+  ...FREELANCER_AMOUNTS.map((amount) => `/freelancer/${amount}`),
   "/freelance-rate",
   "/compare",
   "/quit",
+  "/all",
   "/about",
   "/privacy",
   ...INSURANCE_AMOUNTS.map((amount) => `/insurance/${amount}`),
@@ -91,4 +107,18 @@ export const SEO_ROUTES = [
   ...QUIT_YEARS.map((years) => `/quit/${years}years`),
   "/withholding",
   ...WITHHOLDING_AMOUNTS.map((amount) => `/withholding/${amount}`),
+  "/year-end-settlement",
+  ...YEAR_END_AMOUNTS.map((amount) => `/year-end-settlement/${amount}`),
+  "/parental-leave",
+  ...PARENTAL_LEAVE_AMOUNTS.map((amount) => `/parental-leave/${amount}`),
+  "/unemployment",
+  ...UNEMPLOYMENT_AMOUNTS.map((amount) => `/unemployment/${amount}`),
+  "/regional-health",
+  ...REGIONAL_HEALTH_AMOUNTS.map((amount) => `/regional-health/${amount}`),
+  "/weekly-holiday-pay",
+  ...WEEKLY_HOLIDAY_PAY_AMOUNTS.map((amount) => `/weekly-holiday-pay/${amount}`),
+  "/wage-converter",
+  ...WAGE_CONVERTER_AMOUNTS.map((amount) => `/wage-converter/${amount}`),
+  "/severance-pay",
+  ...SEVERANCE_PAY_AMOUNTS.map((amount) => `/severance-pay/${amount}`),
 ];

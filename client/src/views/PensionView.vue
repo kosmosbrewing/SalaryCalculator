@@ -7,6 +7,7 @@ import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
 import BenefitStatGrid from "@/components/benefits/BenefitStatGrid.vue";
+import InternalLink from "@/components/common/InternalLink.vue";
 import { pensionFaqs } from "@/data/benefitFaqs";
 import { buildFaqJsonLd } from "@/lib/faqSeo";
 import { normalizePensionInput } from "@/lib/benefitValidators";
@@ -25,7 +26,7 @@ const input = computed(() =>
   })
 );
 const result = computed(() => calculatePensionEstimate(input.value));
-const seoTitle = computed(() => "국민연금 예상 수령액 계산기 | 2026 finance.shakilabs");
+const seoTitle = computed(() => "국민연금 예상 수령액 계산기 | 2026 shakilabs.com/finance");
 const seoDescription = computed(
   () => `가입 ${input.value.insuredYears}년 기준 예상 국민연금 월수령액은 ${formatWon(result.value.estimatedMonthlyPension)}입니다.`
 );
@@ -70,6 +71,7 @@ const seoDescription = computed(
         </div>
 
         <BenefitFaqPanel :items="pensionFaqs" />
+        <InternalLink current="pension" />
       </div>
 
       <div class="space-y-4 lg:sticky lg:top-20 lg:self-start">

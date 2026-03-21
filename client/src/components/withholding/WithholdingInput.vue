@@ -61,6 +61,14 @@ function onTaxRangeInput(event: Event): void {
   }
 }
 
+const taxPresets = [
+  { label: "5만", value: 50_000 },
+  { label: "10만", value: 100_000 },
+  { label: "20만", value: 200_000 },
+  { label: "50만", value: 500_000 },
+  { label: "100만", value: 1_000_000 },
+];
+
 const inputIds = {
   monthlyIncomeTax: "withholding-income-tax",
   monthlyIncomeTaxRange: "withholding-income-tax-range",
@@ -123,8 +131,20 @@ const inputIds = {
             aria-label="소득세 슬라이더"
             @input="onTaxRangeInput"
           />
+          <div class="flex flex-wrap gap-1.5">
+            <button
+              v-for="preset in taxPresets"
+              :key="preset.value"
+              type="button"
+              class="retro-chip"
+              :class="monthlyIncomeTax === preset.value ? 'border-primary text-primary' : ''"
+              :aria-label="`소득세 ${preset.label}원으로 설정`"
+              @click="emit('update:monthlyIncomeTax', preset.value)"
+            >
+              {{ preset.label }}
+            </button>
+          </div>
         </div>
-
 
       </div>
 

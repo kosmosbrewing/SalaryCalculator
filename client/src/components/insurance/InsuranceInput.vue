@@ -79,6 +79,23 @@ function updateChildren(value: number): void {
   emit("update:childrenUnder20", safe);
 }
 
+const healthFeePresets = [
+  { label: "8만", value: 80_000 },
+  { label: "12만", value: 120_000 },
+  { label: "18만", value: 180_000 },
+  { label: "25만", value: 250_000 },
+  { label: "35만", value: 350_000 },
+];
+
+const salaryPresets = [
+  { label: "3,000만", value: 30_000_000 },
+  { label: "4,000만", value: 40_000_000 },
+  { label: "5,000만", value: 50_000_000 },
+  { label: "6,000만", value: 60_000_000 },
+  { label: "8,000만", value: 80_000_000 },
+  { label: "1억", value: 100_000_000 },
+];
+
 const inputIds = {
   reverseHealthInsurance: "insurance-health-fee",
   reverseHealthInsuranceRange: "insurance-health-fee-range",
@@ -156,6 +173,19 @@ function updateRetirementIncluded(value: boolean): void {
             aria-label="건보료 슬라이더"
             @input="onHealthFeeRangeInput"
           />
+          <div class="flex flex-wrap gap-1.5">
+            <button
+              v-for="preset in healthFeePresets"
+              :key="preset.value"
+              type="button"
+              class="retro-chip"
+              :class="healthInsuranceFee === preset.value ? 'border-primary text-primary' : ''"
+              :aria-label="`건보료 ${preset.label}원으로 설정`"
+              @click="emit('update:healthInsuranceFee', preset.value)"
+            >
+              {{ preset.label }}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -202,6 +232,19 @@ function updateRetirementIncluded(value: boolean): void {
             aria-label="연봉 슬라이더"
             @input="onGrossRangeInput"
           />
+          <div class="flex flex-wrap gap-1.5">
+            <button
+              v-for="preset in salaryPresets"
+              :key="preset.value"
+              type="button"
+              class="retro-chip"
+              :class="annualGross === preset.value ? 'border-primary text-primary' : ''"
+              :aria-label="`연봉 ${preset.label}원으로 설정`"
+              @click="emit('update:annualGross', preset.value)"
+            >
+              {{ preset.label }}
+            </button>
+          </div>
         </div>
 
         <div>

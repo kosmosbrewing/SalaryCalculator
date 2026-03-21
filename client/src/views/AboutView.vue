@@ -36,7 +36,7 @@ const breadcrumbJsonLd = computed(() => ({
       </div>
       <div class="retro-panel-content">
         <p class="text-body text-muted-foreground leading-relaxed">
-          finance.shakilabs.com은 2026년 최신 세율 기준으로 급여·세금을 빠르게 계산할 수 있는 무료 서비스입니다.
+          shakilabs.com/finance는 2026년 최신 세율 기준으로 급여·세금을 빠르게 계산할 수 있는 무료 서비스입니다.
           회원가입 없이 이용 가능하며, 입력한 급여 정보는 서버에 저장되지 않습니다.
         </p>
       </div>

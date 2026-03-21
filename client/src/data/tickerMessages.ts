@@ -93,3 +93,44 @@ export const freelanceRateTickerMessages = [
   "3.3% 원천징수와 실제 종합소득세는 최종 금액이 다를 수 있어요.",
   "일 단가와 시간당 단가를 같이 보면 견적 방어가 쉬워집니다.",
 ] as const;
+
+export const yearEndSettlementTickerMessages = [
+  "연말정산은 세액공제 항목을 빠짐없이 챙기는 게 핵심입니다.",
+  "월세·IRP·기부금 공제를 합치면 환급이 꽤 커질 수 있어요.",
+  "13월의 월급, 연말정산 환급액을 미리 계산해보세요.",
+] as const;
+
+export const severancePayTickerMessages = [
+  "퇴직금은 1일 평균임금 × 30 × (근속일수/365)로 계산합니다.",
+  "근속 1년 미만이면 퇴직금 수급 요건을 충족하지 못해요.",
+  "퇴직소득세는 근속연수가 길수록 공제가 커집니다.",
+] as const;
+
+export const unemploymentTickerMessages = [
+  "실업급여는 퇴사 사유와 고용보험 가입기간에 따라 달라집니다.",
+  "2026년 실업급여 상한은 일 68,100원입니다.",
+  "자발적 퇴사도 조건에 따라 실업급여를 받을 수 있어요.",
+] as const;
+
+export const weeklyHolidayPayTickerMessages = [
+  "주 15시간 이상 근무하면 주휴수당이 발생합니다.",
+  "주휴수당 포함 시 실질 시급이 20% 이상 올라갈 수 있어요.",
+  "2026년 최저시급 10,320원 기준으로 계산 중이에요.",
+] as const;
+
+export const parentalLeaveTickerMessages = [
+  "2026년 6+6 부모육아휴직제가 확대 적용됩니다.",
+  "육아휴직 급여는 통상임금의 80%이며 상·하한이 있어요.",
+  "부모 모두 사용하면 첫 6개월 급여가 상향됩니다.",
+] as const;
+
+export const wageConverterTickerMessages = [
+  "시급과 월급은 주휴수당 포함 여부에 따라 크게 달라져요.",
+  "1개월 = 4.345주 기준으로 환산합니다.",
+  "주 근무시간을 정확히 넣어야 환산이 정확해요.",
+] as const;
+
+export const allCalculatorsTickerMessages = [
+  "23개 계산기를 한눈에 모아봤어요. 필요한 걸 골라보세요.",
+  "연봉·세금·수당·퇴직·절세까지 한곳에서 계산합니다.",
+] as const;

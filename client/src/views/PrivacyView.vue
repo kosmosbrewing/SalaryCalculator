@@ -8,12 +8,12 @@ useSEO({
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "홈", item: "https://finance.shakilabs.com/" },
+      { "@type": "ListItem", position: 1, name: "홈", item: "https://shakilabs.com/finance/" },
       {
         "@type": "ListItem",
         position: 2,
         name: "개인정보처리방침",
-        item: "https://finance.shakilabs.com/privacy",
+        item: "https://shakilabs.com/finance/privacy",
       },
     ],
   },
@@ -30,7 +30,7 @@ useSEO({
       </div>
       <div class="retro-panel-content">
         <p class="text-body text-muted-foreground leading-relaxed">
-          finance.shakilabs.com(이하 "서비스")은 이용자의 개인정보를 소중히 여기며,
+          shakilabs.com/finance(이하 "서비스")은 이용자의 개인정보를 소중히 여기며,
           관련 법령을 준수합니다. 본 방침은 서비스 이용 과정에서 수집·이용되는 정보를 안내합니다.
         </p>
       </div>

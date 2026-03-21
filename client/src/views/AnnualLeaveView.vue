@@ -6,6 +6,7 @@ import CommunitySidebar from "@/components/common/CommunitySidebar.vue";
 import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
+import InternalLink from "@/components/common/InternalLink.vue";
 import BenefitStatGrid from "@/components/benefits/BenefitStatGrid.vue";
 import { annualLeaveFaqs } from "@/data/benefitFaqs";
 import { buildFaqJsonLd } from "@/lib/faqSeo";
@@ -27,7 +28,7 @@ const input = computed(() =>
   })
 );
 const result = computed(() => calculateAnnualLeavePay(input.value));
-const seoTitle = computed(() => "연차 수당 계산기 | 2026 finance.shakilabs");
+const seoTitle = computed(() => "연차 수당 계산기 | 2026 shakilabs.com/finance");
 const seoDescription = computed(
   () =>
     `미사용 연차 ${result.value.payableDays}일 기준 예상 연차수당은 ${formatWon(
@@ -75,6 +76,7 @@ const seoDescription = computed(
         </div>
 
         <BenefitFaqPanel :items="annualLeaveFaqs" />
+        <InternalLink current="annual-leave" />
       </div>
 
       <div class="space-y-4 lg:sticky lg:top-20 lg:self-start">

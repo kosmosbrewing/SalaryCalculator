@@ -8,6 +8,7 @@ import CommunitySidebar from "@/components/common/CommunitySidebar.vue";
 import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
 import { Button } from "@/components/ui/button";
 import ScenarioChipGroup from "@/components/scenario/ScenarioChipGroup.vue";
+import InternalLink from "@/components/common/InternalLink.vue";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import { useShare } from "@/composables/useShare";
 import { addEntry } from "@/composables/useRecentCalcs";
@@ -60,7 +61,7 @@ const input = computed(() =>
   })
 );
 const result = computed(() => calculateFreelanceRateImpact(input.value));
-const seoTitle = computed(() => "프리랜서 세후 단가 역산 계산기 | 2026 finance.shakilabs");
+const seoTitle = computed(() => "프리랜서 세후 단가 역산 계산기 | 2026 shakilabs.com/finance");
 const seoDescription = computed(
   () =>
     `월 세후 목표 ${formatWon(input.value.targetMonthlyNet)}를 만들기 위해 필요한 청구액은 월 ${formatWon(
@@ -188,6 +189,7 @@ const incomeTypeOptions = [
             </div>
           </div>
         </div>
+        <InternalLink current="freelance-rate" />
       </div>
       <div class="space-y-4 lg:sticky lg:top-20 lg:self-start">
         <CommunitySidebar page-key="freelance-rate-main" @share-request="openShare" />

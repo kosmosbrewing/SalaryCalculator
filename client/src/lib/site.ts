@@ -1,4 +1,4 @@
-export const DEFAULT_SITE_URL = "https://finance.shakilabs.com";
+export const DEFAULT_SITE_URL = "https://shakilabs.com/finance";
 
 function trimTrailingSlash(value: string): string {
   return value.replace(/\/+$/, "");
@@ -22,7 +22,9 @@ export function getCanonicalSiteUrl(): string {
 
 export function getSiteUrl(): string {
   if (typeof window !== "undefined" && window.location.origin) {
-    return trimTrailingSlash(window.location.origin);
+    // origin만 반환하므로 base path를 붙여야 함
+    const basePath = new URL(getCanonicalSiteUrl()).pathname.replace(/\/+$/, "");
+    return trimTrailingSlash(`${window.location.origin}${basePath}`);
   }
 
   return getCanonicalSiteUrl();
@@ -49,7 +51,10 @@ export function isAllowedKakaoHost(hostname: string | null | undefined): boolean
 
 export function buildCanonicalUrl(path: string, queryString = "", hash = ""): string {
   const baseUrl = new URL(getCanonicalSiteUrl());
-  baseUrl.pathname = path.startsWith("/") ? path : `/${path}`;
+  // base path(예: /finance)를 보존하면서 route path를 이어붙임
+  const basePath = baseUrl.pathname.replace(/\/+$/, "");
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  baseUrl.pathname = `${basePath}${normalizedPath}`;
   baseUrl.search = queryString ? `?${queryString.replace(/^\?/, "")}` : "";
   baseUrl.hash = hash ? `#${hash.replace(/^#/, "")}` : "";
   return baseUrl.toString();

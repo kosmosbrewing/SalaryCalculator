@@ -9,6 +9,11 @@ import {
   calculateSalaryBreakdown,
   clampNumber,
 } from "@/utils/calculator";
+import {
+  calcCardDeduction,
+  calculateYearEndSettlement,
+} from "@/utils/yearEndSettlementCalculator";
+import { calculateParentalLeave } from "@/utils/parentalLeaveCalculator";
 
 describe("calculator core", () => {
   it("clampNumber는 최소값 아래 입력을 보정한다", () => {
@@ -127,5 +132,130 @@ describe("calculator core", () => {
         result.employerCost.healthInsurance +
         result.employerCost.employmentInsurance
     );
+  });
+});
+
+describe("yearEndSettlementCalculator", () => {
+  const baseInput = {
+    annualSalary: 52_000_000,
+    dependents: 1,
+    children: 0,
+    creditCardSpend: 0,
+    debitCardSpend: 0,
+    insurancePremium: 0,
+    medicalExpense: 0,
+    educationExpense: 0,
+    donationAmount: 0,
+    pensionSavings: 0,
+    irpContribution: 0,
+    monthlyRent: 0,
+    rentMonths: 12,
+  };
+
+  describe("calcCardDeduction", () => {
+    it("최소사용금액 이하면 공제가 0이다", () => {
+      // 52,000,000 × 25% = 13,000,000 → 총 사용 10,000,000 < 13,000,000
+      expect(calcCardDeduction(52_000_000, 5_000_000, 5_000_000)).toBe(0);
+    });
+
+    it("신용카드부터 최소사용금액을 차감하고 공제율을 적용한다", () => {
+      // 최소사용 13,000,000, 신용카드 15,000,000 → 초과 2,000,000 × 15% = 300,000
+      // 체크카드 5,000,000 × 30% = 1,500,000 → 총 1,800,000
+      expect(calcCardDeduction(52_000_000, 15_000_000, 5_000_000)).toBe(1_800_000);
+    });
+
+    it("공제한도를 초과하지 않는다", () => {
+      // 총급여 7천만 이하 → 300만원 한도
+      const result = calcCardDeduction(52_000_000, 30_000_000, 20_000_000);
+      expect(result).toBe(3_000_000);
+    });
+  });
+
+  describe("calculateYearEndSettlement", () => {
+    it("공제 항목이 없으면 기납부세액과 결정세액이 같아 정산 0이다", () => {
+      const result = calculateYearEndSettlement(baseInput);
+      // 추가 공제 없이 기본 원천징수와 동일 → 정산 0
+      expect(result.settlementAmount).toBe(0);
+      expect(result.determinedTax).toBeGreaterThan(0);
+    });
+
+    it("연금저축·IRP 공제로 환급이 발생한다", () => {
+      const result = calculateYearEndSettlement({
+        ...baseInput,
+        pensionSavings: 4_000_000,
+        irpContribution: 3_000_000,
+      });
+      // 연금계좌 세액공제 반영 → 결정세액 < 원천징수 → 환급
+      expect(result.pensionAccountCredit).toBeGreaterThan(0);
+      expect(result.isRefund).toBe(true);
+      expect(result.settlementAmount).toBeLessThan(0);
+    });
+
+    it("totalTax = determinedTax + localTax", () => {
+      const result = calculateYearEndSettlement({
+        ...baseInput,
+        creditCardSpend: 20_000_000,
+        medicalExpense: 3_000_000,
+        pensionSavings: 6_000_000,
+      });
+      expect(result.totalTax).toBe(result.determinedTax + result.localTax);
+    });
+
+    it("월세 세액공제는 총급여 8천만 초과 시 0이다", () => {
+      const result = calculateYearEndSettlement({
+        ...baseInput,
+        annualSalary: 90_000_000,
+        monthlyRent: 700_000,
+        rentMonths: 12,
+      });
+      expect(result.monthlyRentCredit).toBe(0);
+    });
+  });
+});
+
+describe("parentalLeaveCalculator", () => {
+  it("일반 육아휴직 12개월 급여를 월별로 계산한다", () => {
+    const result = calculateParentalLeave({
+      monthlyWage: 3_000_000,
+      months: 12,
+      leaveType: "general",
+    });
+    expect(result.monthlyDetails).toHaveLength(12);
+    // 1~3개월: min(3,000,000, 2,500,000) = 2,500,000
+    expect(result.monthlyDetails[0].benefit).toBe(2_500_000);
+    // 4~6개월: min(3,000,000, 2,000,000) = 2,000,000
+    expect(result.monthlyDetails[3].benefit).toBe(2_000_000);
+    // 7~12개월: min(3,000,000 × 0.8 = 2,400,000, 1,600,000) = 1,600,000
+    expect(result.monthlyDetails[6].benefit).toBe(1_600_000);
+  });
+
+  it("6+6 부모육아휴직제는 6개월까지 월별 상한이 다르다", () => {
+    const result = calculateParentalLeave({
+      monthlyWage: 5_000_000,
+      months: 6,
+      leaveType: "parent66",
+    });
+    expect(result.monthlyDetails[0].benefit).toBe(2_500_000); // 1개월 상한
+    expect(result.monthlyDetails[2].benefit).toBe(3_000_000); // 3개월 상한
+    expect(result.monthlyDetails[5].benefit).toBe(4_500_000); // 6개월 상한
+  });
+
+  it("통상임금이 하한 미만이면 하한액을 지급한다", () => {
+    const result = calculateParentalLeave({
+      monthlyWage: 500_000,
+      months: 3,
+      leaveType: "general",
+    });
+    expect(result.monthlyDetails[0].benefit).toBe(700_000);
+  });
+
+  it("소득대체율은 총수령 / 총통상임금이다", () => {
+    const result = calculateParentalLeave({
+      monthlyWage: 3_000_000,
+      months: 6,
+      leaveType: "general",
+    });
+    const expectedRate = result.totalBenefit / (3_000_000 * 6);
+    expect(result.incomeReplacementRate).toBeCloseTo(expectedRate, 8);
   });
 });

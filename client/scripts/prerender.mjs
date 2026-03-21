@@ -5,13 +5,21 @@ import { SEO_ROUTES } from "./seo-routes.mjs";
 
 const DIST_DIR = resolve(import.meta.dirname, "../dist");
 const INDEX_HTML = resolve(DIST_DIR, "index.html");
-const SITE_URL = "https://finance.shakilabs.com";
+const SITE_URL = "https://shakilabs.com/finance";
 const SALARY_ROUTE_RE = /^\/salary\/(\d+)$/;
 const INSURANCE_ROUTE_RE = /^\/insurance\/(\d+)$/;
 const COMPREHENSIVE_TAX_ROUTE_RE = /^\/comprehensive-tax\/(\d+)$/;
+const FREELANCER_ROUTE_RE = /^\/freelancer\/(\d+)$/;
 const COMPARE_ROUTE_RE = /^\/compare\/(\d+)-vs-(\d+)$/;
 const QUIT_ROUTE_RE = /^\/quit\/(\d+)years$/;
 const WITHHOLDING_ROUTE_RE = /^\/withholding\/(\d+)$/;
+const YEAR_END_ROUTE_RE = /^\/year-end-settlement\/(\d+)$/;
+const PARENTAL_LEAVE_ROUTE_RE = /^\/parental-leave\/(\d+)$/;
+const UNEMPLOYMENT_ROUTE_RE = /^\/unemployment\/(\d+)$/;
+const REGIONAL_HEALTH_ROUTE_RE = /^\/regional-health\/(\d+)$/;
+const WEEKLY_HOLIDAY_PAY_ROUTE_RE = /^\/weekly-holiday-pay\/(\d+)$/;
+const WAGE_CONVERTER_ROUTE_RE = /^\/wage-converter\/(\d+)$/;
+const SEVERANCE_PAY_ROUTE_RE = /^\/severance-pay\/(\d+)$/;
 
 if (!existsSync(INDEX_HTML)) {
   console.warn("[prerender] dist/index.html not found. Skipping prerender.");
@@ -64,6 +72,13 @@ function readComprehensiveTaxManWon(route) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
 }
 
+function readFreelancerManWon(route) {
+  const matched = route.match(FREELANCER_ROUTE_RE);
+  if (!matched) return null;
+  const parsed = Number.parseInt(matched[1], 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
 function readComparePair(route) {
   const matched = route.match(COMPARE_ROUTE_RE);
   if (!matched) return null;
@@ -92,6 +107,55 @@ function readWithholdingAmount(route) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
 }
 
+function readParentalLeaveManWon(route) {
+  const matched = route.match(PARENTAL_LEAVE_ROUTE_RE);
+  if (!matched) return null;
+  const parsed = Number.parseInt(matched[1], 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+function readUnemploymentManWon(route) {
+  const matched = route.match(UNEMPLOYMENT_ROUTE_RE);
+  if (!matched) return null;
+  const parsed = Number.parseInt(matched[1], 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+function readRegionalHealthManWon(route) {
+  const matched = route.match(REGIONAL_HEALTH_ROUTE_RE);
+  if (!matched) return null;
+  const parsed = Number.parseInt(matched[1], 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+function readYearEndManWon(route) {
+  const matched = route.match(YEAR_END_ROUTE_RE);
+  if (!matched) return null;
+  const parsed = Number.parseInt(matched[1], 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+function readWeeklyHolidayPayAmount(route) {
+  const matched = route.match(WEEKLY_HOLIDAY_PAY_ROUTE_RE);
+  if (!matched) return null;
+  const parsed = Number.parseInt(matched[1], 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+function readWageConverterHourly(route) {
+  const matched = route.match(WAGE_CONVERTER_ROUTE_RE);
+  if (!matched) return null;
+  const parsed = Number.parseInt(matched[1], 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+function readSeverancePayYears(route) {
+  const matched = route.match(SEVERANCE_PAY_ROUTE_RE);
+  if (!matched) return null;
+  const parsed = Number.parseInt(matched[1], 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
 // --- Breadcrumb 빌더 ---
 function buildBreadcrumb(items) {
   return {
@@ -109,7 +173,7 @@ function buildBreadcrumb(items) {
 function buildMeta(route) {
   if (route === "/privacy") {
     const title = "개인정보처리방침 | 연봉 실수령액 계산기";
-    const description = "finance.shakilabs.com 서비스의 개인정보 처리 원칙을 안내합니다.";
+    const description = "shakilabs.com/finance 서비스의 개인정보 처리 원칙을 안내합니다.";
     const canonical = `${SITE_URL}/privacy`;
     return {
       title,
@@ -149,6 +213,246 @@ function buildMeta(route) {
       breadcrumb: buildBreadcrumb([
         { name: "홈", url: SITE_URL },
         { name: "서비스 소개" },
+      ]),
+    };
+  }
+
+  if (route === "/all") {
+    const title = "2026 세금·연봉·수당 계산기 모음 | 23개 계산기";
+    const description = "연봉 실수령액, 종합소득세, 연말정산, 퇴직금, 실업급여, 주휴수당 등 23개 계산기를 한곳에서 이용하세요. 2026년 기준 반영.";
+    const canonical = `${SITE_URL}/all`;
+    return {
+      title,
+      description,
+      canonical,
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        name: title,
+        description,
+        url: canonical,
+        inLanguage: "ko",
+      },
+      breadcrumb: buildBreadcrumb([
+        { name: "홈", url: SITE_URL },
+        { name: "전체 계산기" },
+      ]),
+    };
+  }
+
+  const unemploymentManWon = readUnemploymentManWon(route);
+  if (unemploymentManWon !== null) {
+    const title = `월급 ${formatManWon(unemploymentManWon)} 실업급여 계산기 | 2026 구직급여`;
+    const description = `월급 ${formatManWon(unemploymentManWon)}원 기준 실업급여 일 수급액과 총 수급액을 계산합니다.`;
+    const canonical = `${SITE_URL}/unemployment/${unemploymentManWon}`;
+    return {
+      title,
+      description,
+      canonical,
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: [
+          {
+            "@type": "Question",
+            name: `월급 ${formatManWon(unemploymentManWon)}이면 실업급여가 얼마인가요?`,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "나이와 고용보험 가입기간에 따라 수급액과 수급기간이 달라집니다. 계산기에서 확인하세요.",
+            },
+          },
+        ],
+      },
+      breadcrumb: buildBreadcrumb([
+        { name: "홈", url: SITE_URL },
+        { name: "실업급여 계산기", url: `${SITE_URL}/unemployment` },
+        { name: `월급 ${formatManWon(unemploymentManWon)}` },
+      ]),
+    };
+  }
+
+  const regionalHealthManWon = readRegionalHealthManWon(route);
+  if (regionalHealthManWon !== null) {
+    const title = `월급 ${formatManWon(regionalHealthManWon)} 지역가입자 건보료 | 퇴사 후 건강보험`;
+    const description = `월급 ${formatManWon(regionalHealthManWon)}원 기준 퇴사 후 지역가입자 건보료와 임의계속가입을 비교합니다.`;
+    const canonical = `${SITE_URL}/regional-health/${regionalHealthManWon}`;
+    return {
+      title,
+      description,
+      canonical,
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: [
+          {
+            "@type": "Question",
+            name: `월급 ${formatManWon(regionalHealthManWon)}이면 퇴사 후 건보료가 얼마인가요?`,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "지역가입자, 임의계속가입, 피부양자 등록 세 가지 옵션을 비교해 가장 저렴한 방법을 찾을 수 있습니다.",
+            },
+          },
+        ],
+      },
+      breadcrumb: buildBreadcrumb([
+        { name: "홈", url: SITE_URL },
+        { name: "지역가입자 건보료", url: `${SITE_URL}/regional-health` },
+        { name: `월급 ${formatManWon(regionalHealthManWon)}` },
+      ]),
+    };
+  }
+
+  const weeklyHolidayPayAmount = readWeeklyHolidayPayAmount(route);
+  if (weeklyHolidayPayAmount !== null) {
+    const title = `시급 ${weeklyHolidayPayAmount.toLocaleString("ko-KR")}원 주휴수당 계산 | 2026`;
+    const description = `시급 ${weeklyHolidayPayAmount.toLocaleString("ko-KR")}원 기준 주휴수당과 실질 시급을 계산합니다.`;
+    const canonical = `${SITE_URL}/weekly-holiday-pay/${weeklyHolidayPayAmount}`;
+    return {
+      title,
+      description,
+      canonical,
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: [
+          {
+            "@type": "Question",
+            name: `시급 ${weeklyHolidayPayAmount.toLocaleString("ko-KR")}원이면 주휴수당이 얼마인가요?`,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "주 근무시간에 따라 달라집니다. 계산기에서 확인하세요.",
+            },
+          },
+        ],
+      },
+      breadcrumb: buildBreadcrumb([
+        { name: "홈", url: SITE_URL },
+        { name: "주휴수당 계산기", url: `${SITE_URL}/weekly-holiday-pay` },
+        { name: `시급 ${weeklyHolidayPayAmount.toLocaleString("ko-KR")}원` },
+      ]),
+    };
+  }
+
+  const wageConverterHourly = readWageConverterHourly(route);
+  if (wageConverterHourly !== null) {
+    const title = `시급 ${wageConverterHourly.toLocaleString("ko-KR")}원 월급·연봉 환산 | 2026`;
+    const description = `시급 ${wageConverterHourly.toLocaleString("ko-KR")}원을 월급·일급·연봉으로 환산합니다.`;
+    const canonical = `${SITE_URL}/wage-converter/${wageConverterHourly}`;
+    return {
+      title,
+      description,
+      canonical,
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: [
+          {
+            "@type": "Question",
+            name: `시급 ${wageConverterHourly.toLocaleString("ko-KR")}원이면 월급이 얼마인가요?`,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "주휴수당 포함 여부와 주 근무시간에 따라 달라집니다. 계산기에서 확인하세요.",
+            },
+          },
+        ],
+      },
+      breadcrumb: buildBreadcrumb([
+        { name: "홈", url: SITE_URL },
+        { name: "시급 환산기", url: `${SITE_URL}/wage-converter` },
+        { name: `시급 ${wageConverterHourly.toLocaleString("ko-KR")}원` },
+      ]),
+    };
+  }
+
+  const severancePayYears = readSeverancePayYears(route);
+  if (severancePayYears !== null) {
+    const title = `${severancePayYears}년 근속 퇴직금 계산 | 2026`;
+    const description = `${severancePayYears}년 근속 기준 퇴직금과 퇴직소득세를 계산합니다.`;
+    const canonical = `${SITE_URL}/severance-pay/${severancePayYears}`;
+    return {
+      title,
+      description,
+      canonical,
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: [
+          {
+            "@type": "Question",
+            name: `${severancePayYears}년 근속이면 퇴직금이 얼마인가요?`,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "평균 월급에 따라 달라집니다. 계산기에서 확인하세요.",
+            },
+          },
+        ],
+      },
+      breadcrumb: buildBreadcrumb([
+        { name: "홈", url: SITE_URL },
+        { name: "퇴직금 계산기", url: `${SITE_URL}/severance-pay` },
+        { name: `${severancePayYears}년 근속` },
+      ]),
+    };
+  }
+
+  const parentalManWon = readParentalLeaveManWon(route);
+  if (parentalManWon !== null) {
+    const title = `통상임금 ${formatManWon(parentalManWon)} 육아휴직 급여 계산 | 2026`;
+    const description = `통상임금 ${formatManWon(parentalManWon)}원 기준 육아휴직 월별 급여와 총 수령액을 계산합니다.`;
+    const canonical = `${SITE_URL}/parental-leave/${parentalManWon}`;
+    return {
+      title,
+      description,
+      canonical,
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: [
+          {
+            "@type": "Question",
+            name: `통상임금 ${formatManWon(parentalManWon)}이면 육아휴직 급여가 얼마인가요?`,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "일반, 6+6 부모육아휴직제, 한부모 특례에 따라 월별 상한액이 다릅니다. 계산기에서 확인하세요.",
+            },
+          },
+        ],
+      },
+      breadcrumb: buildBreadcrumb([
+        { name: "홈", url: SITE_URL },
+        { name: "육아휴직 급여", url: `${SITE_URL}/parental-leave` },
+        { name: `통상임금 ${formatManWon(parentalManWon)}` },
+      ]),
+    };
+  }
+
+  const yearEndManWon = readYearEndManWon(route);
+  if (yearEndManWon !== null) {
+    const title = `연봉 ${formatManWon(yearEndManWon)} 연말정산 환급액 계산 | 2026`;
+    const description = `연봉 ${formatManWon(yearEndManWon)}원 기준 연말정산 예상 환급액과 세액공제 내역을 계산합니다.`;
+    const canonical = `${SITE_URL}/year-end-settlement/${yearEndManWon}`;
+    return {
+      title,
+      description,
+      canonical,
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: [
+          {
+            "@type": "Question",
+            name: `연봉 ${formatManWon(yearEndManWon)}이면 연말정산 환급금이 얼마인가요?`,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "신용카드, 의료비, 교육비, 연금저축, 월세 등 공제 항목에 따라 달라집니다. 계산기에서 항목을 입력해 확인하세요.",
+            },
+          },
+        ],
+      },
+      breadcrumb: buildBreadcrumb([
+        { name: "홈", url: SITE_URL },
+        { name: "연말정산 계산기", url: `${SITE_URL}/year-end-settlement` },
+        { name: `연봉 ${formatManWon(yearEndManWon)}` },
       ]),
     };
   }
@@ -290,6 +594,37 @@ function buildMeta(route) {
         { name: "홈", url: SITE_URL },
         { name: "연봉 계산기", url: `${SITE_URL}/salary` },
         { name: `연봉 ${formatManWon(salaryManWon)}` },
+      ]),
+    };
+  }
+
+  const freelancerManWon = readFreelancerManWon(route);
+  if (freelancerManWon !== null) {
+    const title = `프리랜서 수입 ${formatManWon(freelancerManWon)} 세금 계산 | 2026 3.3% 종합소득세`;
+    const description = `프리랜서 연수입 ${formatManWon(freelancerManWon)}원 기준 3.3% 원천징수 후 종합소득세를 계산합니다.`;
+    const canonical = `${SITE_URL}/freelancer/${freelancerManWon}`;
+    return {
+      title,
+      description,
+      canonical,
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: [
+          {
+            "@type": "Question",
+            name: `프리랜서 수입 ${formatManWon(freelancerManWon)}이면 세금이 얼마인가요?`,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "업종별 경비율과 부양가족 수에 따라 달라집니다. 계산기에서 확인하세요.",
+            },
+          },
+        ],
+      },
+      breadcrumb: buildBreadcrumb([
+        { name: "홈", url: SITE_URL },
+        { name: "프리랜서 세금 계산기", url: `${SITE_URL}/freelancer` },
+        { name: `수입 ${formatManWon(freelancerManWon)}` },
       ]),
     };
   }
@@ -443,7 +778,7 @@ function buildMeta(route) {
         {
           "@context": "https://schema.org",
           "@type": "WebSite",
-          name: "finance.shakilabs.com",
+          name: "shakilabs.com/finance",
           url: SITE_URL,
           description: "건보료 계산, 연봉 실수령액 계산, 이직 비교, 퇴사 시뮬레이션",
           inLanguage: "ko",
@@ -492,6 +827,30 @@ function buildMeta(route) {
       breadcrumb: buildBreadcrumb([
         { name: "홈", url: SITE_URL },
         { name: "연봉 계산기" },
+      ]),
+    };
+  }
+
+  if (route === "/freelancer") {
+    const title = "2026 프리랜서 세금 계산기 | 3.3% 종합소득세";
+    const description = "프리랜서·N잡러를 위한 세금 계산. 3.3% 원천징수 후 종합소득세 정산, 분리과세 비교까지 한 번에.";
+    const canonical = `${SITE_URL}/freelancer`;
+    return {
+      title,
+      description,
+      canonical,
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        name: "프리랜서 세금 계산기",
+        url: canonical,
+        applicationCategory: "FinanceApplication",
+        inLanguage: "ko",
+        offers: { "@type": "Offer", price: "0", priceCurrency: "KRW" },
+      },
+      breadcrumb: buildBreadcrumb([
+        { name: "홈", url: SITE_URL },
+        { name: "프리랜서 세금 계산기" },
       ]),
     };
   }
@@ -568,6 +927,174 @@ function buildMeta(route) {
     };
   }
 
+  if (route === "/parental-leave") {
+    const title = "2026 육아휴직 급여 계산기 | 6+6 부모육아휴직제 반영";
+    const description = "통상임금과 휴직 기간을 입력하면 월별 급여와 총 수령액을 계산합니다. 6+6 부모육아휴직제, 한부모 특례 반영.";
+    const canonical = `${SITE_URL}/parental-leave`;
+    return {
+      title,
+      description,
+      canonical,
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        name: "육아휴직 급여 계산기",
+        url: canonical,
+        applicationCategory: "FinanceApplication",
+        inLanguage: "ko",
+        offers: { "@type": "Offer", price: "0", priceCurrency: "KRW" },
+      },
+      breadcrumb: buildBreadcrumb([
+        { name: "홈", url: SITE_URL },
+        { name: "육아휴직 급여 계산기" },
+      ]),
+    };
+  }
+
+  if (route === "/year-end-settlement") {
+    const title = "2026 연말정산 계산기 | 환급액·세액공제 시뮬레이터";
+    const description = "연봉과 공제 항목을 입력하면 예상 환급액 또는 추가 납부액을 계산합니다. 신용카드, 연금, 의료비, 월세 세액공제 포함.";
+    const canonical = `${SITE_URL}/year-end-settlement`;
+    return {
+      title,
+      description,
+      canonical,
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        name: "연말정산 계산기",
+        url: canonical,
+        applicationCategory: "FinanceApplication",
+        inLanguage: "ko",
+        offers: { "@type": "Offer", price: "0", priceCurrency: "KRW" },
+      },
+      breadcrumb: buildBreadcrumb([
+        { name: "홈", url: SITE_URL },
+        { name: "연말정산 계산기" },
+      ]),
+    };
+  }
+
+  if (route === "/unemployment") {
+    const title = "2026 실업급여 계산기 | 구직급여 수급액·수급기간";
+    const description = "월급과 고용보험 가입기간을 입력하면 실업급여 일 수급액, 수급기간, 총 예상 수급액을 계산합니다.";
+    const canonical = `${SITE_URL}/unemployment`;
+    return {
+      title,
+      description,
+      canonical,
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        name: "실업급여 계산기",
+        url: canonical,
+        applicationCategory: "FinanceApplication",
+        inLanguage: "ko",
+        offers: { "@type": "Offer", price: "0", priceCurrency: "KRW" },
+      },
+      breadcrumb: buildBreadcrumb([
+        { name: "홈", url: SITE_URL },
+        { name: "실업급여 계산기" },
+      ]),
+    };
+  }
+
+  if (route === "/regional-health") {
+    const title = "지역가입자 건강보험료 계산기 | 퇴사 후 건보 비교";
+    const description = "퇴사 후 지역가입자 건보료, 임의계속가입, 피부양자 등록 세 가지 옵션을 비교합니다.";
+    const canonical = `${SITE_URL}/regional-health`;
+    return {
+      title,
+      description,
+      canonical,
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        name: "지역가입자 건강보험료 계산기",
+        url: canonical,
+        applicationCategory: "FinanceApplication",
+        inLanguage: "ko",
+        offers: { "@type": "Offer", price: "0", priceCurrency: "KRW" },
+      },
+      breadcrumb: buildBreadcrumb([
+        { name: "홈", url: SITE_URL },
+        { name: "지역가입자 건보료" },
+      ]),
+    };
+  }
+
+  if (route === "/weekly-holiday-pay") {
+    const title = "2026 주휴수당 계산기 | 아르바이트 주휴수당·실질 시급";
+    const description = "시급과 주 근무시간을 입력하면 주휴수당, 실질 시급, 예상 월급을 계산합니다. 2026 최저시급 반영.";
+    const canonical = `${SITE_URL}/weekly-holiday-pay`;
+    return {
+      title,
+      description,
+      canonical,
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        name: "주휴수당 계산기",
+        url: canonical,
+        applicationCategory: "FinanceApplication",
+        inLanguage: "ko",
+        offers: { "@type": "Offer", price: "0", priceCurrency: "KRW" },
+      },
+      breadcrumb: buildBreadcrumb([
+        { name: "홈", url: SITE_URL },
+        { name: "주휴수당 계산기" },
+      ]),
+    };
+  }
+
+  if (route === "/wage-converter") {
+    const title = "2026 시급 월급 연봉 환산기 | 주휴수당 포함·미포함";
+    const description = "시급↔월급↔연봉을 주휴수당 포함·미포함으로 양방향 환산합니다. 2026 최저시급 반영.";
+    const canonical = `${SITE_URL}/wage-converter`;
+    return {
+      title,
+      description,
+      canonical,
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        name: "시급 월급 연봉 환산기",
+        url: canonical,
+        applicationCategory: "FinanceApplication",
+        inLanguage: "ko",
+        offers: { "@type": "Offer", price: "0", priceCurrency: "KRW" },
+      },
+      breadcrumb: buildBreadcrumb([
+        { name: "홈", url: SITE_URL },
+        { name: "시급↔월급↔연봉 환산기" },
+      ]),
+    };
+  }
+
+  if (route === "/severance-pay") {
+    const title = "2026 퇴직금 계산기 | 퇴직소득세·실수령 퇴직금";
+    const description = "월급과 근속연수를 입력하면 퇴직금, 퇴직소득세, 실수령 퇴직금을 계산합니다.";
+    const canonical = `${SITE_URL}/severance-pay`;
+    return {
+      title,
+      description,
+      canonical,
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        name: "퇴직금 계산기",
+        url: canonical,
+        applicationCategory: "FinanceApplication",
+        inLanguage: "ko",
+        offers: { "@type": "Offer", price: "0", priceCurrency: "KRW" },
+      },
+      breadcrumb: buildBreadcrumb([
+        { name: "홈", url: SITE_URL },
+        { name: "퇴직금 계산기" },
+      ]),
+    };
+  }
+
   if (route === "/quit") {
     const title = "퇴사 계산기 2026 | 퇴직금·실업급여·생존기간";
     const description = "퇴직금, 실업급여, 퇴사 후 월 고정비를 한 번에 계산해 버틸 수 있는 기간을 확인합니다.";
@@ -626,7 +1153,7 @@ function buildPrerenderSection(route, meta) {
     <section data-seo-prerender style="max-width:920px;margin:0 auto;padding:20px 16px;line-height:1.6;">
       <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">건보료 ${Math.round(insuranceFee / 10000)}만원이면 연봉 얼마?</h1>
       <p style="margin:0 0 10px;">월 건강보험료 ${formatWon(insuranceFee)} 기준 추정 연봉은 약 ${formatWon(estimatedAnnual)}입니다.</p>
-      <p style="margin:0;"><a href="/insurance">건보료 계산기 열기</a></p>
+      <p style="margin:0;"><a href="/finance/insurance">건보료 계산기 열기</a></p>
     </section>`;
   }
 
@@ -636,7 +1163,17 @@ function buildPrerenderSection(route, meta) {
     <section data-seo-prerender style="max-width:920px;margin:0 auto;padding:20px 16px;line-height:1.6;">
       <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">연봉 ${formatManWon(salaryManWon)}원 실수령액 계산</h1>
       <p style="margin:0 0 10px;">2026년 기준으로 4대보험, 소득세, 지방소득세를 반영해 월 실수령액을 계산할 수 있습니다.</p>
-      <p style="margin:0;"><a href="/salary">실수령액 계산기 열기</a></p>
+      <p style="margin:0;"><a href="/finance/salary">실수령액 계산기 열기</a></p>
+    </section>`;
+  }
+
+  const freelancerAmt = readFreelancerManWon(route);
+  if (freelancerAmt !== null) {
+    return `
+    <section data-seo-prerender style="max-width:920px;margin:0 auto;padding:20px 16px;line-height:1.6;">
+      <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">프리랜서 수입 ${formatManWon(freelancerAmt)} 세금 계산</h1>
+      <p style="margin:0 0 10px;">3.3% 원천징수 후 종합소득세 정산 금액을 계산합니다.</p>
+      <p style="margin:0;"><a href="/finance/freelancer">프리랜서 세금 계산기 열기</a></p>
     </section>`;
   }
 
@@ -646,7 +1183,7 @@ function buildPrerenderSection(route, meta) {
     <section data-seo-prerender style="max-width:920px;margin:0 auto;padding:20px 16px;line-height:1.6;">
       <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">종합소득 ${comprehensiveTaxManWon}만원 계산</h1>
       <p style="margin:0 0 10px;">사업소득·임대소득·기타소득을 합산하고 분리과세와 종합과세를 비교해 최종 세액을 계산할 수 있습니다.</p>
-      <p style="margin:0;"><a href="/comprehensive-tax">종합소득세 계산기 열기</a></p>
+      <p style="margin:0;"><a href="/finance/comprehensive-tax">종합소득세 계산기 열기</a></p>
     </section>`;
   }
 
@@ -656,7 +1193,7 @@ function buildPrerenderSection(route, meta) {
     <section data-seo-prerender style="max-width:920px;margin:0 auto;padding:20px 16px;line-height:1.6;">
       <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">연봉 ${comparePair.a.toLocaleString("ko-KR")} vs ${comparePair.b.toLocaleString("ko-KR")} 이직 비교</h1>
       <p style="margin:0 0 10px;">두 회사의 연봉/복지 조건을 넣으면 월 실수령 및 실질 소득 차이를 확인할 수 있습니다.</p>
-      <p style="margin:0;"><a href="/compare">이직 연봉 비교 계산기 열기</a></p>
+      <p style="margin:0;"><a href="/finance/compare">이직 연봉 비교 계산기 열기</a></p>
     </section>`;
   }
 
@@ -666,7 +1203,77 @@ function buildPrerenderSection(route, meta) {
     <section data-seo-prerender style="max-width:920px;margin:0 auto;padding:20px 16px;line-height:1.6;">
       <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">${quitYears}년 근속 퇴사 계산</h1>
       <p style="margin:0 0 10px;">퇴직금, 실업급여, 월 고정비를 계산해 퇴사 후 생존기간을 확인할 수 있습니다.</p>
-      <p style="margin:0;"><a href="/quit">퇴사 계산기 열기</a></p>
+      <p style="margin:0;"><a href="/finance/quit">퇴사 계산기 열기</a></p>
+    </section>`;
+  }
+
+  const unemploymentAmt = readUnemploymentManWon(route);
+  if (unemploymentAmt !== null) {
+    return `
+    <section data-seo-prerender style="max-width:920px;margin:0 auto;padding:20px 16px;line-height:1.6;">
+      <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">월급 ${formatManWon(unemploymentAmt)} 실업급여 계산</h1>
+      <p style="margin:0 0 10px;">월급 ${formatManWon(unemploymentAmt)}원 기준 실업급여 일 수급액과 총 수급액을 계산합니다.</p>
+      <p style="margin:0;"><a href="/finance/unemployment">실업급여 계산기 열기</a></p>
+    </section>`;
+  }
+
+  const regionalHealthAmt = readRegionalHealthManWon(route);
+  if (regionalHealthAmt !== null) {
+    return `
+    <section data-seo-prerender style="max-width:920px;margin:0 auto;padding:20px 16px;line-height:1.6;">
+      <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">월급 ${formatManWon(regionalHealthAmt)} 퇴사 후 건보료</h1>
+      <p style="margin:0 0 10px;">지역가입자, 임의계속가입, 피부양자 등록 세 가지 옵션을 비교합니다.</p>
+      <p style="margin:0;"><a href="/finance/regional-health">지역가입자 건보료 계산기 열기</a></p>
+    </section>`;
+  }
+
+  const weeklyHolidayPayAmt = readWeeklyHolidayPayAmount(route);
+  if (weeklyHolidayPayAmt !== null) {
+    return `
+    <section data-seo-prerender style="max-width:920px;margin:0 auto;padding:20px 16px;line-height:1.6;">
+      <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">시급 ${weeklyHolidayPayAmt.toLocaleString("ko-KR")}원 주휴수당</h1>
+      <p style="margin:0 0 10px;">시급 ${weeklyHolidayPayAmt.toLocaleString("ko-KR")}원 기준 주휴수당과 실질 시급을 계산합니다.</p>
+      <p style="margin:0;"><a href="/finance/weekly-holiday-pay">주휴수당 계산기 열기</a></p>
+    </section>`;
+  }
+
+  const wageConverterAmt = readWageConverterHourly(route);
+  if (wageConverterAmt !== null) {
+    return `
+    <section data-seo-prerender style="max-width:920px;margin:0 auto;padding:20px 16px;line-height:1.6;">
+      <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">시급 ${wageConverterAmt.toLocaleString("ko-KR")}원 월급·연봉 환산</h1>
+      <p style="margin:0 0 10px;">시급 ${wageConverterAmt.toLocaleString("ko-KR")}원을 월급·일급·연봉으로 환산합니다.</p>
+      <p style="margin:0;"><a href="/finance/wage-converter">시급 환산기 열기</a></p>
+    </section>`;
+  }
+
+  const severancePayYearsAmt = readSeverancePayYears(route);
+  if (severancePayYearsAmt !== null) {
+    return `
+    <section data-seo-prerender style="max-width:920px;margin:0 auto;padding:20px 16px;line-height:1.6;">
+      <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">${severancePayYearsAmt}년 근속 퇴직금 계산</h1>
+      <p style="margin:0 0 10px;">${severancePayYearsAmt}년 근속 기준 퇴직금과 퇴직소득세를 계산합니다.</p>
+      <p style="margin:0;"><a href="/finance/severance-pay">퇴직금 계산기 열기</a></p>
+    </section>`;
+  }
+
+  const parentalAmt = readParentalLeaveManWon(route);
+  if (parentalAmt !== null) {
+    return `
+    <section data-seo-prerender style="max-width:920px;margin:0 auto;padding:20px 16px;line-height:1.6;">
+      <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">통상임금 ${formatManWon(parentalAmt)} 육아휴직 급여</h1>
+      <p style="margin:0 0 10px;">일반·6+6 부모육아휴직제·한부모 특례별 월 급여와 총 수령액을 계산합니다.</p>
+      <p style="margin:0;"><a href="/finance/parental-leave">육아휴직 급여 계산기 열기</a></p>
+    </section>`;
+  }
+
+  const yearEndAmt = readYearEndManWon(route);
+  if (yearEndAmt !== null) {
+    return `
+    <section data-seo-prerender style="max-width:920px;margin:0 auto;padding:20px 16px;line-height:1.6;">
+      <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">연봉 ${formatManWon(yearEndAmt)} 연말정산 계산</h1>
+      <p style="margin:0 0 10px;">신용카드, 의료비, 교육비, 연금저축, 월세 등 공제 항목을 입력하면 예상 환급액을 계산합니다.</p>
+      <p style="margin:0;"><a href="/finance/year-end-settlement">연말정산 계산기 열기</a></p>
     </section>`;
   }
 
@@ -676,7 +1283,52 @@ function buildPrerenderSection(route, meta) {
     <section data-seo-prerender style="max-width:920px;margin:0 auto;padding:20px 16px;line-height:1.6;">
       <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">소득세 ${formatWon(withholdingAmt)}이면 연봉 얼마?</h1>
       <p style="margin:0 0 10px;">월 소득세 ${formatWon(withholdingAmt)} 기준 추정 연봉과 월 실수령액을 계산합니다.</p>
-      <p style="margin:0;"><a href="/withholding">원천세 계산기 열기</a></p>
+      <p style="margin:0;"><a href="/finance/withholding">원천세 계산기 열기</a></p>
+    </section>`;
+  }
+
+  if (route === "/all") {
+    return `
+    <section data-seo-prerender style="max-width:920px;margin:0 auto;padding:20px 16px;line-height:1.6;">
+      <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">2026 세금·연봉·수당 계산기 모음</h1>
+      <p style="margin:0 0 10px;">급여·세금·수당·퇴직·절세까지, 23개 계산기를 한곳에서 확인하세요.</p>
+      <h2 style="font-size:18px;margin:16px 0 6px;">급여·연봉</h2>
+      <ul style="margin:0 0 8px;padding-left:20px;">
+        <li><a href="/finance/salary">연봉 실수령액 계산기</a></li>
+        <li><a href="/finance/insurance">건보료 역산 계산기</a></li>
+        <li><a href="/finance/compare">이직 연봉 비교</a></li>
+        <li><a href="/finance/raise">연봉 인상률 계산기</a></li>
+        <li><a href="/finance/bonus">성과급 실수령 계산기</a></li>
+      </ul>
+      <h2 style="font-size:18px;margin:16px 0 6px;">세금·신고</h2>
+      <ul style="margin:0 0 8px;padding-left:20px;">
+        <li><a href="/finance/comprehensive-tax">종합소득세 계산기</a></li>
+        <li><a href="/finance/withholding">원천세 계산기</a></li>
+        <li><a href="/finance/freelance-rate">프리랜서 단가 역산</a></li>
+        <li><a href="/finance/4-insurance-employer">사업주 4대보험</a></li>
+      </ul>
+      <h2 style="font-size:18px;margin:16px 0 6px;">수당·시급</h2>
+      <ul style="margin:0 0 8px;padding-left:20px;">
+        <li><a href="/finance/weekly-holiday-pay">주휴수당 계산기</a></li>
+        <li><a href="/finance/wage-converter">시급↔월급↔연봉 환산기</a></li>
+        <li><a href="/finance/overtime">연장·야간·휴일수당</a></li>
+        <li><a href="/finance/annual-leave">연차수당 계산기</a></li>
+      </ul>
+      <h2 style="font-size:18px;margin:16px 0 6px;">퇴직·구직</h2>
+      <ul style="margin:0 0 8px;padding-left:20px;">
+        <li><a href="/finance/quit">퇴사 계산기</a></li>
+        <li><a href="/finance/severance-pay">퇴직금 계산기</a></li>
+        <li><a href="/finance/unemployment">실업급여 계산기</a></li>
+        <li><a href="/finance/parental-leave">육아휴직 급여</a></li>
+        <li><a href="/finance/regional-health">지역가입자 건보료</a></li>
+      </ul>
+      <h2 style="font-size:18px;margin:16px 0 6px;">절세·공제</h2>
+      <ul style="margin:0 0 8px;padding-left:20px;">
+        <li><a href="/finance/year-end-settlement">연말정산 계산기</a></li>
+        <li><a href="/finance/monthly-rent-deduction">월세 세액공제</a></li>
+        <li><a href="/finance/irp">IRP 세액공제</a></li>
+        <li><a href="/finance/pension">국민연금 수령액</a></li>
+      </ul>
     </section>`;
   }
 
@@ -685,11 +1337,12 @@ function buildPrerenderSection(route, meta) {
       <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">${meta.title}</h1>
       <p style="margin:0 0 10px;">${meta.description}</p>
       <ul style="margin:0;padding-left:20px;">
-        <li><a href="/insurance">건보료 계산기</a></li>
-        <li><a href="/salary">연봉 실수령액 계산기</a></li>
-        <li><a href="/comprehensive-tax">종합소득세 계산기</a></li>
-        <li><a href="/compare">이직 연봉 비교 계산기</a></li>
-        <li><a href="/quit">퇴사 계산기</a></li>
+        <li><a href="/finance/insurance">건보료 계산기</a></li>
+        <li><a href="/finance/salary">연봉 실수령액 계산기</a></li>
+        <li><a href="/finance/comprehensive-tax">종합소득세 계산기</a></li>
+        <li><a href="/finance/compare">이직 연봉 비교 계산기</a></li>
+        <li><a href="/finance/quit">퇴사 계산기</a></li>
+        <li><a href="/finance/year-end-settlement">연말정산 계산기</a></li>
       </ul>
     </section>`;
 }

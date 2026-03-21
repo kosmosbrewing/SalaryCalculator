@@ -6,6 +6,7 @@ import CommunitySidebar from "@/components/common/CommunitySidebar.vue";
 import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
+import InternalLink from "@/components/common/InternalLink.vue";
 import BenefitStatGrid from "@/components/benefits/BenefitStatGrid.vue";
 import { monthlyRentFaqs } from "@/data/benefitFaqs";
 import { buildFaqJsonLd } from "@/lib/faqSeo";
@@ -25,7 +26,7 @@ const input = computed(() =>
   })
 );
 const result = computed(() => calculateMonthlyRentDeduction(input.value));
-const seoTitle = computed(() => "월세 세액공제 계산기 | 2026 finance.shakilabs");
+const seoTitle = computed(() => "월세 세액공제 계산기 | 2026 shakilabs.com/finance");
 const seoDescription = computed(
   () => `연 월세 ${formatWon(result.value.yearlyRent)} 기준 예상 세액공제 환급액은 ${formatWon(result.value.taxCredit)}입니다.`
 );
@@ -69,6 +70,7 @@ const seoDescription = computed(
         </div>
 
         <BenefitFaqPanel :items="monthlyRentFaqs" />
+        <InternalLink current="monthly-rent-deduction" />
       </div>
 
       <div class="space-y-4 lg:sticky lg:top-20 lg:self-start">

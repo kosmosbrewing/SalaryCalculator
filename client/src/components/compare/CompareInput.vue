@@ -84,6 +84,14 @@ function updateChildren(value: number): void {
   emit("update:childrenUnder20", clampInt(value, 0, maxChildren));
 }
 
+const salaryPresets = [
+  { label: "3,000만", value: 30_000_000 },
+  { label: "4,000만", value: 40_000_000 },
+  { label: "5,000만", value: 50_000_000 },
+  { label: "7,000만", value: 70_000_000 },
+  { label: "1억", value: 100_000_000 },
+];
+
 const inputIds = {
   annualA: "compare-annual-a",
   nonTaxA: "compare-nontax-a",
@@ -120,6 +128,19 @@ const inputIds = {
               @input="onAnnualInput('companyA', $event)"
             />
           </label>
+          <div class="flex flex-wrap gap-1.5">
+            <button
+              v-for="preset in salaryPresets"
+              :key="`a-${preset.value}`"
+              type="button"
+              class="retro-chip"
+              :class="companyA.annualGross === preset.value ? 'border-primary text-primary' : ''"
+              :aria-label="`현재 회사 연봉 ${preset.label}원으로 설정`"
+              @click="updateCompany('companyA', { annualGross: preset.value })"
+            >
+              {{ preset.label }}
+            </button>
+          </div>
           <label class="block space-y-1" :for="inputIds.nonTaxA">
             <span class="text-caption text-muted-foreground">비과세 (원/월)</span>
             <input :id="inputIds.nonTaxA" :value="formattedNonTaxA" type="text" class="retro-input" inputmode="numeric" @input="onNonTaxInput('companyA', $event)" />
@@ -170,6 +191,19 @@ const inputIds = {
               @input="onAnnualInput('companyB', $event)"
             />
           </label>
+          <div class="flex flex-wrap gap-1.5">
+            <button
+              v-for="preset in salaryPresets"
+              :key="`b-${preset.value}`"
+              type="button"
+              class="retro-chip"
+              :class="companyB.annualGross === preset.value ? 'border-primary text-primary' : ''"
+              :aria-label="`이직 회사 연봉 ${preset.label}원으로 설정`"
+              @click="updateCompany('companyB', { annualGross: preset.value })"
+            >
+              {{ preset.label }}
+            </button>
+          </div>
           <label class="block space-y-1" :for="inputIds.nonTaxB">
             <span class="text-caption text-muted-foreground">비과세 (원/월)</span>
             <input :id="inputIds.nonTaxB" :value="formattedNonTaxB" type="text" class="retro-input" inputmode="numeric" @input="onNonTaxInput('companyB', $event)" />

@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => ({
   test: {
     include: ["src/**/*.test.ts"],
   },
-  base: "/",
+  base: "/finance/",
   css: {
     postcss: {
       plugins: [tailwind(), autoprefixer()],

@@ -5,6 +5,7 @@ import type {
   IrpInput,
   MonthlyRentDeductionInput,
   PensionInput,
+  RegionalHealthInput,
 } from "@/utils/benefitCalculators";
 
 const moneySchema = z.number().finite().int().min(0).max(500_000_000);
@@ -62,5 +63,18 @@ export function normalizeEmployerInsuranceInput(
     monthlySalary: parseWithFallback(salarySchema, input.monthlySalary, 3_200_000),
     employmentRatePercent: parseWithFallback(percentSchema, input.employmentRatePercent, 0.9),
     accidentRatePercent: parseWithFallback(percentSchema, input.accidentRatePercent, 1.5),
+  };
+}
+
+const bigMoneySchema = z.number().finite().int().min(0).max(5_000_000_000);
+
+export function normalizeRegionalHealthInput(
+  input: Partial<RegionalHealthInput>,
+): RegionalHealthInput {
+  return {
+    monthlySalary: parseWithFallback(salarySchema, input.monthlySalary, 3_500_000),
+    financialIncome: parseWithFallback(moneySchema, input.financialIncome, 0),
+    propertyTaxBase: parseWithFallback(bigMoneySchema, input.propertyTaxBase, 0),
+    carTaxBase: parseWithFallback(bigMoneySchema, input.carTaxBase, 0),
   };
 }

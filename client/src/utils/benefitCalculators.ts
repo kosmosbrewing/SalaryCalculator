@@ -123,6 +123,73 @@ export function calculateIrpTaxCredit(input: IrpInput) {
   };
 }
 
+// ── 지역가입자 건강보험료 추정 ──
+
+export type RegionalHealthInput = {
+  /** 퇴직 전 월급 (세전) */
+  monthlySalary: number;
+  /** 연간 금융소득 (이자·배당) */
+  financialIncome: number;
+  /** 부동산 과세표준 */
+  propertyTaxBase: number;
+  /** 자동차 과세표준 */
+  carTaxBase: number;
+};
+
+export function calculateRegionalHealth(input: RegionalHealthInput) {
+  const r = RATES_2026;
+
+  // 직장가입자 건보료 (현재 근로자 부담분)
+  const employeeHealth = Math.floor(input.monthlySalary * r.healthInsurance.employee);
+  const employeeLongTerm = Math.floor(employeeHealth * r.longTermCare.rateOfHealth);
+  const currentMonthly = employeeHealth + employeeLongTerm;
+
+  // 임의계속가입: 직장가입 보험료 전액 (사업주+근로자 합계)
+  const voluntaryHealth = Math.floor(input.monthlySalary * r.healthInsurance.total);
+  const voluntaryLongTerm = Math.floor(voluntaryHealth * r.longTermCare.rateOfHealth);
+  const voluntaryMonthly = voluntaryHealth + voluntaryLongTerm;
+
+  // 지역가입자 추정 (간이): 소득 + 재산 점수 기반
+  // 소득보험료: (연 소득 × 건보율) / 12
+  // 재산보험료: 재산 과세표준 × 소정 요율
+  const annualIncome = input.financialIncome; // 퇴사 후 근로소득 없으므로 금융소득만
+  const incomeComponent = Math.floor((annualIncome * r.healthInsurance.total) / 12);
+
+  // 재산: 과세표준 × 0.18% (주택 공시가격 기준 간이 추정)
+  const propertyComponent = Math.floor(input.propertyTaxBase * 0.0018 / 12);
+  const carComponent = Math.floor(input.carTaxBase * 0.0018 / 12);
+
+  const regionalBase = Math.max(incomeComponent + propertyComponent + carComponent, 19_780); // 최저 보험료
+  const regionalLongTerm = Math.floor(regionalBase * r.longTermCare.rateOfHealth);
+  const regionalMonthly = regionalBase + regionalLongTerm;
+
+  // 피부양자: 조건 충족 시 0원
+  const dependentEligible = annualIncome <= 20_000_000 && input.propertyTaxBase <= 540_000_000;
+
+  // 비교 결과
+  const cheapestOption = dependentEligible
+    ? "dependent" as const
+    : regionalMonthly <= voluntaryMonthly
+      ? "regional" as const
+      : "voluntary" as const;
+
+  return {
+    currentMonthly,
+    voluntaryMonthly,
+    regionalMonthly,
+    dependentEligible,
+    cheapestOption,
+    cheapestMonthly: cheapestOption === "dependent" ? 0
+      : cheapestOption === "regional" ? regionalMonthly : voluntaryMonthly,
+    monthlySaving: currentMonthly - (cheapestOption === "dependent" ? 0
+      : cheapestOption === "regional" ? regionalMonthly : voluntaryMonthly),
+    // 상세 내역
+    incomeComponent,
+    propertyComponent,
+    carComponent,
+  };
+}
+
 export function calculateEmployerInsuranceBurden(input: EmployerInsuranceInput) {
   const pensionBase = clamp(
     input.monthlySalary,
