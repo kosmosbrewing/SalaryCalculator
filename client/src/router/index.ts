@@ -335,6 +335,12 @@ const routes: RouteRecordRaw[] = [
     meta: { title: "서비스 안내 | 2026 연봉·건보료 계산기" },
   },
   {
+    path: "/terms",
+    name: "Terms",
+    component: () => import("@/views/TermsView.vue"),
+    meta: { title: "이용약관 | 2026 연봉·건보료 계산기" },
+  },
+  {
     path: "/privacy",
     name: "Privacy",
     component: () => import("@/views/PrivacyView.vue"),

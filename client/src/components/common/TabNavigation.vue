@@ -14,7 +14,7 @@ const tabs = [
   { key: "weekly-holiday-pay", label: "주휴수당", to: "/weekly-holiday-pay" },
   { key: "parental-leave", label: "육아휴직", to: "/parental-leave" },
   { key: "wage-converter", label: "시급 환산", to: "/wage-converter" },
-  { key: "all", label: "전체 →", to: "/all" },
+  { key: "all", label: "전체 보기", to: "/all" },
 ] as const;
 
 const activePath = computed(() => route.path);
@@ -26,6 +26,7 @@ function isActiveTab(key: (typeof tabs)[number]["key"]): boolean {
   return activePath.value.startsWith(`/${key}`);
 }
 
+/* ── 데스크톱 스크롤 fade ── */
 const scrollEl = ref<HTMLElement | null>(null);
 const showLeftFade = ref(false);
 const showRightFade = ref(false);
@@ -33,10 +34,8 @@ const showRightFade = ref(false);
 function checkScroll() {
   const el = scrollEl.value;
   if (!el) return;
-  const left = el.scrollLeft > 8;
-  const right = el.scrollWidth - el.scrollLeft - el.clientWidth > 8;
-  showLeftFade.value = left;
-  showRightFade.value = right;
+  showLeftFade.value = el.scrollLeft > 8;
+  showRightFade.value = el.scrollWidth - el.scrollLeft - el.clientWidth > 8;
 }
 
 onMounted(() => {
@@ -59,16 +58,16 @@ watch(
     await nextTick();
     checkScroll();
   },
-  { immediate: true }
+  { immediate: true },
 );
 </script>
 
 <template>
   <nav class="sticky top-0 z-50 border-b border-primary/20 bg-primary shadow-sm" aria-label="주요 메뉴">
-    <div class="container relative py-2 sm:py-0">
+    <div class="container relative px-3 py-1.5 sm:px-4 sm:py-0">
       <div
         ref="scrollEl"
-        class="tab-scroll grid grid-cols-3 gap-2 sm:flex sm:h-12 sm:items-center sm:gap-2 sm:overflow-x-auto sm:py-0"
+        class="tab-scroll grid grid-cols-3 gap-x-1 gap-y-0.5 sm:flex sm:h-12 sm:items-center sm:gap-2 sm:overflow-x-auto sm:py-0"
       >
         <RouterLink
           v-for="tab in tabs"
@@ -76,19 +75,22 @@ watch(
           :to="tab.to"
           :aria-current="isActiveTab(tab.key) ? 'page' : undefined"
           :class="[
-            'touch-target relative inline-flex min-w-0 items-center justify-center rounded-xl border px-2 py-2 text-center text-[0.78rem] font-semibold leading-tight transition-all duration-200 sm:h-12 sm:shrink-0 sm:rounded-none sm:border-transparent sm:px-3 sm:py-0 sm:text-body',
+            'relative flex items-center justify-center rounded-lg px-1 py-2 text-center text-[0.7rem] font-medium leading-tight transition-colors duration-150',
+            'sm:h-12 sm:shrink-0 sm:rounded-none sm:px-3 sm:py-0 sm:text-body sm:font-semibold',
             isActiveTab(tab.key)
-              ? 'border-white/60 bg-white text-primary shadow-sm sm:bg-transparent sm:text-primary-foreground sm:shadow-none'
-              : 'border-white/15 bg-white/5 text-primary-foreground/88 hover:bg-white/10 hover:text-primary-foreground sm:bg-transparent sm:text-primary-foreground/70',
+              ? 'bg-white/20 font-semibold text-white sm:bg-transparent sm:text-primary-foreground sm:shadow-none'
+              : 'text-primary-foreground/70 active:bg-white/10 sm:bg-transparent sm:hover:text-primary-foreground',
           ]"
         >
           <span class="break-keep">{{ tab.label }}</span>
+          <!-- 데스크톱 활성 밑줄 -->
           <span
             v-if="isActiveTab(tab.key)"
             class="absolute inset-x-1 bottom-0 hidden h-[3px] rounded-full bg-white sm:block"
           />
         </RouterLink>
       </div>
+      <!-- 데스크톱 좌우 fade -->
       <div
         v-show="showLeftFade"
         class="pointer-events-none absolute left-0 top-0 hidden h-full w-10 bg-gradient-to-r from-primary to-transparent sm:block"

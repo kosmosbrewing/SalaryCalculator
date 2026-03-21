@@ -99,6 +99,7 @@ export const SEO_ROUTES = [
   "/quit",
   "/all",
   "/about",
+  "/terms",
   "/privacy",
   ...INSURANCE_AMOUNTS.map((amount) => `/insurance/${amount}`),
   ...SALARY_AMOUNTS.map((amount) => `/salary/${amount}`),

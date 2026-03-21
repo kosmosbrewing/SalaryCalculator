@@ -171,6 +171,29 @@ function buildBreadcrumb(items) {
 }
 
 function buildMeta(route) {
+  if (route === "/terms") {
+    const title = "이용약관 | 2026 연봉·건보료 계산기";
+    const description = "shakilabs.com/finance 서비스 이용약관을 안내합니다.";
+    const canonical = `${SITE_URL}/terms`;
+    return {
+      title,
+      description,
+      canonical,
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        name: title,
+        description,
+        url: canonical,
+        inLanguage: "ko",
+      },
+      breadcrumb: buildBreadcrumb([
+        { name: "홈", url: SITE_URL },
+        { name: "이용약관" },
+      ]),
+    };
+  }
+
   if (route === "/privacy") {
     const title = "개인정보처리방침 | 연봉 실수령액 계산기";
     const description = "shakilabs.com/finance 서비스의 개인정보 처리 원칙을 안내합니다.";
