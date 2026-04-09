@@ -1,4 +1,6 @@
 {
+  "cleanUrls": true,
+  "trailingSlash": false,
   "redirects": [
     { "source": "/favicon.ico", "destination": "/favicon.png", "permanent": true },
     { "source": "/freelance/:amount(\\d+)", "destination": "/comprehensive-tax?biz=:amount", "permanent": true },
@@ -40,6 +42,6 @@
     }
   ],
   "rewrites": [
-    { "source": "/((?!assets|fonts|favicon|og-image|sitemap|robots).*)", "destination": "/index.html" }
+    { "source": "/((?!assets/|fonts/|favicon|og-image|sitemap|robots|ads\\.txt|llms\\.txt|logo|images/).*)", "destination": "/index.html" }
   ]
 }

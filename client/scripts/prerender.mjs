@@ -2,6 +2,8 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
 import { resolve, dirname } from "path";
 import { SEO_ROUTES } from "./seo-routes.mjs";
+import { buildPrerenderHeader, buildPrerenderFooter } from "./prerender-layout.mjs";
+import { buildRichContent } from "./prerender-content.mjs";
 
 const DIST_DIR = resolve(import.meta.dirname, "../dist");
 const INDEX_HTML = resolve(DIST_DIR, "index.html");
@@ -1411,12 +1413,24 @@ function applyMeta(html, route, meta) {
   output = output.replace(/\n?\s*<script type="application\/ld\+json" data-seo-prerender="jsonld">[\s\S]*?<\/script>/i, "");
   output = output.replace("</head>", `${jsonLdTag}\n  </head>`);
 
-  const prerenderSection = buildPrerenderSection(route, meta);
+  // 기존 데이터-seo-prerender 요소 제거 (재실행 대비)
+  output = output.replace(/\n?\s*<header data-seo-prerender[\s\S]*?<\/header>/i, "");
   output = output.replace(/\n?\s*<section data-seo-prerender[\s\S]*?<\/section>/i, "");
+  output = output.replace(/\n?\s*<article data-seo-prerender[\s\S]*?<\/article>/i, "");
+  output = output.replace(/\n?\s*<footer data-seo-prerender[\s\S]*?<\/footer>/i, "");
+
+  // 리치 콘텐츠 우선 시도 → 없으면 기본 스텁
+  const rich = buildRichContent(route, meta);
+  const mainContent = rich || buildPrerenderSection(route, meta);
+  const headerHtml = buildPrerenderHeader();
+  const footerHtml = buildPrerenderFooter();
+
+  const injection = `${headerHtml}${mainContent}${footerHtml}`;
+
   if (output.includes('<div id="app"></div>')) {
-    output = output.replace('<div id="app"></div>', `<div id="app"></div>${prerenderSection}`);
+    output = output.replace('<div id="app"></div>', `<div id="app"></div>${injection}`);
   } else {
-    output = output.replace("</body>", `${prerenderSection}\n  </body>`);
+    output = output.replace("</body>", `${injection}\n  </body>`);
   }
 
   return output;
